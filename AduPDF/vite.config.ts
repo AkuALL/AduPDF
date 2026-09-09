@@ -7,6 +7,7 @@ import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig, lazyPlugins } from 'vite-plus';
 
+
 export default defineConfig({
     plugins: lazyPlugins(() => [
         laravel({
