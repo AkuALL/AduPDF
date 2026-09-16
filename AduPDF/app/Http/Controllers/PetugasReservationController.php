@@ -6,6 +6,7 @@ use App\Enums\ReservationStatus;
 use App\Models\Facility;
 use App\Models\Reservation;
 use App\Models\User;
+use App\Queries\ReservationQueueQuery;
 use App\Services\FacilityConditionService;
 use App\Services\ReservationConflictService;
 use Illuminate\Http\RedirectResponse;
@@ -17,13 +18,9 @@ use Inertia\Response;
 
 class PetugasReservationController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request, ReservationQueueQuery $queue): Response
     {
-        $reservations = Reservation::query()
-            ->with(['facility:id,name,location', 'user:id,nama'])
-            ->where('status', ReservationStatus::Pending->value)
-            ->oldest('start_time')
-            ->oldest('id')
+        $reservations = $queue->pending()
             ->get()
             ->map(fn (Reservation $reservation): array => [
                 'id' => $reservation->id,
@@ -36,8 +33,25 @@ class PetugasReservationController extends Controller
             ])
             ->values();
 
+        $approvedReservations = Reservation::query()
+            ->with(['facility:id,name,location', 'user:id,nama'])
+            ->where('status', ReservationStatus::Approved->value)
+            ->oldest('start_time')
+            ->oldest('id')
+            ->get()
+            ->map(fn (Reservation $reservation): array => [
+                'id' => $reservation->id,
+                'user' => $reservation->user->name,
+                'facility' => $reservation->facility->name,
+                'location' => $reservation->facility->location,
+                'start_time' => $reservation->start_time->setTimezone('Asia/Jakarta')->format('d M Y, H:i'),
+                'end_time' => $reservation->end_time->setTimezone('Asia/Jakarta')->format('d M Y, H:i'),
+            ])
+            ->values();
+
         return Inertia::render('petugas/reservations/index', [
             'reservations' => $reservations,
+            'approved_reservations' => $approvedReservations,
             'success' => $request->session()->get('success'),
         ]);
     }
@@ -110,5 +124,27 @@ class PetugasReservationController extends Controller
 
         return redirect()->route('petugas.reservations.index')
             ->with('success', 'Reservasi berhasil ditolak.');
+    }
+
+    public function cancel(Request $request, Reservation $reservation): RedirectResponse
+    {
+        $input = $request->validate([
+            'alasan_pembatalan' => ['required', 'string', 'max:5000'],
+        ]);
+
+        $updated = Reservation::query()
+            ->whereKey($reservation->id)
+            ->where('status', ReservationStatus::Approved->value)
+            ->update([
+                'status' => ReservationStatus::Cancelled,
+                'alasan_pembatalan' => $input['alasan_pembatalan'],
+            ]);
+
+        if ($updated === 0) {
+            throw ValidationException::withMessages(['reservation' => 'Hanya reservasi yang disetujui yang dapat dibatalkan darurat.']);
+        }
+
+        return redirect()->route('petugas.reservations.index')
+            ->with('success', 'Reservasi berhasil dibatalkan dalam kondisi darurat.');
     }
 }

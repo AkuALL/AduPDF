@@ -14,20 +14,10 @@ class ReservationConflictService
 {
     public function hasConflict(User $user, Facility $facility, CarbonInterface $startTime, CarbonInterface $endTime, bool $lock = false): bool
     {
-        $overlapping = Reservation::query()
-            ->with('facility:id,type,parent_facility_id')
-            ->where('status', ReservationStatus::Approved->value)
-            ->where('start_time', '<', $endTime)
-            ->where('end_time', '>', $startTime)
+        $overlapping = $this->approvedOverlaps($startTime, $endTime)
             ->where(function (Builder $query) use ($user, $facility): void {
-                $query->where('user_id', $user->id)
-                    ->orWhere('facility_id', $facility->id);
-
-                if ($facility->isTool()) {
-                    $query->orWhere('facility_id', $facility->parent_facility_id);
-                } elseif ($facility->isRoom()) {
-                    $query->orWhereHas('facility', fn (Builder $facilityQuery): Builder => $facilityQuery->where('parent_facility_id', $facility->id));
-                }
+                $query->where('user_id', $user->id);
+                $this->addResourceConditions($query, $facility);
             });
 
         if ($lock) {
@@ -61,6 +51,18 @@ class ReservationConflictService
         }
 
         return false;
+    }
+
+    /**
+     * @return Collection<int, Reservation>
+     */
+    public function approvedOccupancies(Facility $facility, CarbonInterface $startTime, CarbonInterface $endTime): Collection
+    {
+        return $this->approvedOverlaps($startTime, $endTime)
+            ->where(function (Builder $query) use ($facility): void {
+                $this->addResourceConditions($query, $facility);
+            })
+            ->get();
     }
 
     /**
@@ -105,5 +107,31 @@ class ReservationConflictService
 
                 return (int) $pending->user_id === (int) $reservation->user_id && ! $sameRoomTools;
             });
+    }
+
+    /**
+     * @return Builder<Reservation>
+     */
+    private function approvedOverlaps(CarbonInterface $startTime, CarbonInterface $endTime): Builder
+    {
+        return Reservation::query()
+            ->with('facility:id,type,parent_facility_id')
+            ->where('status', ReservationStatus::Approved->value)
+            ->where('start_time', '<', $endTime)
+            ->where('end_time', '>', $startTime);
+    }
+
+    /**
+     * @param  Builder<Reservation>  $query
+     */
+    private function addResourceConditions(Builder $query, Facility $facility): void
+    {
+        $query->orWhere('facility_id', $facility->id);
+
+        if ($facility->isTool()) {
+            $query->orWhere('facility_id', $facility->parent_facility_id);
+        } elseif ($facility->isRoom()) {
+            $query->orWhereHas('facility', fn (Builder $facilityQuery): Builder => $facilityQuery->where('parent_facility_id', $facility->id));
+        }
     }
 }

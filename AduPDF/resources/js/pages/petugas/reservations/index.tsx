@@ -10,9 +10,15 @@ type Reservation = {
     end_time: string;
 };
 
-type Props = { reservations: Reservation[]; success: string | null };
+type ApprovedReservation = Omit<Reservation, 'tujuan'>;
 
-export default function PetugasReservationIndex({ reservations, success }: Props) {
+type Props = {
+    reservations: Reservation[];
+    approved_reservations: ApprovedReservation[];
+    success: string | null;
+};
+
+export default function PetugasReservationIndex({ reservations, approved_reservations, success }: Props) {
     return (
         <>
             <Head title="Antrian Reservasi" />
@@ -43,6 +49,41 @@ export default function PetugasReservationIndex({ reservations, success }: Props
                             ))}
                         </div>
                     )}
+                    <section className="mt-10">
+                        <h2 className="text-lg font-bold">Reservasi disetujui</h2>
+                        {approved_reservations.length === 0 ? (
+                            <p className="mt-4 rounded-lg border border-[#E5E7EB] bg-white p-6 text-sm text-[#667085]">Tidak ada reservasi disetujui.</p>
+                        ) : (
+                            <div className="mt-4 space-y-3">
+                                {approved_reservations.map((reservation) => (
+                                    <article key={reservation.id} className="rounded-lg border border-[#E5E7EB] bg-white p-5">
+                                        <h3 className="font-semibold">{reservation.facility}</h3>
+                                        <p className="mt-1 text-sm text-[#667085]">{reservation.start_time}–{reservation.end_time} WIB · {reservation.location}</p>
+                                        <p className="mt-3 text-sm"><span className="font-medium">Pengaju:</span> {reservation.user}</p>
+                                        <Form
+                                            action={`/petugas/reservations/${reservation.id}/cancel`}
+                                            method="patch"
+                                            onSubmit={(event) => {
+                                                if (! window.confirm(`Batalkan darurat reservasi ${reservation.facility}?`)) {
+                                                    event.preventDefault();
+                                                }
+                                            }}
+                                            className="mt-4"
+                                        >
+                                            {({ errors, processing }) => (
+                                                <>
+                                                    <label htmlFor={`reason-${reservation.id}`} className="block text-sm font-medium">Alasan pembatalan darurat</label>
+                                                    <textarea id={`reason-${reservation.id}`} name="alasan_pembatalan" required maxLength={5000} rows={2} aria-invalid={!!errors.alasan_pembatalan} className="mt-1 w-full rounded-md border border-[#D0D5DD] px-3 py-2 text-sm" />
+                                                    {(errors.alasan_pembatalan || errors.reservation) && <p role="alert" className="mt-1 text-sm text-red-700">{errors.alasan_pembatalan || errors.reservation}</p>}
+                                                    <button type="submit" disabled={processing} className="mt-3 rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">{processing ? 'Membatalkan...' : 'Batalkan darurat'}</button>
+                                                </>
+                                            )}
+                                        </Form>
+                                    </article>
+                                ))}
+                            </div>
+                        )}
+                    </section>
                 </div>
             </main>
         </>
