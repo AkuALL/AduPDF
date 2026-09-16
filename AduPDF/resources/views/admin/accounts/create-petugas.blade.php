@@ -3,9 +3,9 @@
 @section('content')
 <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200 bg-slate-50">
-        <h1 class="text-xl font-bold text-slate-800">Buat Akun Petugas Baru (US-13 / FR-15)</h1>
+        <h1 class="text-xl font-bold text-slate-800">Buat Akun Petugas</h1>
         <p class="text-xs text-slate-500 mt-1">
-            Petugas bertugas memproses reservasi, laporan kerusakan, dan kondisi fasilitas kampus. Akun Petugas dibuat langsung oleh Admin tanpa alur pendaftaran mandiri.
+            Petugas mengelola reservasi, laporan, dan fasilitas.
         </p>
     </div>
 

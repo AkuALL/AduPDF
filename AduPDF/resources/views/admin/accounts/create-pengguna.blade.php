@@ -3,9 +3,9 @@
 @section('content')
 <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="p-6 border-b border-slate-200 bg-slate-50">
-        <h1 class="text-xl font-bold text-slate-800">Buat Akun Pengguna Langsung (US-14 / FR-16)</h1>
+        <h1 class="text-xl font-bold text-slate-800">Buat Akun Pengguna</h1>
         <p class="text-xs text-slate-500 mt-1">
-            Admin dapat membuat akun Pengguna (Mahasiswa/Dosen/Staf) secara langsung. Akun yang dibuat oleh Admin otomatis berstatus <strong>Disetujui</strong> dan dapat langsung digunakan untuk masuk.
+            Akun yang dibuat Admin langsung disetujui.
         </p>
     </div>
 
