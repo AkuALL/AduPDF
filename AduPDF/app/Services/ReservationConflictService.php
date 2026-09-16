@@ -8,10 +8,11 @@ use App\Models\Reservation;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class ReservationConflictService
 {
-    public function hasConflict(User $user, Facility $facility, CarbonInterface $startTime, CarbonInterface $endTime): bool
+    public function hasConflict(User $user, Facility $facility, CarbonInterface $startTime, CarbonInterface $endTime, bool $lock = false): bool
     {
         $overlapping = Reservation::query()
             ->with('facility:id,type,parent_facility_id')
@@ -27,8 +28,13 @@ class ReservationConflictService
                 } elseif ($facility->isRoom()) {
                     $query->orWhereHas('facility', fn (Builder $facilityQuery): Builder => $facilityQuery->where('parent_facility_id', $facility->id));
                 }
-            })
-            ->get();
+            });
+
+        if ($lock) {
+            $overlapping->lockForUpdate();
+        }
+
+        $overlapping = $overlapping->get();
 
         foreach ($overlapping as $reservation) {
             if ((int) $reservation->facility_id === (int) $facility->id) {
@@ -55,5 +61,49 @@ class ReservationConflictService
         }
 
         return false;
+    }
+
+    /**
+     * @return Collection<int, Reservation>
+     */
+    public function pendingConflicts(Reservation $reservation): Collection
+    {
+        return Reservation::query()
+            ->with('facility:id,type,parent_facility_id')
+            ->where('status', ReservationStatus::Pending->value)
+            ->where('start_time', '<', $reservation->end_time)
+            ->where('end_time', '>', $reservation->start_time)
+            ->where(function (Builder $query) use ($reservation): void {
+                $query->where('user_id', $reservation->user_id)
+                    ->orWhere('facility_id', $reservation->facility_id);
+
+                if ($reservation->facility->isTool()) {
+                    $query->orWhere('facility_id', $reservation->facility->parent_facility_id);
+                } elseif ($reservation->facility->isRoom()) {
+                    $query->orWhereHas('facility', fn (Builder $facilityQuery): Builder => $facilityQuery->where('parent_facility_id', $reservation->facility_id));
+                }
+            })
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get()
+            ->filter(function (Reservation $pending) use ($reservation): bool {
+                if ((int) $pending->facility_id === (int) $reservation->facility_id) {
+                    return true;
+                }
+
+                if ($reservation->facility->isTool() && (int) $pending->facility_id === (int) $reservation->facility->parent_facility_id) {
+                    return true;
+                }
+
+                if ($reservation->facility->isRoom() && (int) $pending->facility?->parent_facility_id === (int) $reservation->facility_id) {
+                    return true;
+                }
+
+                $sameRoomTools = $reservation->facility->isTool()
+                    && $pending->facility?->isTool()
+                    && (int) $pending->facility->parent_facility_id === (int) $reservation->facility->parent_facility_id;
+
+                return (int) $pending->user_id === (int) $reservation->user_id && ! $sameRoomTools;
+            });
     }
 }

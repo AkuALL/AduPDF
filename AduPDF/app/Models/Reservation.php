@@ -6,7 +6,18 @@ use App\Enums\ReservationStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int $facility_id
+ * @property string $tujuan
+ * @property Carbon $start_time
+ * @property Carbon $end_time
+ * @property ReservationStatus $status
+ * @property string|null $alasan_pembatalan
+ */
 #[Fillable(['user_id', 'facility_id', 'tujuan', 'start_time', 'end_time', 'status', 'alasan_pembatalan'])]
 class Reservation extends Model
 {
