@@ -8,7 +8,7 @@ type Facility = {
     location: string;
     capacity: number;
     description: string | null;
-    condition: string;
+    condition: 'aktif' | 'dalam_perbaikan' | 'nonaktif';
     parent_facility: { id: number; name: string } | null;
 };
 
@@ -39,16 +39,25 @@ const typeLabels: Record<string, string> = {
     lapangan: 'Lapangan',
 };
 
-const conditionLabels: Record<string, string> = {
-    aktif: 'Aktif',
-    dalam_perbaikan: 'Dalam perbaikan',
-    nonaktif: 'Nonaktif',
-};
-
-const conditionClasses: Record<string, string> = {
-    aktif: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
-    dalam_perbaikan: 'bg-amber-50 text-amber-800 ring-amber-200',
-    nonaktif: 'bg-slate-100 text-slate-700 ring-slate-200',
+const conditionConfig: Record<
+    'aktif' | 'dalam_perbaikan' | 'nonaktif',
+    { label: string; icon: string; classes: string }
+> = {
+    aktif: {
+        label: 'Aktif',
+        icon: '✓',
+        classes: 'bg-[#EAF7F0] text-[#16794A] border-[#B7E2CB]',
+    },
+    dalam_perbaikan: {
+        label: 'Dalam perbaikan',
+        icon: '!',
+        classes: 'bg-[#FFF0E8] text-[#B54708] border-[#F5C6A7]',
+    },
+    nonaktif: {
+        label: 'Nonaktif',
+        icon: '—',
+        classes: 'bg-[#F0F2F4] text-[#5D6673] border-[#D7DBE0]',
+    },
 };
 
 export default function FacilityIndex({
@@ -75,105 +84,245 @@ export default function FacilityIndex({
 
     return (
         <>
-            <Head title="Fasilitas" />
-            <main className="min-h-screen bg-[#F7F8FA] px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
-                <div className="mx-auto max-w-6xl">
-                    <header className="mb-8 flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
-                        <div>
-                            <Link href="/" className="text-sm font-medium text-[#2D4C79] hover:underline">
-                                AduPDF
+            <Head title="Katalog Fasilitas — AduPDF" />
+            <div className="min-h-screen bg-[#F7F8FA] text-[#111827] font-sans antialiased">
+                {/* Navigation Bar */}
+                <header className="sticky top-0 z-30 border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm">
+                    <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+                        <div className="flex items-center gap-8">
+                            <Link href="/" className="flex items-center gap-2">
+                                <span className="text-xl font-bold tracking-tight text-[#2D4C79]">
+                                    AduPDF
+                                </span>
+                                <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-xs font-semibold text-[#2D4C79]">
+                                    Kampus
+                                </span>
                             </Link>
-                            <h1 className="mt-2 text-3xl font-semibold tracking-tight">Fasilitas Kampus</h1>
-                            <p className="mt-2 text-slate-600">
-                                Temukan fasilitas sesuai kebutuhan kegiatan Anda.
-                            </p>
+                            <nav className="hidden sm:flex sm:gap-6 text-sm">
+                                <Link
+                                    href="/facilities"
+                                    className="font-semibold text-[#2D4C79] border-b-2 border-[#2D4C79] pb-4 pt-4"
+                                >
+                                    Fasilitas
+                                </Link>
+                            </nav>
                         </div>
-                    </header>
+                        <div className="flex items-center gap-3">
+                            <Link
+                                href="/login"
+                                className="inline-flex h-9 items-center justify-center rounded-md px-3.5 text-sm font-medium text-[#111827] hover:bg-[#F3F5F7] transition"
+                            >
+                                Masuk
+                            </Link>
+                            <Link
+                                href="/register"
+                                className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
+                            >
+                                Daftar
+                            </Link>
+                        </div>
+                    </div>
+                </header>
 
-                    <form onSubmit={submit} className="mb-6 grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-4">
-                        <label className="md:col-span-2">
-                            <span className="mb-1.5 block text-sm font-medium">Cari fasilitas</span>
-                            <input
-                                value={form.search}
-                                onChange={(event) => setForm({ ...form, search: event.target.value })}
-                                placeholder="Nama atau lokasi fasilitas"
-                                className="h-10 w-full rounded-md border border-slate-300 px-3 outline-none focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
-                            />
-                        </label>
-                        <label>
-                            <span className="mb-1.5 block text-sm font-medium">Tipe</span>
-                            <select
-                                value={form.type}
-                                onChange={(event) => setForm({ ...form, type: event.target.value })}
-                                className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 outline-none focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
-                            >
-                                <option value="">Semua tipe</option>
-                                {types.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}
-                            </select>
-                        </label>
-                        <label>
-                            <span className="mb-1.5 block text-sm font-medium">Lokasi</span>
-                            <select
-                                value={form.location}
-                                onChange={(event) => setForm({ ...form, location: event.target.value })}
-                                className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 outline-none focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
-                            >
-                                <option value="">Semua lokasi</option>
-                                {locations.map((location) => <option key={location} value={location}>{location}</option>)}
-                            </select>
-                        </label>
-                        <label>
-                            <span className="mb-1.5 block text-sm font-medium">Kapasitas minimum</span>
-                            <input
-                                type="number"
-                                min="0"
-                                value={form.minimum_capacity}
-                                onChange={(event) => setForm({ ...form, minimum_capacity: event.target.value === '' ? '' : Number(event.target.value) })}
-                                className="h-10 w-full rounded-md border border-slate-300 px-3 outline-none focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
-                            />
-                        </label>
-                        <div className="flex items-end gap-2 md:col-span-3">
-                            <button type="submit" className="h-10 rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white hover:bg-[#243E63]">
-                                Terapkan filter
-                            </button>
-                            <button type="button" onClick={resetFilters} className="h-10 rounded-md px-3 text-sm font-medium text-slate-700 hover:bg-slate-100">
-                                Reset
-                            </button>
+                {/* Main Content Area */}
+                <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+                    {/* Header */}
+                    <div className="mb-6">
+                        <h1 className="text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl">
+                            Fasilitas Kampus
+                        </h1>
+                        <p className="mt-1 text-sm text-[#667085]">
+                            Temukan fasilitas ruangan dan peralatan untuk kegiatan akademik dan organisasi.
+                        </p>
+                    </div>
+
+                    {/* Filter Toolbar (Design Section 13) */}
+                    <form
+                        onSubmit={submit}
+                        className="mb-8 rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)]"
+                    >
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                            <div className="sm:col-span-2 lg:col-span-1">
+                                <label className="mb-1.5 block text-xs font-semibold text-[#111827]">
+                                    Cari Fasilitas
+                                </label>
+                                <input
+                                    type="text"
+                                    value={form.search}
+                                    onChange={(e) => setForm({ ...form, search: e.target.value })}
+                                    placeholder="Nama atau lokasi..."
+                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="mb-1.5 block text-xs font-semibold text-[#111827]">
+                                    Tipe
+                                </label>
+                                <select
+                                    value={form.type}
+                                    onChange={(e) => setForm({ ...form, type: e.target.value })}
+                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                >
+                                    <option value="">Semua tipe</option>
+                                    {types.map((type) => (
+                                        <option key={type.value} value={type.value}>
+                                            {type.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="mb-1.5 block text-xs font-semibold text-[#111827]">
+                                    Lokasi
+                                </label>
+                                <select
+                                    value={form.location}
+                                    onChange={(e) => setForm({ ...form, location: e.target.value })}
+                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                >
+                                    <option value="">Semua lokasi</option>
+                                    {locations.map((loc) => (
+                                        <option key={loc} value={loc}>
+                                            {loc}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="mb-1.5 block text-xs font-semibold text-[#111827]">
+                                    Kapasitas Min.
+                                </label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={form.minimum_capacity}
+                                    onChange={(e) =>
+                                        setForm({
+                                            ...form,
+                                            minimum_capacity:
+                                                e.target.value === '' ? '' : Number(e.target.value),
+                                        })
+                                    }
+                                    placeholder="0 orang"
+                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mt-4 flex items-center justify-between border-t border-[#E5E7EB] pt-4">
+                            <span className="text-xs text-[#667085]">
+                                Menampilkan <strong className="font-semibold text-[#111827]">{facilities.length}</strong> fasilitas
+                            </span>
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={resetFilters}
+                                    className="h-9 rounded-md border border-[#D0D5DD] bg-white px-3.5 text-xs font-semibold text-[#111827] hover:bg-[#F3F5F7] transition"
+                                >
+                                    Reset
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="h-9 rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
+                                >
+                                    Terapkan Filter
+                                </button>
+                            </div>
                         </div>
                     </form>
 
-                    <p className="mb-4 text-sm text-slate-600">{facilities.length} fasilitas ditemukan</p>
-
+                    {/* Facility List (Design Section 14) */}
                     {facilities.length === 0 ? (
-                        <section className="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-                            <h2 className="text-lg font-semibold">Fasilitas tidak ditemukan</h2>
-                            <p className="mt-2 text-slate-600">Ubah atau hapus filter untuk melihat fasilitas lain.</p>
-                        </section>
+                        <div className="rounded-lg border border-dashed border-[#D0D5DD] bg-white p-12 text-center">
+                            <p className="text-sm font-semibold text-[#111827]">
+                                Fasilitas tidak ditemukan
+                            </p>
+                            <p className="mt-1 text-xs text-[#667085]">
+                                Coba sesuaikan kata kunci pencarian atau ubah kriteria filter Anda.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={resetFilters}
+                                className="mt-4 inline-flex h-9 items-center justify-center rounded-md border border-[#D0D5DD] bg-white px-4 text-xs font-semibold text-[#2D4C79] hover:bg-[#E9EEF5] transition"
+                            >
+                                Reset Filter
+                            </button>
+                        </div>
                     ) : (
-                        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            {facilities.map((facility) => (
-                                <article key={facility.id} className="flex flex-col rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                                    <div className="flex items-start justify-between gap-3">
-                                        <span className="text-sm font-medium text-[#2D4C79]">{typeLabels[facility.type]}</span>
-                                        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${conditionClasses[facility.condition]}`}>
-                                            {conditionLabels[facility.condition]}
-                                        </span>
-                                    </div>
-                                    <h2 className="mt-4 text-lg font-semibold">{facility.name}</h2>
-                                    <dl className="mt-3 space-y-1 text-sm text-slate-600">
-                                        <div className="flex justify-between gap-3"><dt>Lokasi</dt><dd className="text-right">{facility.location}</dd></div>
-                                        <div className="flex justify-between gap-3"><dt>Kapasitas</dt><dd>{facility.capacity} orang</dd></div>
-                                        {facility.parent_facility && <div className="flex justify-between gap-3"><dt>Ruangan</dt><dd className="text-right">{facility.parent_facility.name}</dd></div>}
-                                    </dl>
-                                    <Link href={`/facilities/${facility.id}`} className="mt-5 inline-flex h-10 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-semibold text-[#2D4C79] hover:bg-slate-50">
-                                        Lihat detail
-                                    </Link>
-                                </article>
-                            ))}
-                        </section>
+                        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                            {facilities.map((fac) => {
+                                const status = conditionConfig[fac.condition] || conditionConfig.aktif;
+
+                                return (
+                                    <article
+                                        key={fac.id}
+                                        className="flex flex-col justify-between rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#D0D5DD] transition"
+                                    >
+                                        <div>
+                                            <div className="flex items-center justify-between gap-2">
+                                                <span className="text-xs font-semibold text-[#2D4C79]">
+                                                    {typeLabels[fac.type] || fac.type}
+                                                </span>
+                                                <span
+                                                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${status.classes}`}
+                                                >
+                                                    <span>{status.icon}</span>
+                                                    <span>{status.label}</span>
+                                                </span>
+                                            </div>
+
+                                            <h2 className="mt-3 text-base font-semibold text-[#111827]">
+                                                {fac.name}
+                                            </h2>
+
+                                            <dl className="mt-3 space-y-1.5 text-xs text-[#667085]">
+                                                <div className="flex justify-between">
+                                                    <dt>Lokasi:</dt>
+                                                    <dd className="font-medium text-[#111827]">
+                                                        {fac.location}
+                                                    </dd>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <dt>Kapasitas:</dt>
+                                                    <dd className="font-medium text-[#111827]">
+                                                        {fac.capacity} orang
+                                                    </dd>
+                                                </div>
+                                                {fac.parent_facility && (
+                                                    <div className="flex justify-between">
+                                                        <dt>Ruangan Induk:</dt>
+                                                        <dd className="font-medium text-[#2D4C79]">
+                                                            {fac.parent_facility.name}
+                                                        </dd>
+                                                    </div>
+                                                )}
+                                            </dl>
+
+                                            {fac.description && (
+                                                <p className="mt-3 line-clamp-2 text-xs text-[#667085]">
+                                                    {fac.description}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div className="mt-5 pt-4 border-t border-[#E5E7EB]">
+                                            <Link
+                                                href={`/facilities/${fac.id}`}
+                                                className="inline-flex h-9 w-full items-center justify-center rounded-md border border-[#D0D5DD] bg-white text-xs font-semibold text-[#2D4C79] hover:bg-[#E9EEF5] hover:border-[#2D4C79] transition"
+                                            >
+                                                Lihat Detail & Jadwal →
+                                            </Link>
+                                        </div>
+                                    </article>
+                                );
+                            })}
+                        </div>
                     )}
-                </div>
-            </main>
+                </main>
+            </div>
         </>
     );
 }
