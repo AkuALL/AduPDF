@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->route('login');
+    return redirect()->route('facilities.index');
 })->name('home');
 
 // Modular Route Aggregation (Jobdesc Section 8)

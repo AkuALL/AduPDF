@@ -82,18 +82,18 @@ export default function FacilityShow({ facility }: Props) {
                             </nav>
                         </div>
                         <div className="flex items-center gap-3">
-                            <Link
+                            <a
                                 href="/login"
                                 className="inline-flex h-9 items-center justify-center rounded-md px-3.5 text-sm font-medium text-[#111827] hover:bg-[#F3F5F7] transition"
                             >
                                 Masuk
-                            </Link>
-                            <Link
+                            </a>
+                            <a
                                 href="/register"
                                 className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
                             >
                                 Daftar
-                            </Link>
+                            </a>
                         </div>
                     </div>
                 </header>
@@ -229,12 +229,12 @@ export default function FacilityShow({ facility }: Props) {
                                 Ingin memesan fasilitas ini? Silakan masuk ke akun Anda.
                             </span>
                             <div className="flex gap-2">
-                                <Link
+                                <a
                                     href="/login"
                                     className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
                                 >
                                     Masuk untuk Reservasi
-                                </Link>
+                                </a>
                             </div>
                         </div>
                     </article>
