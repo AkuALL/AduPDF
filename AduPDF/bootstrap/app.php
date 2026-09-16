@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureUserApproved;
+use App\Http\Middleware\EnsureUserRole;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -22,6 +24,28 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        $middleware->alias([
+            'role' => EnsureUserRole::class,
+            'approved' => EnsureUserApproved::class,
+        ]);
+
+        $middleware->redirectGuestsTo(fn () => route('login'));
+
+        $middleware->redirectUsersTo(function () {
+            $user = auth()->user();
+            if (! $user) {
+                return route('login');
+            }
+            if ($user->isAdmin()) {
+                return route('admin.verifications.index');
+            }
+            if ($user->isPetugas()) {
+                return url('/petugas/dashboard');
+            }
+
+            return url('/facilities');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

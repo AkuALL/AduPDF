@@ -24,16 +24,61 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $name = fake()->name();
+
         return [
-            'name' => fake()->name(),
+            'nama' => $name,
+            'name' => $name,
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'role' => 'pengguna',
+            'verification_status' => 'approved',
             'remember_token' => Str::random(10),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
         ];
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn () => [
+            'role' => 'admin',
+            'verification_status' => 'approved',
+        ]);
+    }
+
+    public function petugas(): static
+    {
+        return $this->state(fn () => [
+            'role' => 'petugas',
+            'verification_status' => 'approved',
+        ]);
+    }
+
+    public function pengguna(): static
+    {
+        return $this->state(fn () => [
+            'role' => 'pengguna',
+            'verification_status' => 'approved',
+        ]);
+    }
+
+    public function pending(): static
+    {
+        return $this->state(fn () => [
+            'role' => 'pengguna',
+            'verification_status' => 'pending',
+        ]);
+    }
+
+    public function rejected(): static
+    {
+        return $this->state(fn () => [
+            'role' => 'pengguna',
+            'verification_status' => 'rejected',
+        ]);
     }
 
     /**
