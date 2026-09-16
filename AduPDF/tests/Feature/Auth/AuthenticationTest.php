@@ -1,55 +1,111 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Support\Facades\RateLimiter;
-use Laravel\Fortify\Features;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 test('login screen can be rendered', function () {
     $response = $this->get(route('login'));
 
     $response->assertOk();
+    $response->assertSee('Masuk ke AduPDF');
 });
 
-test('users can authenticate using the login screen', function () {
-    $user = User::factory()->create();
-
-    $response = $this->post(route('login.store'), [
-        'email' => $user->email,
-        'password' => 'password',
+test('approved Pengguna can authenticate successfully', function () {
+    $user = User::factory()->pengguna()->create([
+        'email' => 'pengguna@kampus.ac.id',
+        'password' => bcrypt('password123'),
     ]);
-
-    $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
-});
-
-test('users with two factor enabled are redirected to two factor challenge', function () {
-    $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
-
-    Features::twoFactorAuthentication([
-        'confirm' => true,
-        'confirmPassword' => true,
-    ]);
-
-    $user = User::factory()->withTwoFactor()->create();
 
     $response = $this->post(route('login'), [
-        'email' => $user->email,
-        'password' => 'password',
+        'email' => 'pengguna@kampus.ac.id',
+        'password' => 'password123',
     ]);
 
-    $response->assertRedirect(route('two-factor.login'));
-    $response->assertSessionHas('login.id', $user->id);
+    $this->assertAuthenticatedAs($user);
+    $response->assertRedirect(url('/facilities'));
+});
+
+test('pending Pengguna CANNOT authenticate and receives pending error notice', function () {
+    $user = User::factory()->pending()->create([
+        'email' => 'pending@kampus.ac.id',
+        'password' => bcrypt('password123'),
+    ]);
+
+    $response = $this->post(route('login'), [
+        'email' => 'pending@kampus.ac.id',
+        'password' => 'password123',
+    ]);
+
     $this->assertGuest();
+    $response->assertSessionHasErrors('email');
+    $this->assertTrue(str_contains(
+        session('errors')->first('email'),
+        'menunggu verifikasi'
+    ));
+});
+
+test('rejected Pengguna CANNOT authenticate and receives rejected error notice', function () {
+    $user = User::factory()->rejected()->create([
+        'email' => 'rejected@kampus.ac.id',
+        'password' => bcrypt('password123'),
+    ]);
+
+    $response = $this->post(route('login'), [
+        'email' => 'rejected@kampus.ac.id',
+        'password' => 'password123',
+    ]);
+
+    $this->assertGuest();
+    $response->assertSessionHasErrors('email');
+    $this->assertTrue(str_contains(
+        session('errors')->first('email'),
+        'ditolak'
+    ));
+});
+
+test('petugas can authenticate successfully', function () {
+    $petugas = User::factory()->petugas()->create([
+        'email' => 'petugas@kampus.ac.id',
+        'password' => bcrypt('password123'),
+    ]);
+
+    $response = $this->post(route('login'), [
+        'email' => 'petugas@kampus.ac.id',
+        'password' => 'password123',
+    ]);
+
+    $this->assertAuthenticatedAs($petugas);
+    $response->assertRedirect(url('/petugas/dashboard'));
+});
+
+test('admin can authenticate successfully and redirects to verifications', function () {
+    $admin = User::factory()->admin()->create([
+        'email' => 'admin@kampus.ac.id',
+        'password' => bcrypt('password123'),
+    ]);
+
+    $response = $this->post(route('login'), [
+        'email' => 'admin@kampus.ac.id',
+        'password' => 'password123',
+    ]);
+
+    $this->assertAuthenticatedAs($admin);
+    $response->assertRedirect(route('admin.verifications.index'));
 });
 
 test('users can not authenticate with invalid password', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'password' => bcrypt('correct-password'),
+    ]);
 
-    $this->post(route('login.store'), [
+    $response = $this->post(route('login'), [
         'email' => $user->email,
         'password' => 'wrong-password',
     ]);
 
+    $response->assertSessionHasErrors('email');
     $this->assertGuest();
 });
 
@@ -58,20 +114,6 @@ test('users can logout', function () {
 
     $response = $this->actingAs($user)->post(route('logout'));
 
-    $response->assertRedirect(route('home'));
-
+    $response->assertRedirect(route('login'));
     $this->assertGuest();
-});
-
-test('users are rate limited', function () {
-    $user = User::factory()->create();
-
-    RateLimiter::increment(md5('login'.implode('|', [$user->email, '127.0.0.1'])), amount: 5);
-
-    $response = $this->post(route('login.store'), [
-        'email' => $user->email,
-        'password' => 'wrong-password',
-    ]);
-
-    $response->assertTooManyRequests();
 });
