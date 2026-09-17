@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\FacilityCondition;
 use App\Enums\ReportStatus;
+use App\Http\Requests\UpdateReportFacilityConditionRequest;
 use App\Http\Requests\UpdateReportStatusRequest;
 use App\Models\Report;
+use App\Services\FacilityConditionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -29,7 +32,7 @@ class PetugasReportController extends Controller
         ]);
     }
 
-    public function show(Report $report): Response
+    public function show(Request $request, Report $report): Response
     {
         $report->load([
             'facility:id,name,location,condition',
@@ -39,6 +42,7 @@ class PetugasReportController extends Controller
 
         return Inertia::render('petugas/reports/show', [
             'report' => $this->reportData($report),
+            'success' => $request->session()->get('success'),
         ]);
     }
 
@@ -61,6 +65,18 @@ class PetugasReportController extends Controller
 
         return redirect()->route('petugas.reports.show', $report)
             ->with('success', 'Status laporan berhasil diperbarui.');
+    }
+
+    public function updateFacilityCondition(
+        UpdateReportFacilityConditionRequest $request,
+        Report $report,
+        FacilityConditionService $conditions,
+    ): RedirectResponse {
+        $condition = FacilityCondition::from($request->string('condition')->toString());
+        $conditions->updateCondition($report->facility, $condition);
+
+        return redirect()->route('petugas.reports.show', $report)
+            ->with('success', 'Kondisi fasilitas berhasil diperbarui.');
     }
 
     /**
