@@ -6,16 +6,17 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class PasswordController extends Controller
 {
     /**
      * Show the change password form for the Admin.
      */
-    public function edit(Request $request): View
+    public function edit(Request $request): Response
     {
-        return view('admin.accounts.change-password', [
+        return Inertia::render('admin/accounts/change-password', [
             'user' => $request->user(),
         ]);
     }
