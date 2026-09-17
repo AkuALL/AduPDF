@@ -46,6 +46,9 @@
                         <a href="{{ route('admin.users.pengguna.create') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('admin.users.pengguna.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}">
                             Tambah Pengguna
                         </a>
+                        <a href="{{ route('admin.facilities.index') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('admin.facilities.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}">
+                            Kelola Fasilitas
+                        </a>
                         <a href="{{ route('admin.password.edit') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('admin.password.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}">
                             Ganti Password
                         </a>
