@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Enums\FacilityType;
 use App\Models\Facility;
+use App\Services\FacilityAvailabilityService;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -53,15 +55,25 @@ class FacilityController extends Controller
         ]);
     }
 
-    public function show(Facility $facility): Response
+    public function show(Request $request, Facility $facility, FacilityAvailabilityService $availabilityService): Response
     {
+        $validated = $request->validate([
+            'date' => ['nullable', 'date_format:Y-m-d'],
+        ]);
+
+        $selectedDate = $validated['date'] ?? CarbonImmutable::now('Asia/Jakarta')->format('Y-m-d');
+
         $facility->load([
             'parentFacility:id,name',
             'childTools:id,name,type,condition,parent_facility_id',
         ]);
 
+        $availability = $availabilityService->getAvailability($facility, $selectedDate);
+
         return Inertia::render('facilities/show', [
             'facility' => $this->toPublicData($facility, true),
+            'availability' => $availability,
+            'selectedDate' => $selectedDate,
         ]);
     }
 

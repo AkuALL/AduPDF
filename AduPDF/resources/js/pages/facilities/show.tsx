@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 
 type ChildTool = {
     id: number;
@@ -19,8 +19,27 @@ type Facility = {
     child_tools: ChildTool[];
 };
 
+type AvailabilitySlot = {
+    start_time: string;
+    end_time: string;
+    is_available: boolean;
+    status: string;
+    label: string;
+};
+
+type Availability = {
+    date: string;
+    is_reservable: boolean;
+    total_slots: number;
+    available_slots_count: number;
+    occupied_slots_count: number;
+    slots: AvailabilitySlot[];
+};
+
 type Props = {
     facility: Facility;
+    availability?: Availability;
+    selectedDate?: string;
 };
 
 const typeLabels: Record<string, string> = {
@@ -52,9 +71,19 @@ const conditionConfig: Record<
     },
 };
 
-export default function FacilityShow({ facility }: Props) {
+export default function FacilityShow({ facility, availability, selectedDate }: Props) {
     const status = conditionConfig[facility.condition] || conditionConfig.aktif;
     const isRoom = ['ruang_kelas', 'aula', 'laboratorium'].includes(facility.type);
+
+    const currentDate = selectedDate || availability?.date || new Date().toISOString().slice(0, 10);
+
+    const handleDateChange = (newDate: string) => {
+        router.get(
+            `/facilities/${facility.id}`,
+            { date: newDate },
+            { preserveState: true, preserveScroll: true }
+        );
+    };
 
     return (
         <>
@@ -238,6 +267,137 @@ export default function FacilityShow({ facility }: Props) {
                             </div>
                         </div>
                     </article>
+
+                    {/* Availability Schedule Section (AG-04, FR-01, FR-02) */}
+                    <section className="mt-8 rounded-lg border border-[#E5E7EB] bg-white p-6 shadow-[0_1px_2px_rgba(16,24,40,0.03)] sm:p-8">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <span className="text-xs font-semibold uppercase tracking-wider text-[#2D4C79]">
+                                    Integrasi Jadwal Operasional
+                                </span>
+                                <h2 className="mt-1 text-xl font-bold tracking-tight text-[#111827]">
+                                    Ketersediaan Slot (07:00 – 20:00 WIB)
+                                </h2>
+                                <p className="mt-1 text-xs text-[#667085]">
+                                    Interval 30 menit. Ketersediaan otomatis mencerminkan kondisi fisik fasilitas dan reservasi yang disetujui.
+                                </p>
+                            </div>
+
+                            {/* Date Picker Control */}
+                            <div className="flex items-center gap-2">
+                                <label htmlFor="availability-date" className="text-xs font-medium text-[#667085] whitespace-nowrap">
+                                    Pilih Tanggal:
+                                </label>
+                                <input
+                                    id="availability-date"
+                                    type="date"
+                                    value={currentDate}
+                                    onChange={(e) => handleDateChange(e.target.value)}
+                                    className="rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#111827] shadow-sm focus:border-[#2D4C79] focus:outline-none focus:ring-1 focus:ring-[#2D4C79]"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Availability Summary Stats */}
+                        {availability && (
+                            <div className="mt-5 flex flex-wrap items-center gap-3 border-y border-[#E5E7EB] py-3 text-xs">
+                                <div className="flex items-center gap-1.5 font-medium text-[#16794A]">
+                                    <span className="inline-block h-2 w-2 rounded-full bg-[#16794A]" />
+                                    <span>{availability.available_slots_count} Slot Tersedia</span>
+                                </div>
+                                <span className="text-[#D0D5DD]">•</span>
+                                <div className="flex items-center gap-1.5 font-medium text-[#667085]">
+                                    <span className="inline-block h-2 w-2 rounded-full bg-[#98A2B3]" />
+                                    <span>{availability.occupied_slots_count} Tidak Tersedia</span>
+                                </div>
+                                <span className="text-[#D0D5DD]">•</span>
+                                <span className="text-[#667085]">Total {availability.total_slots} slot (30 mnt/slot)</span>
+
+                                {!availability.is_reservable && (
+                                    <span className="ml-auto rounded bg-[#FFF0E8] border border-[#F5C6A7] px-2 py-0.5 text-[11px] font-semibold text-[#B54708]">
+                                        Fasilitas Saat Ini Tidak Dapat Direservasi
+                                    </span>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Slot Grid */}
+                        <div className="mt-6">
+                            {availability && availability.slots.length > 0 ? (
+                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7">
+                                    {availability.slots.map((slot) => {
+                                        let slotStyle = 'bg-[#EAF7F0] border-[#B7E2CB] text-[#16794A]';
+                                        let statusBadge = 'Tersedia';
+
+                                        if (slot.status === 'terisi') {
+                                            slotStyle = 'bg-[#F3F5F7] border-[#E5E7EB] text-[#667085] opacity-80';
+                                            statusBadge = 'Dipesan';
+                                        } else if (slot.status === 'dalam_perbaikan') {
+                                            slotStyle = 'bg-[#FFF0E8] border-[#F5C6A7] text-[#B54708]';
+                                            statusBadge = 'Perbaikan';
+                                        } else if (slot.status === 'nonaktif' || !slot.is_available) {
+                                            slotStyle = 'bg-[#F0F2F4] border-[#D7DBE0] text-[#5D6673]';
+                                            statusBadge = 'Nonaktif';
+                                        }
+
+                                        return (
+                                            <div
+                                                key={slot.start_time}
+                                                className={`flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all ${slotStyle}`}
+                                            >
+                                                <span className="text-xs font-bold tracking-tight">
+                                                    {slot.start_time} - {slot.end_time}
+                                                </span>
+                                                <span className="mt-1 inline-flex items-center text-[10px] font-semibold uppercase tracking-wider">
+                                                    {statusBadge}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <p className="text-center text-xs text-[#667085] py-8">
+                                    Memuat informasi slot ketersediaan...
+                                </p>
+                            )}
+                        </div>
+
+                        {/* FR-02 Privacy Protection Notice */}
+                        <div className="mt-6 rounded-md bg-[#F3F5F7] border border-[#E5E7EB] p-3 text-xs text-[#667085]">
+                            <div className="flex items-start gap-2">
+                                <span className="font-bold text-[#2D4C79]">ℹ Perlindungan Privasi (FR-02):</span>
+                                <span>
+                                    Sistem hanya menampilkan status ketersediaan slot waktu. Identitas pemesan, kontak, dan tujuan kegiatan yang telah disetujui dirahasiakan dari tampilan publik.
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* CTA / Quick Link to Reservation */}
+                        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-[#E5E7EB] pt-5">
+                            <span className="text-xs text-[#667085]">
+                                {availability?.is_reservable
+                                    ? 'Slot waktu di atas dapat diajukan oleh pengguna terverifikasi.'
+                                    : 'Fasilitas ini sedang tidak menerima pengajuan reservasi baru.'}
+                            </span>
+                            <div className="flex gap-2">
+                                {availability?.is_reservable ? (
+                                    <Link
+                                        href={`/reservations/create?facility_id=${facility.id}`}
+                                        className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
+                                    >
+                                        Ajukan Reservasi Fasilitas Ini
+                                    </Link>
+                                ) : (
+                                    <button
+                                        disabled
+                                        className="inline-flex h-9 cursor-not-allowed items-center justify-center rounded-md bg-[#E5E7EB] px-4 text-xs font-semibold text-[#98A2B3]"
+                                    >
+                                        Tidak Tersedia untuk Reservasi
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </section>
                 </main>
             </div>
         </>
