@@ -4,6 +4,7 @@ import type { PropsWithChildren } from 'react';
 type AuthUser = { name?: string; nama?: string };
 
 const navigation = [
+    ['Kelola Akun', '/admin/users'],
     ['Antrian Verifikasi', '/admin/verifications'],
     ['Tambah Petugas', '/admin/users/petugas/create'],
     ['Tambah Pengguna', '/admin/users/pengguna/create'],
