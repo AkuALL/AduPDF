@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreFacilityRequest;
 use App\Http\Requests\Admin\UpdateFacilityRequest;
 use App\Models\Facility;
+use App\Services\ReservationImpactService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -113,9 +114,9 @@ class FacilityManagementController extends Controller
     }
 
     /**
-     * Update facility details (AG-05, FR-18).
+     * Update facility details (AG-05, AG-06, FR-18).
      */
-    public function update(UpdateFacilityRequest $request, Facility $facility): RedirectResponse
+    public function update(UpdateFacilityRequest $request, Facility $facility, ReservationImpactService $impactService): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -123,20 +124,40 @@ class FacilityManagementController extends Controller
             $validated['parent_facility_id'] = null;
         }
 
+        $wasInactive = $facility->condition === FacilityCondition::Inactive;
+        $isNowInactive = $validated['condition'] === FacilityCondition::Inactive->value;
+
         $facility->update($validated);
+
+        if (! $wasInactive && $isNowInactive) {
+            $impact = $impactService->applyDeactivation($facility);
+            $message = "Data fasilitas {$facility->name} berhasil diperbarui dan dinonaktifkan.";
+            if ($impact['rejected'] > 0 || $impact['cancelled'] > 0) {
+                $message .= " Dampak reservasi: {$impact['rejected']} reservasi menunggu otomatis ditolak, dan {$impact['cancelled']} reservasi disetujui otomatis dibatalkan.";
+            }
+
+            return redirect()->route('admin.facilities.show', $facility)->with('success', $message);
+        }
 
         return redirect()->route('admin.facilities.show', $facility)
             ->with('success', "Data fasilitas {$facility->name} berhasil diperbarui.");
     }
 
     /**
-     * Deactivate facility (AG-05, FR-18).
+     * Deactivate facility with absolute reservation cancellation/rejection (AG-05, AG-06, FR-18).
      */
-    public function deactivate(Facility $facility): RedirectResponse
+    public function deactivate(Facility $facility, ReservationImpactService $impactService): RedirectResponse
     {
         $facility->update(['condition' => FacilityCondition::Inactive]);
 
-        return back()->with('success', "Fasilitas {$facility->name} telah berhasil dinonaktifkan.");
+        $impact = $impactService->applyDeactivation($facility);
+
+        $message = "Fasilitas {$facility->name} telah berhasil dinonaktifkan.";
+        if ($impact['rejected'] > 0 || $impact['cancelled'] > 0) {
+            $message .= " Dampak penonaktifan: {$impact['rejected']} reservasi menunggu otomatis ditolak dan {$impact['cancelled']} reservasi disetujui otomatis dibatalkan.";
+        }
+
+        return back()->with('success', $message);
     }
 
     /**

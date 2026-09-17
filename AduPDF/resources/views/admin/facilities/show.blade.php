@@ -13,7 +13,7 @@
                 Edit Fasilitas
             </a>
             @if($facility->condition->value === 'aktif')
-                <form action="{{ route('admin.facilities.deactivate', $facility) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menonaktifkan fasilitas ini?');">
+                <form action="{{ route('admin.facilities.deactivate', $facility) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menonaktifkan fasilitas ini? Seluruh reservasi menunggu akan otomatis ditolak dan reservasi disetujui yang belum selesai akan dibatalkan.');">
                     @csrf
                     @method('PATCH')
                     <button type="submit" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-semibold px-3 py-1.5 rounded-md shadow-sm transition">
