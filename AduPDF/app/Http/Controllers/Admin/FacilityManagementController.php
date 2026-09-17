@@ -12,14 +12,15 @@ use App\Services\ReservationImpactService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class FacilityManagementController extends Controller
 {
     /**
      * Display a listing of facilities for administrator (AG-05, FR-18).
      */
-    public function index(Request $request): View
+    public function index(Request $request): Response
     {
         $search = $request->query('search');
         $type = $request->query('type');
@@ -53,20 +54,20 @@ class FacilityManagementController extends Controller
             'inactive' => Facility::where('condition', FacilityCondition::Inactive)->count(),
         ];
 
-        return view('admin.facilities.index', compact('facilities', 'counts', 'search', 'type', 'condition'));
+        return Inertia::render('admin/facilities/index', compact('facilities', 'counts', 'search', 'type', 'condition'));
     }
 
     /**
      * Show form to create a new facility (AG-05, FR-18).
      */
-    public function create(): View
+    public function create(): Response
     {
         $parentRooms = Facility::query()
             ->whereIn('type', [FacilityType::Classroom, FacilityType::Hall, FacilityType::Laboratory])
             ->orderBy('name')
             ->get();
 
-        return view('admin.facilities.create', compact('parentRooms'));
+        return Inertia::render('admin/facilities/create', compact('parentRooms'));
     }
 
     /**
@@ -89,20 +90,20 @@ class FacilityManagementController extends Controller
     /**
      * Display detailed admin view of a facility (AG-05, FR-18).
      */
-    public function show(Facility $facility): View
+    public function show(Facility $facility): Response
     {
         $facility->load([
             'parentFacility:id,name,type,condition,location',
             'childTools:id,name,type,condition,parent_facility_id',
         ])->loadCount(['childTools', 'reservations']);
 
-        return view('admin.facilities.show', compact('facility'));
+        return Inertia::render('admin/facilities/show', compact('facility'));
     }
 
     /**
      * Show form to edit facility (AG-05, FR-18).
      */
-    public function edit(Facility $facility): View
+    public function edit(Facility $facility): Response
     {
         $parentRooms = Facility::query()
             ->whereIn('type', [FacilityType::Classroom, FacilityType::Hall, FacilityType::Laboratory])
@@ -110,7 +111,7 @@ class FacilityManagementController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('admin.facilities.edit', compact('facility', 'parentRooms'));
+        return Inertia::render('admin/facilities/edit', compact('facility', 'parentRooms'));
     }
 
     /**

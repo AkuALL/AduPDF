@@ -1,5 +1,11 @@
 @import 'tailwindcss';
 
+@layer components {
+    .input {
+        @apply w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-[#2D4C79] focus:outline-none focus:ring-2 focus:ring-[#2D4C79];
+    }
+}
+
 @import 'tw-animate-css';
 
 @source '../views';

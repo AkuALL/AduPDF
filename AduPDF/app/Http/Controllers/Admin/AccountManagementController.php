@@ -7,14 +7,15 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class AccountManagementController extends Controller
 {
     /**
      * Display the verification queue and account management list (FR-17, US-15).
      */
-    public function verifications(Request $request): View
+    public function verifications(Request $request): Response
     {
         $status = $request->query('status', 'pending');
 
@@ -32,7 +33,7 @@ class AccountManagementController extends Controller
             'rejected' => User::where('role', 'pengguna')->where('verification_status', 'rejected')->count(),
         ];
 
-        return view('admin.accounts.verifications', compact('users', 'status', 'counts'));
+        return Inertia::render('admin/accounts/verifications', compact('users', 'status', 'counts'));
     }
 
     /**
@@ -80,9 +81,9 @@ class AccountManagementController extends Controller
     /**
      * Show the form for creating a new Petugas account (FR-15, US-13).
      */
-    public function createPetugas(): View
+    public function createPetugas(): Response
     {
-        return view('admin.accounts.create-petugas');
+        return Inertia::render('admin/accounts/create-petugas');
     }
 
     /**
@@ -120,9 +121,9 @@ class AccountManagementController extends Controller
     /**
      * Show the form for creating a new Pengguna account directly by Admin (FR-16, US-14).
      */
-    public function createPengguna(): View
+    public function createPengguna(): Response
     {
-        return view('admin.accounts.create-pengguna');
+        return Inertia::render('admin/accounts/create-pengguna');
     }
 
     /**
