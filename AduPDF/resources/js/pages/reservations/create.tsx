@@ -7,6 +7,10 @@ type Props = {
 };
 
 export default function CreateReservation({ facility, reservable, success }: Props) {
+    const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const defaultStartTime = params?.get('start_time') ?? '';
+    const defaultEndTime = params?.get('end_time') ?? '';
+
     return (
         <>
             <Head title="Ajukan Reservasi" />
@@ -27,12 +31,12 @@ export default function CreateReservation({ facility, reservable, success }: Pro
                                 {errors.facility_id && <p role="alert" className="text-sm text-red-700">{errors.facility_id}</p>}
                                 <div>
                                     <label htmlFor="start_time" className="block text-sm font-medium">Mulai (WIB)</label>
-                                    <input id="start_time" name="start_time" type="datetime-local" step="1800" required aria-invalid={!!errors.start_time} className="mt-1 w-full rounded-md border border-[#D0D5DD] px-3 py-2" />
+                                    <input id="start_time" name="start_time" type="datetime-local" step="1800" defaultValue={defaultStartTime} required aria-invalid={!!errors.start_time} className="mt-1 w-full rounded-md border border-[#D0D5DD] px-3 py-2" />
                                     {errors.start_time && <p role="alert" className="mt-1 text-sm text-red-700">{errors.start_time}</p>}
                                 </div>
                                 <div>
                                     <label htmlFor="end_time" className="block text-sm font-medium">Selesai (WIB)</label>
-                                    <input id="end_time" name="end_time" type="datetime-local" step="1800" required aria-invalid={!!errors.end_time} className="mt-1 w-full rounded-md border border-[#D0D5DD] px-3 py-2" />
+                                    <input id="end_time" name="end_time" type="datetime-local" step="1800" defaultValue={defaultEndTime} required aria-invalid={!!errors.end_time} className="mt-1 w-full rounded-md border border-[#D0D5DD] px-3 py-2" />
                                     {errors.end_time && <p role="alert" className="mt-1 text-sm text-red-700">{errors.end_time}</p>}
                                 </div>
                                 <div>
