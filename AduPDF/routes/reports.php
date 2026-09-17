@@ -15,4 +15,5 @@ Route::middleware(['auth', 'role:petugas'])->prefix('petugas')->name('petugas.')
     Route::get('/reports', [PetugasReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/{report}', [PetugasReportController::class, 'show'])->name('reports.show');
     Route::patch('/reports/{report}', [PetugasReportController::class, 'update'])->name('reports.update');
+    Route::patch('/reports/{report}/facility-condition', [PetugasReportController::class, 'updateFacilityCondition'])->name('reports.facility-condition.update');
 });
