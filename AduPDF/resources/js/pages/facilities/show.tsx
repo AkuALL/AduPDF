@@ -1,4 +1,12 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+
+type AuthUser = {
+    id: number;
+    name?: string;
+    nama?: string;
+    email: string;
+    role: string;
+};
 
 type ChildTool = {
     id: number;
@@ -72,6 +80,9 @@ const conditionConfig: Record<
 };
 
 export default function FacilityShow({ facility, availability, selectedDate }: Props) {
+    const { auth } = usePage<{ auth?: { user?: AuthUser | null } }>().props;
+    const user = auth?.user;
+
     const status = conditionConfig[facility.condition] || conditionConfig.aktif;
     const isRoom = ['ruang_kelas', 'aula', 'laboratorium'].includes(facility.type);
 
@@ -108,21 +119,68 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                 >
                                     Fasilitas
                                 </Link>
+                                {user?.role === 'pengguna' && (
+                                    <Link
+                                        href="/reservations"
+                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                    >
+                                        Reservasi Saya
+                                    </Link>
+                                )}
+                                {user?.role === 'petugas' && (
+                                    <Link
+                                        href="/petugas/reservations"
+                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                    >
+                                        Panel Petugas
+                                    </Link>
+                                )}
+                                {user?.role === 'admin' && (
+                                    <a
+                                        href="/admin/facilities"
+                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                    >
+                                        Kelola Fasilitas
+                                    </a>
+                                )}
                             </nav>
                         </div>
                         <div className="flex items-center gap-3">
-                            <a
-                                href="/login"
-                                className="inline-flex h-9 items-center justify-center rounded-md px-3.5 text-sm font-medium text-[#111827] hover:bg-[#F3F5F7] transition"
-                            >
-                                Masuk
-                            </a>
-                            <a
-                                href="/register"
-                                className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
-                            >
-                                Daftar
-                            </a>
+                            {user ? (
+                                <>
+                                    <div className="text-right hidden sm:block">
+                                        <span className="text-xs font-semibold text-[#111827] block">
+                                            {user.nama || user.name}
+                                        </span>
+                                        <span className="text-[10px] text-[#667085] capitalize block">
+                                            {user.role}
+                                        </span>
+                                    </div>
+                                    <Link
+                                        href="/logout"
+                                        method="post"
+                                        as="button"
+                                        className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#5D6673] hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition shadow-sm"
+                                    >
+                                        Keluar
+                                    </Link>
+                                </>
+                            ) : (
+                                <>
+                                    <a
+                                        href="/login"
+                                        className="inline-flex h-9 items-center justify-center rounded-md px-3.5 text-sm font-medium text-[#111827] hover:bg-[#F3F5F7] transition"
+                                    >
+                                        Masuk
+                                    </a>
+                                    <a
+                                        href="/register"
+                                        className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
+                                    >
+                                        Daftar
+                                    </a>
+                                </>
+                            )}
                         </div>
                     </div>
                 </header>
@@ -255,15 +313,35 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                         {/* Action Area */}
                         <div className="mt-8 flex flex-col gap-3 border-t border-[#E5E7EB] pt-6 sm:flex-row sm:items-center sm:justify-between">
                             <span className="text-xs text-[#667085]">
-                                Ingin memesan fasilitas ini? Silakan masuk ke akun Anda.
+                                {user
+                                    ? (availability?.is_reservable ? 'Fasilitas ini dapat diajukan untuk reservasi kegiatan akademik atau organisasi.' : 'Fasilitas ini sedang tidak menerima pengajuan reservasi.')
+                                    : 'Ingin memesan fasilitas ini? Silakan masuk ke akun Anda.'}
                             </span>
                             <div className="flex gap-2">
-                                <a
-                                    href="/login"
-                                    className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
-                                >
-                                    Masuk untuk Reservasi
-                                </a>
+                                {user ? (
+                                    availability?.is_reservable ? (
+                                        <Link
+                                            href={`/reservations/create?facility_id=${facility.id}`}
+                                            className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
+                                        >
+                                            Ajukan Reservasi Fasilitas Ini
+                                        </Link>
+                                    ) : (
+                                        <button
+                                            disabled
+                                            className="inline-flex h-9 cursor-not-allowed items-center justify-center rounded-md bg-[#E5E7EB] px-4 text-xs font-semibold text-[#98A2B3]"
+                                        >
+                                            Tidak Tersedia untuk Reservasi
+                                        </button>
+                                    )
+                                ) : (
+                                    <a
+                                        href="/login"
+                                        className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
+                                    >
+                                        Masuk untuk Reservasi
+                                    </a>
+                                )}
                             </div>
                         </div>
                     </article>
@@ -340,10 +418,32 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                             statusBadge = 'Nonaktif';
                                         }
 
+                                        const isClickable = slot.is_available && availability.is_reservable;
+                                        const reservationUrl = `/reservations/create?facility_id=${facility.id}&start_time=${currentDate}T${slot.start_time}&end_time=${currentDate}T${slot.end_time}`;
+
+                                        if (isClickable) {
+                                            return (
+                                                <Link
+                                                    key={slot.start_time}
+                                                    href={reservationUrl}
+                                                    title={`Klik untuk ajukan reservasi slot ${slot.start_time} - ${slot.end_time}`}
+                                                    className={`group flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all cursor-pointer hover:bg-[#D4EFE0] hover:border-[#16794A] hover:shadow-sm hover:scale-[1.02] ${slotStyle}`}
+                                                >
+                                                    <span className="text-xs font-bold tracking-tight group-hover:underline">
+                                                        {slot.start_time} - {slot.end_time}
+                                                    </span>
+                                                    <span className="mt-1 inline-flex items-center text-[10px] font-semibold uppercase tracking-wider">
+                                                        {statusBadge}
+                                                    </span>
+                                                </Link>
+                                            );
+                                        }
+
                                         return (
                                             <div
                                                 key={slot.start_time}
-                                                className={`flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all ${slotStyle}`}
+                                                title={`Slot ${slot.start_time} - ${slot.end_time} (${statusBadge})`}
+                                                className={`flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all cursor-default ${slotStyle}`}
                                             >
                                                 <span className="text-xs font-bold tracking-tight">
                                                     {slot.start_time} - {slot.end_time}
