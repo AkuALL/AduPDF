@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 
 type Facility = {
@@ -60,12 +60,23 @@ const conditionConfig: Record<
     },
 };
 
+type AuthUser = {
+    id: number;
+    name?: string;
+    nama?: string;
+    email: string;
+    role: string;
+};
+
 export default function FacilityIndex({
     facilities,
     filters,
     locations,
     types,
 }: Props) {
+    const { auth } = usePage<{ auth?: { user?: AuthUser | null } }>().props;
+    const user = auth?.user;
+
     const [form, setForm] = useState<Filters>(filters);
 
     function submit(event: FormEvent<HTMLFormElement>) {
@@ -105,21 +116,68 @@ export default function FacilityIndex({
                                 >
                                     Fasilitas
                                 </Link>
+                                {user?.role === 'pengguna' && (
+                                    <Link
+                                        href="/reservations"
+                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                    >
+                                        Reservasi Saya
+                                    </Link>
+                                )}
+                                {user?.role === 'petugas' && (
+                                    <Link
+                                        href="/petugas/reservations"
+                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                    >
+                                        Panel Petugas
+                                    </Link>
+                                )}
+                                {user?.role === 'admin' && (
+                                    <a
+                                        href="/admin/facilities"
+                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                    >
+                                        Kelola Fasilitas
+                                    </a>
+                                )}
                             </nav>
                         </div>
                         <div className="flex items-center gap-3">
-                            <a
-                                href="/login"
-                                className="inline-flex h-9 items-center justify-center rounded-md px-3.5 text-sm font-medium text-[#111827] hover:bg-[#F3F5F7] transition"
-                            >
-                                Masuk
-                            </a>
-                            <a
-                                href="/register"
-                                className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
-                            >
-                                Daftar
-                            </a>
+                            {user ? (
+                                <>
+                                    <div className="text-right hidden sm:block">
+                                        <span className="text-xs font-semibold text-[#111827] block">
+                                            {user.nama || user.name}
+                                        </span>
+                                        <span className="text-[10px] text-[#667085] capitalize block">
+                                            {user.role}
+                                        </span>
+                                    </div>
+                                    <Link
+                                        href="/logout"
+                                        method="post"
+                                        as="button"
+                                        className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#5D6673] hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition shadow-sm"
+                                    >
+                                        Keluar
+                                    </Link>
+                                </>
+                            ) : (
+                                <>
+                                    <a
+                                        href="/login"
+                                        className="inline-flex h-9 items-center justify-center rounded-md px-3.5 text-sm font-medium text-[#111827] hover:bg-[#F3F5F7] transition"
+                                    >
+                                        Masuk
+                                    </a>
+                                    <a
+                                        href="/register"
+                                        className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
+                                    >
+                                        Daftar
+                                    </a>
+                                </>
+                            )}
                         </div>
                     </div>
                 </header>
