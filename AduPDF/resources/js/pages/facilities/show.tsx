@@ -362,16 +362,6 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                             )}
                         </div>
 
-                        {/* FR-02 Privacy Protection Notice */}
-                        <div className="mt-6 rounded-md bg-[#F3F5F7] border border-[#E5E7EB] p-3 text-xs text-[#667085]">
-                            <div className="flex items-start gap-2">
-                                <span className="font-bold text-[#2D4C79]">ℹ Perlindungan Privasi (FR-02):</span>
-                                <span>
-                                    Sistem hanya menampilkan status ketersediaan slot waktu. Identitas pemesan, kontak, dan tujuan kegiatan yang telah disetujui dirahasiakan dari tampilan publik.
-                                </span>
-                            </div>
-                        </div>
-
                         {/* CTA / Quick Link to Reservation */}
                         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-[#E5E7EB] pt-5">
                             <span className="text-xs text-[#667085]">
@@ -382,7 +372,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                             <div className="flex gap-2">
                                 {availability?.is_reservable ? (
                                     <Link
-                                        href={`/reservations/create?facility_id=${facility.id}`}
+                                        href="/login"
                                         className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
                                     >
                                         Ajukan Reservasi Fasilitas Ini
