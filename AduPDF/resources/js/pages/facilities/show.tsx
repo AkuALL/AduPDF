@@ -362,16 +362,6 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                             )}
                         </div>
 
-                        {/* Privacy Protection Notice */}
-                        <div className="mt-6 rounded-md bg-[#F3F5F7] border border-[#E5E7EB] p-3 text-xs text-[#667085]">
-                            <div className="flex items-start gap-2">
-                                <span className="font-bold text-[#2D4C79]">ℹ Perlindungan Privasi:</span>
-                                <span>
-                                    Sistem hanya menampilkan status ketersediaan slot waktu. Identitas pemesan, kontak, dan tujuan kegiatan yang telah disetujui dirahasiakan dari tampilan publik.
-                                </span>
-                            </div>
-                        </div>
-
                         {/* CTA / Quick Link to Reservation */}
                         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-[#E5E7EB] pt-5">
                             <span className="text-xs text-[#667085]">
