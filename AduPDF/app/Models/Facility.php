@@ -55,6 +55,21 @@ class Facility extends Model
         return $this->hasMany(self::class, 'parent_facility_id');
     }
 
+    /**
+     * Get the reservations for this facility.
+     *
+     * @return HasMany<Reservation, $this>
+     */
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    public function hasHistory(): bool
+    {
+        return $this->reservations()->exists();
+    }
+
     public function isRoom(): bool
     {
         return $this->type->canContainTools();
