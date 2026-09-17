@@ -13,6 +13,19 @@ use Inertia\Response;
 class AccountManagementController extends Controller
 {
     /**
+     * Display Petugas and Pengguna accounts.
+     */
+    public function index(): Response
+    {
+        $users = User::query()
+            ->whereIn('role', ['petugas', 'pengguna'])
+            ->orderByDesc('created_at')
+            ->paginate(15);
+
+        return Inertia::render('admin/accounts/index', compact('users'));
+    }
+
+    /**
      * Display the verification queue and account management list (FR-17, US-15).
      */
     public function verifications(Request $request): Response

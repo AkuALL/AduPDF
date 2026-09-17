@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/users', [AccountManagementController::class, 'index'])->name('users.index');
+
     // GAL-05: Verification Queue (FR-17, US-15)
     Route::get('/verifications', [AccountManagementController::class, 'verifications'])->name('verifications.index');
     Route::patch('/users/{user}/verify', [AccountManagementController::class, 'verify'])->name('users.verify');

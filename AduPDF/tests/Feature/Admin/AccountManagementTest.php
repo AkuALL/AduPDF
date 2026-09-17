@@ -12,6 +12,28 @@ test('non-admin users cannot access admin verification queue', function () {
     $response->assertForbidden();
 });
 
+test('non-admin users cannot access admin account list', function () {
+    $pengguna = User::factory()->pengguna()->create();
+
+    $response = $this->actingAs($pengguna)->get(route('admin.users.index'));
+
+    $response->assertForbidden();
+});
+
+test('admin can view Petugas and Pengguna account list', function () {
+    $admin = User::factory()->admin()->create();
+    $petugas = User::factory()->petugas()->create(['nama' => 'Petugas Fasilitas']);
+    $pengguna = User::factory()->pengguna()->create(['nama' => 'Pengguna Kampus']);
+    $otherAdmin = User::factory()->admin()->create(['nama' => 'Admin Lain']);
+
+    $response = $this->actingAs($admin)->get(route('admin.users.index'));
+
+    $response->assertOk();
+    $response->assertSee($petugas->nama);
+    $response->assertSee($pengguna->nama);
+    $response->assertDontSee($otherAdmin->nama);
+});
+
 test('admin can view verification queue with pending users', function () {
     $admin = User::factory()->admin()->create();
     $pendingUser = User::factory()->pending()->create([
