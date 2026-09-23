@@ -133,3 +133,43 @@ test('system prevents deletion of the last admin account via profile settings (B
         'id' => $admin->id,
     ]);
 });
+
+test('profile page is directly accessible via GET /profile (FR-17, SRS 12.5)', function () {
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get('/profile');
+
+    $response->assertOk();
+});
+
+test('accessing /profiles redirects to /profile', function () {
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get('/profiles');
+
+    $response->assertRedirect('/profile');
+});
+
+test('profile password can be updated via profile form (FR-17, GAL-05)', function () {
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->patch(route('profile.update'), [
+            'name' => 'Budi Utomo',
+            'email' => $user->email,
+            'password' => 'new-password-123',
+            'password_confirmation' => 'new-password-123',
+        ]);
+
+    $response
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('profile.edit'));
+
+    $user->refresh();
+    expect(\Illuminate\Support\Facades\Hash::check('new-password-123', $user->password))->toBeTrue();
+});
