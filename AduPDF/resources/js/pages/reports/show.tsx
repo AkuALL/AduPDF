@@ -10,7 +10,7 @@ type Report = {
     reported_at: string;
     catatan_resolusi: string | null;
     facility: { id: number; name: string; location: string };
-    attachments: { id: number; original_name: string; mime_type: string; file_size: number }[];
+    attachments: { id: number; original_name: string; mime_type: string; file_size: number; url: string }[];
 };
 
 type Props = { report: Report };
@@ -55,7 +55,10 @@ export default function ReportShow({ report }: Props) {
                                 {report.attachments.map((attachment) => (
                                     <div key={attachment.id} className="flex items-center justify-between gap-4 px-4 py-3 text-sm">
                                         <span className="min-w-0 truncate font-medium">{attachment.original_name}</span>
-                                        <span className="shrink-0 text-[#667085]">{formatFileSize(attachment.file_size)}</span>
+                                        <div className="flex shrink-0 items-center gap-3">
+                                            <span className="text-[#667085]">{formatFileSize(attachment.file_size)}</span>
+                                            <a href={attachment.url} target="_blank" rel="noreferrer" className="font-semibold text-[#2D4C79] hover:underline">Lihat</a>
+                                        </div>
                                     </div>
                                 ))}
                             </div>

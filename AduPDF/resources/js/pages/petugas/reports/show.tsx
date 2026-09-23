@@ -12,7 +12,7 @@ type Report = {
     status_laporan: ReportStatus;
     catatan_resolusi: string | null;
     facility: { name: string; location: string; condition: FacilityCondition };
-    attachments: { id: number; original_name: string; file_size: number }[];
+    attachments: { id: number; original_name: string; file_size: number; url: string }[];
 };
 
 type Props = { report: Report; success: string | null };
@@ -59,7 +59,7 @@ export default function PetugasReportShow({ report, success }: Props) {
                             <div><dt className="text-[#667085]">Deskripsi</dt><dd className="mt-1 whitespace-pre-wrap">{report.deskripsi}</dd></div>
                             {report.catatan_resolusi && <div><dt className="text-[#667085]">Catatan resolusi</dt><dd className="mt-1 whitespace-pre-wrap">{report.catatan_resolusi}</dd></div>}
                         </dl>
-                        <section className="mt-6"><h2 className="text-sm font-semibold">Foto pendukung ({report.attachments.length})</h2><ul className="mt-3 divide-y rounded-lg border border-[#E5E7EB]">{report.attachments.map((attachment) => <li key={attachment.id} className="flex items-center justify-between gap-4 px-4 py-3 text-sm"><span className="min-w-0 truncate font-medium">{attachment.original_name}</span><span className="shrink-0 text-[#667085]">{formatFileSize(attachment.file_size)}</span></li>)}</ul></section>
+                        <section className="mt-6"><h2 className="text-sm font-semibold">Foto pendukung ({report.attachments.length})</h2><ul className="mt-3 divide-y rounded-lg border border-[#E5E7EB]">{report.attachments.map((attachment) => <li key={attachment.id} className="flex items-center justify-between gap-4 px-4 py-3 text-sm"><span className="min-w-0 truncate font-medium">{attachment.original_name}</span><span className="flex shrink-0 items-center gap-3"><span className="text-[#667085]">{formatFileSize(attachment.file_size)}</span><a href={attachment.url} target="_blank" rel="noreferrer" className="font-semibold text-[#2D4C79] hover:underline">Lihat</a></span></li>)}</ul></section>
 
                         {report.status_laporan === 'diproses' && report.facility.condition === 'aktif' && (
                             <Form action={`/petugas/reports/${report.id}/facility-condition`} method="patch" className="mt-6 border-t border-[#E5E7EB] pt-6">

@@ -37,6 +37,7 @@ test('Petugas can view report details separately from facility condition', funct
         ->where('report.status_laporan', 'diproses')
         ->where('report.facility.condition', 'dalam_perbaikan')
         ->has('report.attachments', 2)
+        ->where('report.attachments.0.url', route('reports.attachments.show', $report->attachments->first()))
     );
 });
 
