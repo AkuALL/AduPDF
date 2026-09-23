@@ -102,7 +102,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
             <div className="min-h-screen bg-[#F7F8FA] text-[#111827] font-sans antialiased">
                 {/* Navigation Bar */}
                 <header className="sticky top-0 z-30 border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm">
-                    <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
+                    <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
                         <div className="flex items-center gap-8">
                             <Link href="/" className="flex items-center gap-2">
                                 <span className="text-xl font-bold tracking-tight text-[#2D4C79]">
@@ -186,7 +186,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                 </header>
 
                 {/* Main Content Area */}
-                <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+                <main className="w-full px-4 py-8 sm:px-6 lg:px-8">
                     {/* Back Breadcrumb */}
                     <div className="mb-6">
                         <Link

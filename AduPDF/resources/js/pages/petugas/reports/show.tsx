@@ -43,7 +43,7 @@ export default function PetugasReportShow({ report, success }: Props) {
         <>
             <Head title="Proses Laporan" />
             <main className="min-h-screen bg-[#F7F8FA] px-4 py-10 text-[#111827]">
-                <div className="mx-auto max-w-3xl">
+                <div className="w-full">
                     <Link href="/petugas/reports" className="text-sm font-medium text-[#2D4C79] hover:underline">Kembali ke antrian laporan</Link>
                     {success && <p role="status" className="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
                     <article className="mt-6 rounded-lg border border-[#E5E7EB] bg-white p-6">

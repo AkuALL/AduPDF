@@ -20,7 +20,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
     return (
         <div className="flex min-h-screen flex-col bg-slate-100 text-slate-800 antialiased">
             <header className="bg-[#2D4C79] text-white shadow">
-                <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+                <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-6">
                         <Link href="/admin/users" className="flex items-center gap-2">
                             <span className="text-2xl font-bold tracking-wider">AduPDF</span>
@@ -40,7 +40,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                     </div>
                 </div>
             </header>
-            <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
+            <main className="w-full min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
                 {flash?.success && <div role="status" className="mb-4 rounded border-l-4 border-emerald-600 bg-emerald-50 p-4 text-sm text-emerald-800">{flash.success}</div>}
                 {flash?.error && <div role="alert" className="mb-4 rounded border-l-4 border-rose-600 bg-rose-50 p-4 text-sm text-rose-800">{flash.error}</div>}
                 {children}

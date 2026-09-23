@@ -15,7 +15,7 @@ export default function CreateReservation({ facility, reservable, success }: Pro
         <>
             <Head title="Ajukan Reservasi" />
             <main className="min-h-screen bg-[#F7F8FA] px-4 py-10 text-[#111827]">
-                <div className="mx-auto max-w-xl">
+                <div className="w-full">
                     <Link href={`/facilities/${facility.id}`} className="text-sm font-medium text-[#2D4C79] hover:underline">
                         Kembali ke detail fasilitas
                     </Link>

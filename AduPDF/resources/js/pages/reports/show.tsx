@@ -33,7 +33,7 @@ export default function ReportShow({ report }: Props) {
         <>
             <Head title="Detail Laporan" />
             <main className="min-h-screen bg-[#F7F8FA] px-4 py-10 text-[#111827]">
-                <div className="mx-auto max-w-2xl">
+                <div className="w-full">
                     <Link href="/reports" className="text-sm font-medium text-[#2D4C79] hover:underline">Kembali ke laporan saya</Link>
                     <article className="mt-6 rounded-lg border border-[#E5E7EB] bg-white p-6">
                         <div className="flex items-start justify-between gap-4">
