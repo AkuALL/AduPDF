@@ -146,6 +146,31 @@ test('admin can update a facility', function () {
     ]);
 });
 
+test('admin can update a facility using PATCH method per SRS V2 spec', function () {
+    $admin = User::factory()->admin()->create();
+    $facility = Facility::factory()->create([
+        'name' => 'Aula Gedung Lama',
+        'capacity' => 150,
+    ]);
+
+    $response = $this->actingAs($admin)->patch(route('admin.facilities.update', $facility), [
+        'name' => 'Aula Gedung Baru PATCH',
+        'type' => $facility->type->value,
+        'location' => 'Gedung Baru Lt. 3',
+        'capacity' => 250,
+        'condition' => FacilityCondition::Active->value,
+        'description' => 'Sudah direnovasi.',
+        'parent_facility_id' => null,
+    ]);
+
+    $response->assertRedirect(route('admin.facilities.show', $facility));
+
+    $this->assertDatabaseHas('facilities', [
+        'id' => $facility->id,
+        'name' => 'Aula Gedung Baru PATCH',
+    ]);
+});
+
 test('admin cannot change a room type to field if it contains child tools', function () {
     $admin = User::factory()->admin()->create();
     $room = Facility::factory()->create(['type' => FacilityType::Laboratory]);
