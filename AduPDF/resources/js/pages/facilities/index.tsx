@@ -145,14 +145,18 @@ export default function FacilityIndex({
                         <div className="flex items-center gap-3">
                             {user ? (
                                 <>
-                                    <div className="text-right hidden sm:block">
-                                        <span className="text-xs font-semibold text-[#111827] block">
+                                    <Link
+                                        href="/profile"
+                                        aria-label="Buka profil"
+                                        className="group hidden rounded-md text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79] sm:block"
+                                    >
+                                        <span className="block text-xs font-semibold text-[#111827] group-hover:text-[#2D4C79]">
                                             {user.nama || user.name}
                                         </span>
-                                        <span className="text-[10px] text-[#667085] capitalize block">
+                                        <span className="block text-[10px] text-[#667085] capitalize">
                                             {user.role}
                                         </span>
-                                    </div>
+                                    </Link>
                                     <Link
                                         href="/logout"
                                         method="post"

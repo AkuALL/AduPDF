@@ -1,9 +1,7 @@
 import { Link, router } from '@inertiajs/react';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut, UserRound } from 'lucide-react';
 import {
-    DropdownMenuGroup,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
@@ -25,25 +23,23 @@ export function UserMenuContent({ user }: Props) {
 
     return (
         <>
-            <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+            <DropdownMenuItem asChild className="cursor-pointer px-2 py-2">
+                <Link
+                    href="/profile"
+                    prefetch
+                    onClick={cleanup}
+                    aria-label="Buka profil"
+                >
                     <UserInfo user={user} showEmail={true} />
-                </div>
-            </DropdownMenuLabel>
+                </Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-                <DropdownMenuItem asChild>
-                    <Link
-                        className="block w-full cursor-pointer"
-                        href="/settings/profile"
-                        prefetch
-                        onClick={cleanup}
-                    >
-                        <Settings className="mr-2" />
-                        Settings
-                    </Link>
-                </DropdownMenuItem>
-            </DropdownMenuGroup>
+            <DropdownMenuItem asChild>
+                <Link href="/profile" prefetch onClick={cleanup}>
+                    <UserRound className="mr-2" />
+                    Profil
+                </Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
                 <Link
@@ -54,7 +50,7 @@ export function UserMenuContent({ user }: Props) {
                     data-test="logout-button"
                 >
                     <LogOut className="mr-2" />
-                    Log out
+                    Keluar
                 </Link>
             </DropdownMenuItem>
         </>

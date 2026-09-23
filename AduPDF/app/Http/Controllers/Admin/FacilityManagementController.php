@@ -177,7 +177,7 @@ class FacilityManagementController extends Controller
     public function destroy(Facility $facility): RedirectResponse
     {
         if ($facility->hasHistory()) {
-            return back()->with('error', 'Fasilitas tidak dapat dihapus permanen karena memiliki riwayat reservasi (FR-18). Silakan gunakan tombol Nonaktifkan.');
+            return back()->with('error', 'Fasilitas tidak dapat dihapus permanen karena memiliki riwayat reservasi. Silakan gunakan tombol Nonaktifkan.');
         }
 
         if ($facility->childTools()->exists()) {
