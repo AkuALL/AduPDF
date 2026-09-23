@@ -184,7 +184,7 @@ test('dashboard route redirects authenticated users based on role', function () 
     $petugas = User::factory()->petugas()->create();
     $this->actingAs($petugas)
         ->get(route('dashboard'))
-        ->assertRedirect(route('petugas.reservations.index'));
+        ->assertRedirect(route('petugas.dashboard'));
 
     $admin = User::factory()->admin()->create();
     $this->actingAs($admin)
