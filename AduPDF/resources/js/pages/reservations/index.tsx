@@ -5,7 +5,7 @@ type Reservation = {
     tujuan: string;
     start_time: string;
     end_time: string;
-    status: 'menunggu' | 'disetujui' | 'ditolak' | 'dibatalkan';
+    status: 'menunggu' | 'disetujui' | 'ditolak' | 'dibatalkan' | 'kedaluwarsa';
     facility: { id: number; name: string; location: string };
 };
 
@@ -16,6 +16,7 @@ const statusLabel: Record<Reservation['status'], string> = {
     disetujui: 'Disetujui',
     ditolak: 'Ditolak',
     dibatalkan: 'Dibatalkan',
+    kedaluwarsa: 'Kedaluwarsa',
 };
 
 export default function ReservationIndex({ reservations, success }: Props) {
