@@ -21,6 +21,16 @@ class EnsureUserRole
             return redirect()->route('login');
         }
 
+        if ($user->trashed()) {
+            \Illuminate\Support\Facades\Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Akun Anda tidak aktif.',
+            ]);
+        }
+
         // Support comma-separated roles e.g. 'admin,petugas'
         $allowedRoles = [];
         foreach ($roles as $roleArg) {

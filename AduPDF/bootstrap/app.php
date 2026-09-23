@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureHasInstitutionalIdentity;
 use App\Http\Middleware\EnsureUserApproved;
 use App\Http\Middleware\EnsureUserRole;
 use App\Http\Middleware\HandleAppearance;
@@ -23,11 +24,13 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            EnsureUserApproved::class,
         ]);
 
         $middleware->alias([
             'role' => EnsureUserRole::class,
             'approved' => EnsureUserApproved::class,
+            'institutional.identity' => EnsureHasInstitutionalIdentity::class,
         ]);
 
         $middleware->redirectGuestsTo(fn () => route('login'));
@@ -38,7 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return route('login');
             }
             if ($user->isAdmin()) {
-                return route('admin.verifications.index');
+                return route('admin.users.index');
             }
             if ($user->isPetugas()) {
                 return url('/petugas/dashboard');

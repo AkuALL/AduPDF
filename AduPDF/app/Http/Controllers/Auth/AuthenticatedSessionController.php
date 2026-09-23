@@ -19,7 +19,9 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('auth/login');
+        return Inertia::render('auth/login', [
+            'status' => session('status'),
+        ]);
     }
 
     /**
@@ -36,27 +38,13 @@ class AuthenticatedSessionController extends Controller
             'password.required' => 'Kata sandi wajib diisi.',
         ]);
 
-        $user = User::where('email', strtolower($request->email))->first();
+        $user = User::withTrashed()->where('email', strtolower($request->email))->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        // SRS 7.1 & BR-26: Soft-deleted accounts cannot log in; messages do not leak sensitive details
+        if (! $user || $user->trashed() || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => 'Email atau kata sandi yang Anda masukkan salah.',
             ]);
-        }
-
-        // Verification check for Pengguna role per SRS 5.1 & 7.1
-        if ($user->isPengguna()) {
-            if ($user->isPending()) {
-                throw ValidationException::withMessages([
-                    'email' => 'Akun Anda sedang menunggu verifikasi dari Admin sebelum dapat login.',
-                ]);
-            }
-
-            if ($user->isRejected()) {
-                throw ValidationException::withMessages([
-                    'email' => 'Pendaftaran akun Anda telah ditolak oleh Admin. Akun tidak dapat digunakan.',
-                ]);
-            }
         }
 
         Auth::login($user, $request->boolean('remember'));
@@ -65,7 +53,7 @@ class AuthenticatedSessionController extends Controller
 
         // Redirect based on role
         if ($user->isAdmin()) {
-            return redirect()->intended(route('admin.verifications.index'));
+            return redirect()->intended(route('admin.users.index'));
         }
 
         if ($user->isPetugas()) {

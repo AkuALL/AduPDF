@@ -19,9 +19,12 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password', 255);
             $table->enum('role', ['pengguna', 'petugas', 'admin'])->default('pengguna');
-            $table->enum('verification_status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->string('institutional_id', 100)->nullable();
+            $table->enum('identity_type', ['nim', 'nip', 'no_pegawai'])->nullable();
+            $table->string('whatsapp', 30)->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

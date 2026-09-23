@@ -33,7 +33,9 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'role' => 'pengguna',
-            'verification_status' => 'approved',
+            'institutional_id' => null,
+            'identity_type' => null,
+            'whatsapp' => null,
             'remember_token' => Str::random(10),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
@@ -45,7 +47,6 @@ class UserFactory extends Factory
     {
         return $this->state(fn () => [
             'role' => 'admin',
-            'verification_status' => 'approved',
         ]);
     }
 
@@ -53,7 +54,6 @@ class UserFactory extends Factory
     {
         return $this->state(fn () => [
             'role' => 'petugas',
-            'verification_status' => 'approved',
         ]);
     }
 
@@ -61,23 +61,14 @@ class UserFactory extends Factory
     {
         return $this->state(fn () => [
             'role' => 'pengguna',
-            'verification_status' => 'approved',
         ]);
     }
 
-    public function pending(): static
+    public function withInstitutionalIdentity(string $type = 'nim', string $id = '1234567890'): static
     {
         return $this->state(fn () => [
-            'role' => 'pengguna',
-            'verification_status' => 'pending',
-        ]);
-    }
-
-    public function rejected(): static
-    {
-        return $this->state(fn () => [
-            'role' => 'pengguna',
-            'verification_status' => 'rejected',
+            'identity_type' => $type,
+            'institutional_id' => $id,
         ]);
     }
 

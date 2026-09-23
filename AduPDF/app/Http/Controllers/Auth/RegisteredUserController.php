@@ -45,13 +45,12 @@ class RegisteredUserController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'pengguna',
-            'verification_status' => 'pending',
         ]);
 
-        // Per BR-06 & FR-17: Akun baru pending dan tidak boleh login otomatis
+        // Per SRS V2 (BR-05, BR-06, FR-17, GAL-02): Akun baru langsung aktif dan dapat login
         return redirect()->route('login')->with(
             'status',
-            'Pendaftaran berhasil! Akun Anda sedang menunggu verifikasi oleh Admin sebelum dapat digunakan untuk login.'
+            'Pendaftaran berhasil! Akun Anda sudah aktif dan dapat langsung digunakan untuk masuk.'
         );
     }
 }

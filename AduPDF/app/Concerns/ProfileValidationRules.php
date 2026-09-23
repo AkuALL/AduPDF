@@ -16,8 +16,13 @@ trait ProfileValidationRules
     protected function profileRules(?int $userId = null): array
     {
         return [
-            'name' => $this->nameRules(),
+            'name' => ['nullable', 'string', 'max:100', 'required_without:nama'],
+            'nama' => ['nullable', 'string', 'max:100', 'required_without:name'],
             'email' => $this->emailRules($userId),
+            'whatsapp' => ['nullable', 'string', 'max:30'],
+            'identity_type' => ['nullable', 'string', Rule::in(['nim', 'nip', 'no_pegawai']), 'required_with:institutional_id'],
+            'institutional_id' => ['nullable', 'string', 'max:100', 'required_with:identity_type'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ];
     }
 
@@ -28,7 +33,7 @@ trait ProfileValidationRules
      */
     protected function nameRules(): array
     {
-        return ['required', 'string', 'max:255'];
+        return ['required', 'string', 'max:100'];
     }
 
     /**
@@ -42,7 +47,7 @@ trait ProfileValidationRules
             'required',
             'string',
             'email',
-            'max:255',
+            'max:100',
             $userId === null
                 ? Rule::unique(User::class)
                 : Rule::unique(User::class)->ignore($userId),

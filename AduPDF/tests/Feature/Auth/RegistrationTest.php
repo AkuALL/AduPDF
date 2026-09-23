@@ -3,16 +3,17 @@
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+use Inertia\Testing\AssertableInertia as Assert;
+
 uses(RefreshDatabase::class);
 
 test('registration screen can be rendered', function () {
     $response = $this->get(route('register'));
 
-    $response->assertOk();
-    $response->assertSee('Pendaftaran Pengguna');
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page->component('auth/register'));
 });
 
-test('new Pengguna can self-register with pending verification status', function () {
+test('new Pengguna can self-register and account is immediately active (GAL-02, BR-05, BR-06)', function () {
     $response = $this->post(route('register'), [
         'nama' => 'Ahmad Dahlan',
         'email' => 'ahmad@kampus.ac.id',
@@ -29,8 +30,15 @@ test('new Pengguna can self-register with pending verification status', function
         'nama' => 'Ahmad Dahlan',
         'email' => 'ahmad@kampus.ac.id',
         'role' => 'pengguna',
-        'verification_status' => 'pending',
     ]);
+
+    // Per SRS V2 & GAL-02: Akun baru langsung aktif dan dapat login
+    $loginResponse = $this->post(route('login'), [
+        'email' => 'ahmad@kampus.ac.id',
+        'password' => 'Password123!',
+    ]);
+
+    $this->assertAuthenticated();
 });
 
 test('registration fails when email is already registered', function () {

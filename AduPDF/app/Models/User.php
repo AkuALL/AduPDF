@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -24,15 +26,19 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string|null $two_factor_recovery_codes
  * @property Carbon|null $two_factor_confirmed_at
  * @property string|null $remember_token
+ * @property string|null $institutional_id
+ * @property string|null $identity_type
+ * @property string|null $whatsapp
+ * @property Carbon|null $deleted_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['nama', 'name', 'email', 'password', 'role', 'verification_status'])]
+#[Fillable(['nama', 'name', 'email', 'password', 'role', 'institutional_id', 'identity_type', 'whatsapp'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable, SoftDeletes;
 
     protected static function booted(): void
     {
@@ -56,6 +62,7 @@ class User extends Authenticatable implements PasskeyUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'deleted_at' => 'datetime',
         ];
     }
 
@@ -87,19 +94,24 @@ class User extends Authenticatable implements PasskeyUser
         return $this->role === 'admin';
     }
 
+    public function hasInstitutionalIdentity(): bool
+    {
+        return ! empty($this->institutional_id) && ! empty($this->identity_type);
+    }
+
     public function isApproved(): bool
     {
-        return $this->verification_status === 'approved';
+        return ! $this->trashed();
     }
 
     public function isPending(): bool
     {
-        return $this->verification_status === 'pending';
+        return false;
     }
 
     public function isRejected(): bool
     {
-        return $this->verification_status === 'rejected';
+        return false;
     }
 
     /**
@@ -112,5 +124,25 @@ class User extends Authenticatable implements PasskeyUser
         }
 
         return false;
+    }
+
+    /**
+     * Get reservations made by the user (SRS 12.3).
+     *
+     * @return HasMany<Reservation, $this>
+     */
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    /**
+     * Get damage reports made by the user (SRS 12.3).
+     *
+     * @return HasMany<Report, $this>
+     */
+    public function reports(): HasMany
+    {
+        return $this->hasMany(Report::class);
     }
 }

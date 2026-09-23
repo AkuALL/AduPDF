@@ -21,7 +21,6 @@ class AdminUserSeeder extends Seeder
                 'email' => 'admin@adupdf.ac.id',
                 'password' => Hash::make('Admin123!'),
                 'role' => 'admin',
-                'verification_status' => 'approved',
                 'email_verified_at' => now(),
             ]);
         }

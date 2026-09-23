@@ -30,25 +30,46 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $validated = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if (! empty($validated['password'])) {
+            $validated['password'] = \Illuminate\Support\Facades\Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
         }
 
-        $request->user()->save();
+        if (! empty($validated['nama']) && empty($validated['name'])) {
+            $validated['name'] = $validated['nama'];
+        } elseif (! empty($validated['name']) && empty($validated['nama'])) {
+            $validated['nama'] = $validated['name'];
+        }
+
+        $user = $request->user();
+        $user->fill($validated);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
 
-        return to_route('profile.edit');
+        return to_route('profile.edit')->with('status', 'profile-updated')->with('success', 'Profil berhasil diperbarui.');
     }
 
     /**
-     * Delete the user's profile.
+     * Delete the user's profile (soft-delete).
+     * Prevents deletion of the last Admin account (BR-26).
      */
     public function destroy(ProfileDeleteRequest $request): RedirectResponse
     {
         $user = $request->user();
+
+        // BR-26 & FR-16: Sistem harus mencegah penghapusan Admin terakhir
+        if ($user->isAdmin() && \App\Models\User::where('role', 'admin')->count() <= 1) {
+            return back()->with('error', 'Admin terakhir tidak dapat dihapus.');
+        }
 
         Auth::logout();
 
