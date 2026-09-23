@@ -106,6 +106,19 @@
 
                         {{-- Petugas Role Navigation --}}
                         @if(auth()->user()->isPetugas())
+                            @if(Route::has('petugas.dashboard'))
+                                <a
+                                    href="{{ route('petugas.dashboard') }}"
+                                    @class([
+                                        'px-3 py-2 rounded-md transition duration-150',
+                                        'bg-white/20 text-white font-semibold' => request()->routeIs('petugas.dashboard*'),
+                                        'text-slate-200 hover:bg-white/10 hover:text-white' => !request()->routeIs('petugas.dashboard*'),
+                                    ])
+                                >
+                                    Dashboard
+                                </a>
+                            @endif
+
                             @if(Route::has('petugas.reservations.index'))
                                 <a
                                     href="{{ route('petugas.reservations.index') }}"
@@ -364,6 +377,14 @@
             @endif
 
             @if(auth()->user()->isPetugas())
+                @if(Route::has('petugas.dashboard'))
+                    <a
+                        href="{{ route('petugas.dashboard') }}"
+                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('petugas.dashboard*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
+                    >
+                        Dashboard
+                    </a>
+                @endif
                 @if(Route::has('petugas.reservations.index'))
                     <a
                         href="{{ route('petugas.reservations.index') }}"

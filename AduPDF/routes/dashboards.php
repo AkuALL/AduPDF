@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PetugasDashboardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,6 +29,10 @@ Route::middleware(['auth'])->group(function () {
         }
 
         if ($user->isPetugas()) {
+            if (Route::has('petugas.dashboard')) {
+                return redirect()->route('petugas.dashboard');
+            }
+
             if (Route::has('petugas.reservations.index')) {
                 return redirect()->route('petugas.reservations.index');
             }
@@ -45,4 +50,8 @@ Route::middleware(['auth'])->group(function () {
 
         return redirect()->route('facilities.index');
     })->name('dashboard');
+});
+
+Route::middleware(['auth', 'role:petugas'])->prefix('petugas')->name('petugas.')->group(function () {
+    Route::get('/dashboard', [PetugasDashboardController::class, 'index'])->name('dashboard');
 });
