@@ -8,8 +8,8 @@ import { cn, toUrl } from '@/lib/utils';
 import type { NavItem } from '@/types';
 const sidebarNavItems: NavItem[] = [
     {
-        title: 'Profile',
-        href: '/settings/profile',
+        title: 'Profil',
+        href: '/profile',
         icon: null,
     },
     {
