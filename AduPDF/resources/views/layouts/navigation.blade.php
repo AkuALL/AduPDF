@@ -78,6 +78,30 @@
                                     Lapor Kerusakan
                                 </a>
                             @endif
+
+                            @if(Route::has('profile.edit'))
+                                <a
+                                    href="{{ route('profile.edit') }}"
+                                    @class([
+                                        'px-3 py-2 rounded-md transition duration-150',
+                                        'bg-white/20 text-white font-semibold' => request()->routeIs('profile*') || request()->routeIs('settings*'),
+                                        'text-slate-200 hover:bg-white/10 hover:text-white' => !(request()->routeIs('profile*') || request()->routeIs('settings*')),
+                                    ])
+                                >
+                                    Profil
+                                </a>
+                            @elseif(Route::has('profile'))
+                                <a
+                                    href="{{ route('profile') }}"
+                                    @class([
+                                        'px-3 py-2 rounded-md transition duration-150',
+                                        'bg-white/20 text-white font-semibold' => request()->routeIs('profile*') || request()->routeIs('settings*'),
+                                        'text-slate-200 hover:bg-white/10 hover:text-white' => !(request()->routeIs('profile*') || request()->routeIs('settings*')),
+                                    ])
+                                >
+                                    Profil
+                                </a>
+                            @endif
                         @endif
 
                         {{-- Petugas Role Navigation --}}
@@ -111,16 +135,16 @@
 
                         {{-- Admin Role Navigation --}}
                         @if(auth()->user()->isAdmin())
-                            @if(Route::has('admin.verifications.index'))
+                            @if(Route::has('admin.users.index'))
                                 <a
-                                    href="{{ route('admin.verifications.index') }}"
+                                    href="{{ route('admin.users.index') }}"
                                     @class([
                                         'px-3 py-2 rounded-md transition duration-150',
-                                        'bg-white/20 text-white font-semibold' => request()->routeIs('admin.verifications.*'),
-                                        'text-slate-200 hover:bg-white/10 hover:text-white' => !request()->routeIs('admin.verifications.*'),
+                                        'bg-white/20 text-white font-semibold' => request()->routeIs('admin.users.index'),
+                                        'text-slate-200 hover:bg-white/10 hover:text-white' => !request()->routeIs('admin.users.index'),
                                     ])
                                 >
-                                    Antrian Verifikasi
+                                    Kelola Akun
                                 </a>
                             @endif
 
@@ -197,9 +221,19 @@
             <div class="hidden md:flex items-center gap-4">
                 @auth
                     <div class="text-right">
-                        <div class="text-sm font-semibold text-white leading-tight">
-                            {{ auth()->user()->nama ?? auth()->user()->name }}
-                        </div>
+                        @if(Route::has('profile.edit'))
+                            <a href="{{ route('profile.edit') }}" class="text-sm font-semibold text-white hover:underline leading-tight block">
+                                {{ auth()->user()->nama ?? auth()->user()->name }}
+                            </a>
+                        @elseif(Route::has('profile'))
+                            <a href="{{ route('profile') }}" class="text-sm font-semibold text-white hover:underline leading-tight block">
+                                {{ auth()->user()->nama ?? auth()->user()->name }}
+                            </a>
+                        @else
+                            <div class="text-sm font-semibold text-white leading-tight">
+                                {{ auth()->user()->nama ?? auth()->user()->name }}
+                            </div>
+                        @endif
                         <div class="flex items-center justify-end gap-1.5 mt-0.5">
                             @if(auth()->user()->isAdmin())
                                 <span class="inline-block px-1.5 py-0.2 text-[10px] font-bold rounded bg-amber-400/20 text-amber-200 border border-amber-400/30">
@@ -312,6 +346,21 @@
                         Laporan Saya
                     </a>
                 @endif
+                @if(Route::has('profile.edit'))
+                    <a
+                        href="{{ route('profile.edit') }}"
+                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('profile*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
+                    >
+                        Profil
+                    </a>
+                @elseif(Route::has('profile'))
+                    <a
+                        href="{{ route('profile') }}"
+                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('profile*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
+                    >
+                        Profil
+                    </a>
+                @endif
             @endif
 
             @if(auth()->user()->isPetugas())
@@ -334,12 +383,12 @@
             @endif
 
             @if(auth()->user()->isAdmin())
-                @if(Route::has('admin.verifications.index'))
+                @if(Route::has('admin.users.index'))
                     <a
-                        href="{{ route('admin.verifications.index') }}"
-                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.verifications.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
+                        href="{{ route('admin.users.index') }}"
+                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.users.index') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
                     >
-                        Antrian Verifikasi
+                        Kelola Akun
                     </a>
                 @endif
                 @if(Route::has('admin.users.petugas.create'))
@@ -356,6 +405,22 @@
                         class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.users.pengguna.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
                     >
                         Tambah Pengguna
+                    </a>
+                @endif
+                @if(Route::has('admin.facilities.index'))
+                    <a
+                        href="{{ route('admin.facilities.index') }}"
+                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.facilities.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
+                    >
+                        Kelola Fasilitas
+                    </a>
+                @endif
+                @if(Route::has('admin.recap.index'))
+                    <a
+                        href="{{ route('admin.recap.index') }}"
+                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.recap.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
+                    >
+                        Rekap Okupansi
                     </a>
                 @endif
                 @if(Route::has('admin.password.edit'))

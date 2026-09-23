@@ -16,7 +16,15 @@ Route::middleware(['auth'])->group(function () {
         $user = auth()->user();
 
         if ($user->isAdmin()) {
-            return redirect()->route('admin.verifications.index');
+            if (Route::has('admin.users.index')) {
+                return redirect()->route('admin.users.index');
+            }
+
+            if (Route::has('admin.facilities.index')) {
+                return redirect()->route('admin.facilities.index');
+            }
+
+            return redirect()->route('facilities.index');
         }
 
         if ($user->isPetugas()) {

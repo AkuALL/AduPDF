@@ -72,6 +72,11 @@
             'icon' => '—',
             'wrapper' => 'bg-[#F0F2F4] text-[#5D6673] border-[#D7DBE0]',
         ],
+        'kedaluwarsa', 'expired' => [
+            'label' => $label ?? 'Kedaluwarsa',
+            'icon' => '—',
+            'wrapper' => 'bg-[#F0F2F4] text-[#5D6673] border-[#D7DBE0]',
+        ],
         'nonaktif', 'inactive' => [
             'label' => $label ?? 'Nonaktif',
             'icon' => '—',
