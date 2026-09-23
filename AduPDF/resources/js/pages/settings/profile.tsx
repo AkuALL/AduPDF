@@ -144,8 +144,8 @@ export default function Profile({
 
                 <Heading
                     variant="small"
-                    title="Informasi Profil"
-                    description="Perbarui data diri, identitas kampus, dan nomor WhatsApp."
+                    title="Informasi Profil & Identitas"
+                    description="Perbarui informasi profil, identitas institusional (NIM/NIP/No. Pegawai), serta nomor kontak WhatsApp Anda."
                 />
 
                 <Form
@@ -245,42 +245,6 @@ export default function Profile({
                                 <InputError
                                     className={inputErrorClass}
                                     message={errors.whatsapp}
-                                />
-                            </div>
-
-                            <div className="border-t border-slate-200 pt-6">
-                                <Heading
-                                    variant="small"
-                                    title="Ubah Kata Sandi"
-                                    description="Isi jika ingin menggunakan kata sandi baru."
-                                />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="password">Kata Sandi Baru</Label>
-                                <Input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="new-password"
-                                />
-                                <InputError
-                                    className={inputErrorClass}
-                                    message={errors.password}
-                                />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation">Konfirmasi Kata Sandi Baru</Label>
-                                <Input
-                                    id="password_confirmation"
-                                    name="password_confirmation"
-                                    type="password"
-                                    autoComplete="new-password"
-                                />
-                                <InputError
-                                    className={inputErrorClass}
-                                    message={errors.password_confirmation}
                                 />
                             </div>
 

@@ -29,6 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/confirm-password', fn () => redirect()->route('login'))->name('password.confirm');
 
     // GAL-05: Profile & Institutional Identity (FR-17, SRS 12.5)
+    Route::redirect('/profiles', '/profile');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
     Route::patch('/profile', [ProfileController::class, 'update']);
     Route::delete('/profile', [ProfileController::class, 'destroy']);

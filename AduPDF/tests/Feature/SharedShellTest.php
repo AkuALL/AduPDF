@@ -78,11 +78,12 @@ test('admin sees role-aware navigation for admin management tasks', function () 
 
     expect($view)->toContain('Admin Tunggal')
         ->and($view)->toContain('ADMIN')
-        ->and($view)->toContain('Antrian Verifikasi')
+        ->and($view)->toContain('Kelola Akun')
         ->and($view)->toContain('Tambah Petugas')
         ->and($view)->toContain('Tambah Pengguna')
         ->and($view)->toContain('Ganti Password')
-        ->and($view)->toContain('Keluar');
+        ->and($view)->toContain('Keluar')
+        ->and($view)->not->toContain('Antrian Verifikasi');
 });
 
 test('shared alert component renders semantic states correctly', function () {
@@ -132,6 +133,11 @@ test('shared status badge component renders label and explicit symbol icon', fun
     expect($ditolak)->toContain('Ditolak')
         ->and($ditolak)->toContain('×')
         ->and($ditolak)->toContain('#B42318');
+
+    $kedaluwarsa = Blade::render('<x-status-badge status="kedaluwarsa" />');
+    expect($kedaluwarsa)->toContain('Kedaluwarsa')
+        ->and($kedaluwarsa)->toContain('—')
+        ->and($kedaluwarsa)->toContain('#5D6673');
 });
 
 test('shared empty state component renders informative copy and CTA link', function () {
@@ -183,5 +189,5 @@ test('dashboard route redirects authenticated users based on role', function () 
     $admin = User::factory()->admin()->create();
     $this->actingAs($admin)
         ->get(route('dashboard'))
-        ->assertRedirect(route('admin.verifications.index'));
+        ->assertRedirect(route('admin.users.index'));
 });
