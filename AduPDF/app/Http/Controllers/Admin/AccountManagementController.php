@@ -13,7 +13,7 @@ use Inertia\Response;
 class AccountManagementController extends Controller
 {
     /**
-     * Display Petugas and Pengguna accounts.
+     * Display Petugas and Pengguna accounts (GAL-06).
      */
     public function index(): Response
     {
@@ -26,73 +26,15 @@ class AccountManagementController extends Controller
     }
 
     /**
-     * Display the verification queue and account management list (FR-17, US-15).
+     * Legacy route fallback / redirect for verification queue.
      */
-    public function verifications(Request $request): Response
+    public function verifications(): RedirectResponse|Response
     {
-        $status = $request->query('status', 'pending');
-
-        $query = User::where('role', 'pengguna');
-
-        if (in_array($status, ['pending', 'approved', 'rejected'], true)) {
-            $query->where('verification_status', $status);
-        }
-
-        $users = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
-
-        $counts = [
-            'pending' => User::where('role', 'pengguna')->where('verification_status', 'pending')->count(),
-            'approved' => User::where('role', 'pengguna')->where('verification_status', 'approved')->count(),
-            'rejected' => User::where('role', 'pengguna')->where('verification_status', 'rejected')->count(),
-        ];
-
-        return Inertia::render('admin/accounts/verifications', compact('users', 'status', 'counts'));
+        return redirect()->route('admin.users.index');
     }
 
     /**
-     * Approve a pending Pengguna account (FR-17, US-15).
-     */
-    public function verify(Request $request, User $user): RedirectResponse
-    {
-        if (! $user->isPengguna()) {
-            return back()->with('error', 'Hanya akun Pengguna yang dapat diverifikasi.');
-        }
-
-        // SRS 7.1: Cegah state transition tidak valid jika sudah approved/rejected
-        if (! $user->isPending()) {
-            return back()->with('error', 'Hanya akun berstatus "Menunggu Verifikasi" yang dapat disetujui.');
-        }
-
-        $user->update([
-            'verification_status' => 'approved',
-        ]);
-
-        return back()->with('success', 'Akun Pengguna ('.$user->nama.') berhasil disetujui. Pengguna kini dapat login.');
-    }
-
-    /**
-     * Reject a pending Pengguna account (FR-17, US-15).
-     */
-    public function reject(Request $request, User $user): RedirectResponse
-    {
-        if (! $user->isPengguna()) {
-            return back()->with('error', 'Hanya akun Pengguna yang dapat ditolak.');
-        }
-
-        // SRS 7.1: Cegah state transition tidak valid jika sudah approved/rejected
-        if (! $user->isPending()) {
-            return back()->with('error', 'Hanya akun berstatus "Menunggu Verifikasi" yang dapat ditolak.');
-        }
-
-        $user->update([
-            'verification_status' => 'rejected',
-        ]);
-
-        return back()->with('success', 'Pendaftaran akun Pengguna ('.$user->nama.') telah ditolak.');
-    }
-
-    /**
-     * Show the form for creating a new Petugas account (FR-15, US-13).
+     * Show the form for creating a new Petugas account (FR-15, US-13, GAL-06).
      */
     public function createPetugas(): Response
     {
@@ -100,7 +42,7 @@ class AccountManagementController extends Controller
     }
 
     /**
-     * Store a newly created Petugas account in storage (FR-15, US-13).
+     * Store a newly created Petugas account in storage (FR-15, US-13, GAL-06).
      */
     public function storePetugas(Request $request): RedirectResponse
     {
@@ -124,15 +66,14 @@ class AccountManagementController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'petugas',
-            'verification_status' => 'approved',
             'email_verified_at' => now(),
         ]);
 
-        return redirect()->route('admin.verifications.index')->with('success', 'Akun Petugas ('.$validated['nama'].') berhasil dibuat.');
+        return redirect()->route('admin.users.index')->with('success', 'Akun Petugas ('.$validated['nama'].') berhasil dibuat.');
     }
 
     /**
-     * Show the form for creating a new Pengguna account directly by Admin (FR-16, US-14).
+     * Show the form for creating a new Pengguna account directly by Admin (FR-16, US-14, GAL-06).
      */
     public function createPengguna(): Response
     {
@@ -140,7 +81,7 @@ class AccountManagementController extends Controller
     }
 
     /**
-     * Store a newly created Pengguna account directly by Admin (FR-16, US-14).
+     * Store a newly created Pengguna account directly by Admin (FR-16, US-14, GAL-06).
      */
     public function storePengguna(Request $request): RedirectResponse
     {
@@ -164,13 +105,32 @@ class AccountManagementController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'pengguna',
-            'verification_status' => 'approved',
             'email_verified_at' => now(),
         ]);
 
-        return redirect()->route('admin.verifications.index', ['status' => 'approved'])->with(
+        return redirect()->route('admin.users.index')->with(
             'success',
-            'Akun Pengguna ('.$validated['nama'].') berhasil dibuat langsung oleh Admin dengan status terverifikasi.'
+            'Akun Pengguna ('.$validated['nama'].') berhasil dibuat langsung oleh Admin.'
+        );
+    }
+
+    /**
+     * Soft-delete an account of any role (FR-16, BR-26, GAL-06).
+     * Prevents deletion of the last Admin account.
+     */
+    public function destroy(Request $request, User $user): RedirectResponse
+    {
+        // BR-26 & FR-16: Sistem harus mencegah penghapusan Admin terakhir
+        if ($user->isAdmin() && User::where('role', 'admin')->count() <= 1) {
+            return back()->with('error', 'Admin terakhir tidak dapat dihapus.');
+        }
+
+        $nama = $user->nama ?? $user->name ?? $user->email;
+        $user->delete();
+
+        return redirect()->route('admin.users.index')->with(
+            'success',
+            'Akun '.$nama.' berhasil dihapus (soft-delete).'
         );
     }
 }

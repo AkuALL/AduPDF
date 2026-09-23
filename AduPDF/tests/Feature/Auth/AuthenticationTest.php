@@ -3,16 +3,17 @@
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+use Inertia\Testing\AssertableInertia as Assert;
+
 uses(RefreshDatabase::class);
 
 test('login screen can be rendered', function () {
     $response = $this->get(route('login'));
 
-    $response->assertOk();
-    $response->assertSee('Masuk ke AduPDF');
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page->component('auth/login'));
 });
 
-test('approved Pengguna can authenticate successfully', function () {
+test('pengguna can authenticate successfully', function () {
     $user = User::factory()->pengguna()->create([
         'email' => 'pengguna@kampus.ac.id',
         'password' => bcrypt('password123'),
@@ -27,42 +28,20 @@ test('approved Pengguna can authenticate successfully', function () {
     $response->assertRedirect(url('/facilities'));
 });
 
-test('pending Pengguna CANNOT authenticate and receives pending error notice', function () {
-    $user = User::factory()->pending()->create([
-        'email' => 'pending@kampus.ac.id',
+test('soft-deleted account CANNOT authenticate (BR-26, SRS 7.1)', function () {
+    $user = User::factory()->pengguna()->create([
+        'email' => 'deleted@kampus.ac.id',
         'password' => bcrypt('password123'),
     ]);
+    $user->delete();
 
     $response = $this->post(route('login'), [
-        'email' => 'pending@kampus.ac.id',
+        'email' => 'deleted@kampus.ac.id',
         'password' => 'password123',
     ]);
 
     $this->assertGuest();
     $response->assertSessionHasErrors('email');
-    $this->assertTrue(str_contains(
-        session('errors')->first('email'),
-        'menunggu verifikasi'
-    ));
-});
-
-test('rejected Pengguna CANNOT authenticate and receives rejected error notice', function () {
-    $user = User::factory()->rejected()->create([
-        'email' => 'rejected@kampus.ac.id',
-        'password' => bcrypt('password123'),
-    ]);
-
-    $response = $this->post(route('login'), [
-        'email' => 'rejected@kampus.ac.id',
-        'password' => 'password123',
-    ]);
-
-    $this->assertGuest();
-    $response->assertSessionHasErrors('email');
-    $this->assertTrue(str_contains(
-        session('errors')->first('email'),
-        'ditolak'
-    ));
 });
 
 test('petugas can authenticate successfully', function () {
@@ -80,7 +59,7 @@ test('petugas can authenticate successfully', function () {
     $response->assertRedirect(url('/petugas/dashboard'));
 });
 
-test('admin can authenticate successfully and redirects to verifications', function () {
+test('admin can authenticate successfully and redirects to user list', function () {
     $admin = User::factory()->admin()->create([
         'email' => 'admin@kampus.ac.id',
         'password' => bcrypt('password123'),
@@ -92,7 +71,7 @@ test('admin can authenticate successfully and redirects to verifications', funct
     ]);
 
     $this->assertAuthenticatedAs($admin);
-    $response->assertRedirect(route('admin.verifications.index'));
+    $response->assertRedirect(route('admin.users.index'));
 });
 
 test('users can not authenticate with invalid password', function () {

@@ -13,13 +13,14 @@ test('non-admin users cannot access admin change password page', function () {
     $response->assertForbidden();
 });
 
+use Inertia\Testing\AssertableInertia as Assert;
+
 test('admin can view change password form', function () {
     $admin = User::factory()->admin()->create();
 
     $response = $this->actingAs($admin)->get(route('admin.password.edit'));
 
-    $response->assertOk();
-    $response->assertSee('Ganti Password Administrator');
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page->component('admin/accounts/change-password'));
 });
 
 test('admin can update password with valid current password', function () {

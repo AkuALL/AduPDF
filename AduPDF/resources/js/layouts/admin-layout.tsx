@@ -5,7 +5,6 @@ type AuthUser = { name?: string; nama?: string };
 
 const navigation = [
     ['Kelola Akun', '/admin/users'],
-    ['Antrian Verifikasi', '/admin/verifications'],
     ['Tambah Petugas', '/admin/users/petugas/create'],
     ['Tambah Pengguna', '/admin/users/pengguna/create'],
     ['Kelola Fasilitas', '/admin/facilities'],
@@ -23,7 +22,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
             <header className="bg-[#2D4C79] text-white shadow">
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-6">
-                        <Link href="/admin/verifications" className="flex items-center gap-2">
+                        <Link href="/admin/users" className="flex items-center gap-2">
                             <span className="text-2xl font-bold tracking-wider">AduPDF</span>
                             <span className="rounded border border-amber-400/40 bg-amber-500/30 px-2 py-0.5 text-xs font-semibold text-amber-200">ADMIN</span>
                         </Link>

@@ -18,26 +18,14 @@ class EnsureUserApproved
     {
         $user = $request->user();
 
-        if ($user && $user->isPengguna()) {
-            if ($user->isPending()) {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+        if ($user && $user->trashed()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
 
-                return redirect()->route('login')->withErrors([
-                    'email' => 'Akun Anda sedang menunggu verifikasi dari Admin sebelum dapat login.',
-                ]);
-            }
-
-            if ($user->isRejected()) {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-
-                return redirect()->route('login')->withErrors([
-                    'email' => 'Pendaftaran akun Anda telah ditolak oleh Admin. Akun tidak dapat digunakan.',
-                ]);
-            }
+            return redirect()->route('login')->withErrors([
+                'email' => 'Akun Anda tidak aktif.',
+            ]);
         }
 
         return $next($request);

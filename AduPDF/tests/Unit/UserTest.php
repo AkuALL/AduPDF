@@ -19,21 +19,33 @@ test('role helper methods identify roles accurately', function () {
         ->and($admin->isPetugas())->toBeFalse();
 });
 
-test('verification status helper methods identify status accurately', function () {
-    $pending = new User(['verification_status' => 'pending']);
-    expect($pending->isPending())->toBeTrue()
-        ->and($pending->isApproved())->toBeFalse()
-        ->and($pending->isRejected())->toBeFalse();
+test('institutional identity helper identifies completed identity accurately (GAL-05)', function () {
+    $userWithoutIdentity = new User;
+    expect($userWithoutIdentity->hasInstitutionalIdentity())->toBeFalse();
 
-    $approved = new User(['verification_status' => 'approved']);
-    expect($approved->isApproved())->toBeTrue()
-        ->and($approved->isPending())->toBeFalse()
-        ->and($approved->isRejected())->toBeFalse();
+    $userWithOnlyId = new User(['institutional_id' => '24060121140100']);
+    expect($userWithOnlyId->hasInstitutionalIdentity())->toBeFalse();
 
-    $rejected = new User(['verification_status' => 'rejected']);
-    expect($rejected->isRejected())->toBeTrue()
-        ->and($rejected->isPending())->toBeFalse()
-        ->and($rejected->isApproved())->toBeFalse();
+    $userWithOnlyType = new User(['identity_type' => 'nim']);
+    expect($userWithOnlyType->hasInstitutionalIdentity())->toBeFalse();
+
+    $userWithFullNim = new User([
+        'identity_type' => 'nim',
+        'institutional_id' => '24060121140100',
+    ]);
+    expect($userWithFullNim->hasInstitutionalIdentity())->toBeTrue();
+
+    $userWithFullNip = new User([
+        'identity_type' => 'nip',
+        'institutional_id' => '198501012010121001',
+    ]);
+    expect($userWithFullNip->hasInstitutionalIdentity())->toBeTrue();
+
+    $userWithNoPegawai = new User([
+        'identity_type' => 'no_pegawai',
+        'institutional_id' => 'PEG-9988',
+    ]);
+    expect($userWithNoPegawai->hasInstitutionalIdentity())->toBeTrue();
 });
 
 test('owns helper checks model ownership correctly', function () {
