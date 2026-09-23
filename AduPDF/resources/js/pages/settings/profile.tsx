@@ -72,7 +72,7 @@ export default function Profile({
                 <Heading
                     variant="small"
                     title="Informasi Profil & Identitas"
-                    description="Perbarui informasi profil, identitas institusional (NIM/NIP/No. Pegawai), serta nomor kontak WhatsApp Anda."
+                    description="Perbarui informasi profil, kata sandi, identitas institusional (NIM/NIP/No. Pegawai), serta nomor kontak WhatsApp Anda."
                 />
 
                 <Form
@@ -171,6 +171,40 @@ export default function Profile({
                                 <InputError
                                     className="mt-1"
                                     message={errors.whatsapp}
+                                />
+                            </div>
+
+                            {/* Kata Sandi Baru (Opsional - FR-17) */}
+                            <div className="grid gap-2 border-t pt-4">
+                                <Label htmlFor="password">Kata Sandi Baru (Opsional)</Label>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    className="mt-1 block w-full"
+                                    name="password"
+                                    autoComplete="new-password"
+                                    placeholder="Biarkan kosong jika tidak ingin mengubah kata sandi"
+                                />
+                                <InputError
+                                    className="mt-1"
+                                    message={errors.password}
+                                />
+                            </div>
+
+                            {/* Konfirmasi Kata Sandi Baru */}
+                            <div className="grid gap-2">
+                                <Label htmlFor="password_confirmation">Konfirmasi Kata Sandi Baru</Label>
+                                <Input
+                                    id="password_confirmation"
+                                    type="password"
+                                    className="mt-1 block w-full"
+                                    name="password_confirmation"
+                                    autoComplete="new-password"
+                                    placeholder="Ulangi kata sandi baru"
+                                />
+                                <InputError
+                                    className="mt-1"
+                                    message={errors.password_confirmation}
                                 />
                             </div>
 
