@@ -57,6 +57,12 @@ class StoreReservationRequest extends FormRequest
                     return;
                 }
 
+                if ($startTime->greaterThan(CarbonImmutable::now('Asia/Jakarta')->addDays(90))) {
+                    $validator->errors()->add('start_time', 'Reservasi hanya dapat diajukan maksimal 90 hari ke depan.');
+
+                    return;
+                }
+
                 if (! $startTime->isSameDay($endTime)
                     || $startTime->format('H:i') < '07:00'
                     || $endTime->format('H:i') > '20:00'

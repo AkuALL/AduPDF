@@ -17,6 +17,6 @@ class ReservationQueueQuery
             ->with(['facility:id,name,location', 'user:id,nama'])
             ->where('status', ReservationStatus::Pending->value)
             ->oldest('start_time')
-            ->oldest('id');
+            ->oldest('created_at');
     }
 }
