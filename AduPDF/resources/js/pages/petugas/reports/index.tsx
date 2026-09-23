@@ -16,7 +16,7 @@ export default function PetugasReportIndex({ reports, success }: Props) {
         <>
             <Head title="Antrian Laporan" />
             <main className="min-h-screen bg-[#F7F8FA] px-4 py-10 text-[#111827]">
-                <div className="mx-auto max-w-4xl">
+                <div className="w-full">
                     <Link href="/petugas/dashboard" className="text-sm font-medium text-[#2D4C79] hover:underline">Kembali ke dashboard</Link>
                     <h1 className="mt-6 text-2xl font-bold">Antrian laporan baru</h1>
                     <p className="mt-1 text-sm text-[#667085]">Tinjau laporan kerusakan yang belum diproses.</p>

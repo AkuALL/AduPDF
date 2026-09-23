@@ -23,7 +23,7 @@ export default function PetugasReservationIndex({ reservations, approved_reserva
         <>
             <Head title="Antrian Reservasi" />
             <main className="min-h-screen bg-[#F7F8FA] px-4 py-10 text-[#111827]">
-                <div className="mx-auto max-w-3xl">
+                <div className="w-full">
                     <Link href="/facilities" className="text-sm font-medium text-[#2D4C79] hover:underline">Kembali ke fasilitas</Link>
                     <h1 className="mt-6 text-2xl font-bold">Antrian reservasi</h1>
                     {success && <p role="status" className="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}

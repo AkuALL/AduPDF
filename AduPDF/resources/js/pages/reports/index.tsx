@@ -25,7 +25,7 @@ export default function ReportIndex({ reports, success }: Props) {
         <>
             <Head title="Laporan Saya" />
             <main className="min-h-screen bg-[#F7F8FA] px-4 py-10 text-[#111827]">
-                <div className="mx-auto max-w-3xl">
+                <div className="w-full">
                     <Link href="/facilities" className="text-sm font-medium text-[#2D4C79] hover:underline">Kembali ke fasilitas</Link>
                     <div className="mt-6 flex items-center justify-between gap-4">
                         <div>
