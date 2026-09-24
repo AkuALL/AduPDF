@@ -1,7 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
 import { home, logout } from '@/routes';
-import facilities from '@/routes/facilities';
 import petugas from '@/routes/petugas';
 import reports from '@/routes/petugas/reports';
 import reservations from '@/routes/petugas/reservations';
@@ -17,7 +16,6 @@ const navigationClass = (isActive: boolean): string =>
 export default function PetugasLayout({ activePage, children }: Props) {
     const { auth } = usePage<{ auth: Auth }>().props;
     const navigation = [
-        { label: 'Fasilitas', href: facilities.index(), active: false },
         { label: 'Dashboard', href: petugas.dashboard(), active: activePage === 'dashboard' },
         { label: 'Antrean Reservasi', href: reservations.index(), active: activePage === 'reservations' },
         { label: 'Antrean Laporan', href: reports.index(), active: activePage === 'reports' },

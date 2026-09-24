@@ -7,7 +7,6 @@ const navigation = [
     ['Kelola Akun', '/admin/users'],
     ['Tambah Petugas', '/admin/users/petugas/create'],
     ['Tambah Pengguna', '/admin/users/pengguna/create'],
-    ['Kelola Fasilitas', '/admin/facilities'],
     ['Ganti Password', '/admin/change-password'],
 ] as const;
 

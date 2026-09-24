@@ -12,8 +12,8 @@
 
                 <!-- Desktop Nav Items -->
                 <nav class="hidden md:flex items-center gap-1 text-sm font-medium" aria-label="Navigasi Utama">
-                    {{-- Common: Katalog Fasilitas (Guest, Pengguna, Petugas, Admin) --}}
-                    @if(Route::has('facilities.index'))
+                    {{-- Public catalog navigation for guests and Pengguna. --}}
+                    @if(Route::has('facilities.index') && (auth()->guest() || auth()->user()->isPengguna()))
                         <a
                             href="{{ route('facilities.index') }}"
                             @class([
@@ -187,19 +187,6 @@
                                 </a>
                             @endif
 
-                            @if(Route::has('admin.facilities.index'))
-                                <a
-                                    href="{{ route('admin.facilities.index') }}"
-                                    @class([
-                                        'px-3 py-2 rounded-md transition duration-150',
-                                        'bg-white/20 text-white font-semibold' => request()->routeIs('admin.facilities.*'),
-                                        'text-slate-200 hover:bg-white/10 hover:text-white' => !request()->routeIs('admin.facilities.*'),
-                                    ])
-                                >
-                                    Kelola Fasilitas
-                                </a>
-                            @endif
-
                             @if(Route::has('admin.recap.index'))
                                 <a
                                     href="{{ route('admin.recap.index') }}"
@@ -324,7 +311,7 @@
 
     <!-- Mobile Drawer Menu -->
     <div id="mobile-menu" class="hidden md:hidden border-t border-white/15 bg-[#243E63] px-4 pt-3 pb-4 space-y-1">
-        @if(Route::has('facilities.index'))
+        @if(Route::has('facilities.index') && (auth()->guest() || auth()->user()->isPengguna()))
             <a
                 href="{{ route('facilities.index') }}"
                 class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('facilities.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
@@ -426,14 +413,6 @@
                         class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.users.pengguna.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
                     >
                         Tambah Pengguna
-                    </a>
-                @endif
-                @if(Route::has('admin.facilities.index'))
-                    <a
-                        href="{{ route('admin.facilities.index') }}"
-                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.facilities.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
-                    >
-                        Kelola Fasilitas
                     </a>
                 @endif
                 @if(Route::has('admin.recap.index'))
