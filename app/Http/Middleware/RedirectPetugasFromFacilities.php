@@ -10,7 +10,6 @@ class RedirectPetugasFromFacilities
 {
     /**
      * Redirect Petugas away from public facility pages.
-     *
      * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
