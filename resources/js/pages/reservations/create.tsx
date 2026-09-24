@@ -1,5 +1,6 @@
 import { Form, Head, Link } from '@inertiajs/react';
 import { store as storeReservation } from '@/actions/App/Http/Controllers/ReservationController';
+import DateCalendarGrid from '@/components/date-calendar-grid';
 import { useEffect, useState } from 'react';
 
 const wibDateTimeFormatter = new Intl.DateTimeFormat('en-CA', {
@@ -54,15 +55,6 @@ export default function CreateReservation({ facility, reservable, success }: Pro
     const latestDateValue = new Date(`${currentWib.date}T00:00:00Z`);
     latestDateValue.setUTCDate(latestDateValue.getUTCDate() + 90);
     const latestDate = latestDateValue.toISOString().slice(0, 10);
-    const firstDateValue = new Date(`${currentWib.date.slice(0, 7)}-01T00:00:00Z`);
-    const dateOptionCount = Math.floor((latestDateValue.getTime() - firstDateValue.getTime()) / 86_400_000) + 1;
-    const dateOptions = Array.from({ length: dateOptionCount }, (_, index) => {
-        const date = new Date(firstDateValue);
-        date.setUTCDate(date.getUTCDate() + index);
-        const value = date.toISOString().slice(0, 10);
-
-        return { value, label: reservationDateFormatter.format(date) };
-    });
     const [currentHour, currentMinute] = currentWib.time.split(':').map(Number);
     const currentMinutes = currentHour * 60 + currentMinute;
     const latestStartMinutes = Math.floor(currentMinutes / 30) * 30;
@@ -125,29 +117,21 @@ export default function CreateReservation({ facility, reservable, success }: Pro
                                 <input type="hidden" name="end_time" value={selectedDate && endTime ? `${selectedDate}T${endTime}` : ''} />
                                 {errors.facility_id && <p role="alert" className="text-sm text-red-700">{errors.facility_id}</p>}
 
-                                <div className="grid gap-4 sm:grid-cols-3">
-                                    <div>
-                                        <label htmlFor="reservation_date" className="block text-sm font-medium">Tanggal</label>
-                                        <select
-                                            id="reservation_date"
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <fieldset className="min-w-0" aria-describedby="reservation_date_hint" aria-invalid={!!errors.start_time}>
+                                        <legend className="text-sm font-medium">Tanggal</legend>
+                                        <DateCalendarGrid
                                             value={selectedDate}
-                                            required
-                                            onChange={(event) => {
-                                                const date = event.currentTarget.value;
+                                            minimumDate={currentWib.date}
+                                            maximumDate={latestDate}
+                                            onSelect={(date) => {
                                                 setSelectedDate(date);
                                                 setStartTime('');
                                                 setEndTime('');
                                             }}
-                                            aria-invalid={!!errors.start_time}
-                                            className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 focus-visible:border-[#2D4C79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20"
-                                        >
-                                            <option value="" disabled>Pilih tanggal</option>
-                                            {dateOptions.map(({ value, label }) => (
-                                                <option key={value} value={value} disabled={value < currentWib.date}>{label}</option>
-                                            ))}
-                                        </select>
-                                        <p className="mt-1 text-xs text-[#667085]">Tanggal lampau tidak dapat dipilih.</p>
-                                    </div>
+                                        />
+                                        <p id="reservation_date_hint" className="mt-1 text-xs text-[#667085]">Pilih tanggal hari ini sampai 90 hari ke depan.</p>
+                                    </fieldset>
                                     <div>
                                         <label htmlFor="start_time_select" className="block text-sm font-medium">Mulai (WIB)</label>
                                         <select
@@ -190,7 +174,7 @@ export default function CreateReservation({ facility, reservable, success }: Pro
                                 </div>
                                 {selectedDate && startTime && endTime && (
                                     <p role="status" className="rounded-md bg-[#F3F5F7] px-3 py-2 text-sm text-[#344054]">
-                                        Jadwal dipilih: {selectedDate}, {startTime}–{endTime} WIB
+                                        Jadwal dipilih: {reservationDateFormatter.format(new Date(`${selectedDate}T00:00:00Z`))}, {startTime}–{endTime} WIB
                                     </p>
                                 )}
                                 <div>
