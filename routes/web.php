@@ -3,6 +3,12 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    $user = request()->user();
+
+    if ($user?->isAdmin() || $user?->isPetugas()) {
+        return redirect()->route('dashboard');
+    }
+
     return redirect()->route('facilities.index');
 })->name('home');
 

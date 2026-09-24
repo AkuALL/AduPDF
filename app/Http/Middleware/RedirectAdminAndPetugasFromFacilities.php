@@ -6,16 +6,19 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class RedirectPetugasFromFacilities
+class RedirectAdminAndPetugasFromFacilities
 {
     /**
-     * Redirect Petugas away from public facility pages.
+     * Redirect Admin and Petugas to their dashboards from facility pages.
+     *
      * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user()?->isPetugas()) {
-            return redirect()->route('petugas.dashboard');
+        $user = $request->user();
+
+        if ($user?->isAdmin() || $user?->isPetugas()) {
+            return redirect()->route('dashboard');
         }
 
         return $next($request);
