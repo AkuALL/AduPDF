@@ -1,4 +1,5 @@
-import { Form, Head, Link } from '@inertiajs/react';
+import { Form, Head } from '@inertiajs/react';
+import PetugasLayout from '@/layouts/petugas-layout';
 
 type ReportStatus = 'baru' | 'diproses' | 'selesai' | 'ditolak';
 type FacilityCondition = 'aktif' | 'dalam_perbaikan' | 'nonaktif';
@@ -40,11 +41,10 @@ export default function PetugasReportShow({ report, success }: Props) {
     const isOpen = report.status_laporan === 'baru' || report.status_laporan === 'diproses';
 
     return (
-        <>
+        <PetugasLayout activePage="reports">
             <Head title="Proses Laporan" />
-            <main className="min-h-screen bg-[#F7F8FA] px-4 py-10 text-[#111827]">
+            <main className="mx-auto w-full max-w-[1360px] px-4 py-8 text-[#111827] sm:px-6 lg:px-8">
                 <div className="w-full">
-                    <Link href="/petugas/reports" className="text-sm font-medium text-[#2D4C79] hover:underline">Kembali ke antrian laporan</Link>
                     {success && <p role="status" className="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
                     <article className="mt-6 rounded-lg border border-[#E5E7EB] bg-white p-6">
                         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
@@ -91,6 +91,6 @@ export default function PetugasReportShow({ report, success }: Props) {
                     </article>
                 </div>
             </main>
-        </>
+        </PetugasLayout>
     );
 }

@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import PetugasLayout from '@/layouts/petugas-layout';
 
 type Report = {
     id: number;
@@ -13,12 +14,11 @@ type Props = { reports: Report[]; success: string | null };
 
 export default function PetugasReportIndex({ reports, success }: Props) {
     return (
-        <>
+        <PetugasLayout activePage="reports">
             <Head title="Antrian Laporan" />
-            <main className="min-h-screen bg-[#F7F8FA] px-4 py-10 text-[#111827]">
+            <main className="mx-auto w-full max-w-[1360px] px-4 py-8 text-[#111827] sm:px-6 lg:px-8">
                 <div className="w-full">
-                    <Link href="/petugas/dashboard" className="text-sm font-medium text-[#2D4C79] hover:underline">Kembali ke dashboard</Link>
-                    <h1 className="mt-6 text-2xl font-bold">Antrian laporan baru</h1>
+                    <h1 className="text-2xl font-bold">Antrian laporan baru</h1>
                     <p className="mt-1 text-sm text-[#667085]">Tinjau laporan kerusakan yang belum diproses.</p>
                     {success && <p role="status" className="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
 
@@ -41,6 +41,6 @@ export default function PetugasReportIndex({ reports, success }: Props) {
                     )}
                 </div>
             </main>
-        </>
+        </PetugasLayout>
     );
 }

@@ -1,4 +1,5 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
+import PetugasLayout from '@/layouts/petugas-layout';
 
 type ReservationItem = {
     id: number;
@@ -49,33 +50,8 @@ export default function PetugasDashboard({
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
 
     return (
-        <>
+        <PetugasLayout activePage="dashboard">
             <Head title="Dashboard Petugas — AduPDF" />
-            <div className="min-h-screen bg-[#F7F8FA] text-[#111827]">
-                {/* Header Top Bar */}
-                <header className="border-b border-[#E5E7EB] bg-white">
-                    <div className="mx-auto flex max-w-[1360px] items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-                        <div className="flex items-center gap-3">
-                            <span className="text-xl font-bold tracking-tight text-[#2D4C79]">AduPDF</span>
-                            <span className="rounded bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-800">PETUGAS</span>
-                        </div>
-                        <nav className="flex items-center gap-4 text-sm font-medium">
-                            <Link href="/petugas/dashboard" className="text-[#2D4C79] font-bold">
-                                Dashboard
-                            </Link>
-                            <Link href="/petugas/reservations" className="text-[#667085] hover:text-[#111827]">
-                                Antrean Reservasi
-                            </Link>
-                            <Link href="/petugas/reports" className="text-[#667085] hover:text-[#111827]">
-                                Antrean Laporan
-                            </Link>
-                            <Link href="/facilities" className="text-[#667085] hover:text-[#111827]">
-                                Katalog Fasilitas
-                            </Link>
-                        </nav>
-                    </div>
-                </header>
-
                 <main className="mx-auto max-w-[1360px] px-4 py-8 sm:px-6 lg:px-8">
                     {/* Flash messages */}
                     {flash?.success && (
@@ -276,7 +252,6 @@ export default function PetugasDashboard({
                         )}
                     </section>
                 </main>
-            </div>
-        </>
+        </PetugasLayout>
     );
 }

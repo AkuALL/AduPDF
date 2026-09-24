@@ -25,7 +25,7 @@ Route::middleware(['auth'])->group(function () {
                 return redirect()->route('admin.facilities.index');
             }
 
-            return redirect()->route('facilities.index');
+            abort(404);
         }
 
         if ($user->isPetugas()) {
@@ -37,7 +37,7 @@ Route::middleware(['auth'])->group(function () {
                 return redirect()->route('petugas.reservations.index');
             }
 
-            return redirect()->route('facilities.index');
+            abort(404);
         }
 
         if ($user->isPengguna()) {
