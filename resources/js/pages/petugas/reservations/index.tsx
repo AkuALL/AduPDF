@@ -1,4 +1,5 @@
-import { Form, Head, Link } from '@inertiajs/react';
+import { Form, Head } from '@inertiajs/react';
+import PetugasLayout from '@/layouts/petugas-layout';
 
 type Reservation = {
     id: number;
@@ -20,12 +21,11 @@ type Props = {
 
 export default function PetugasReservationIndex({ reservations, approved_reservations, success }: Props) {
     return (
-        <>
+        <PetugasLayout activePage="reservations">
             <Head title="Antrian Reservasi" />
-            <main className="min-h-screen bg-[#F7F8FA] px-4 py-10 text-[#111827]">
+            <main className="mx-auto w-full max-w-[1360px] px-4 py-8 text-[#111827] sm:px-6 lg:px-8">
                 <div className="w-full">
-                    <Link href="/facilities" className="text-sm font-medium text-[#2D4C79] hover:underline">Kembali ke fasilitas</Link>
-                    <h1 className="mt-6 text-2xl font-bold">Antrian reservasi</h1>
+                    <h1 className="text-2xl font-bold">Antrian reservasi</h1>
                     {success && <p role="status" className="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
                     {reservations.length === 0 ? (
                         <p className="mt-6 rounded-lg border border-[#E5E7EB] bg-white p-6 text-sm text-[#667085]">Tidak ada pengajuan yang menunggu.</p>
@@ -86,6 +86,6 @@ export default function PetugasReservationIndex({ reservations, approved_reserva
                     </section>
                 </div>
             </main>
-        </>
+        </PetugasLayout>
     );
 }
