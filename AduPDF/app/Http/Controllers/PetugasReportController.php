@@ -112,6 +112,7 @@ class PetugasReportController extends Controller
                 'original_name' => $attachment->original_name,
                 'mime_type' => $attachment->mime_type,
                 'file_size' => $attachment->file_size,
+                'url' => route('reports.attachments.show', $attachment),
             ])->values()->all(),
         ];
     }

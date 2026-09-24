@@ -45,6 +45,7 @@ test('approved Pengguna can view their report detail', function () {
         ->where('report.status_laporan', 'selesai')
         ->where('report.catatan_resolusi', 'Proyektor telah diperbaiki.')
         ->has('report.attachments', 2)
+        ->where('report.attachments.0.url', route('reports.attachments.show', $report->attachments->first()))
     );
 });
 

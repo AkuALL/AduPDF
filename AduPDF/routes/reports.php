@@ -1,15 +1,19 @@
 <?php
 
 use App\Http\Controllers\PetugasReportController;
+use App\Http\Controllers\ReportAttachmentController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'approved', 'role:pengguna'])->group(function () {
+Route::middleware(['auth', 'role:pengguna'])->group(function () {
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/create', [ReportController::class, 'create'])->name('reports.create');
     Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
     Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
 });
+
+Route::middleware('auth')->get('/report-attachments/{attachment}', ReportAttachmentController::class)
+    ->name('reports.attachments.show');
 
 Route::middleware(['auth', 'role:petugas'])->prefix('petugas')->name('petugas.')->group(function () {
     Route::get('/reports', [PetugasReportController::class, 'index'])->name('reports.index');

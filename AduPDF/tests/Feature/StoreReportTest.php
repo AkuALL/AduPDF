@@ -8,9 +8,9 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 
-test('approved Pengguna can view the report form', function () {
+test('Pengguna can view the report form without legacy account approval', function () {
     $this->withoutVite();
-    $user = User::factory()->pengguna()->create();
+    $user = User::factory()->pending()->create();
     $facility = Facility::factory()->create(['name' => 'Laboratorium Komputer']);
 
     $response = $this->actingAs($user)->get(route('reports.create'));
@@ -37,9 +37,9 @@ test('Petugas cannot create a report', function () {
     $response->assertForbidden();
 });
 
-test('approved Pengguna can create a damage report with supporting photos', function () {
+test('Pengguna can create a damage report with supporting photos without legacy account approval', function () {
     Storage::fake('local');
-    $user = User::factory()->pengguna()->create();
+    $user = User::factory()->pending()->create();
     $facility = Facility::factory()->create();
 
     $response = $this->actingAs($user)->post(route('reports.store'), [
