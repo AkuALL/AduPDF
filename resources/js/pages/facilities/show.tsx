@@ -1,4 +1,26 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import DateCalendarGrid from '@/components/date-calendar-grid';
+import { useState } from 'react';
+
+const wibDateFormatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+});
+
+const displayDateFormatter = new Intl.DateTimeFormat('id-ID', {
+    timeZone: 'UTC',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+});
+
+function todayWibDate(): string {
+    const parts = Object.fromEntries(wibDateFormatter.formatToParts(new Date()).map(({ type, value }) => [type, value])) as Record<string, string>;
+
+    return `${parts.year}-${parts.month}-${parts.day}`;
+}
 
 type AuthUser = {
     id: number;
@@ -82,13 +104,19 @@ const conditionConfig: Record<
 export default function FacilityShow({ facility, availability, selectedDate }: Props) {
     const { auth } = usePage<{ auth?: { user?: AuthUser | null } }>().props;
     const user = auth?.user;
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
     const status = conditionConfig[facility.condition] || conditionConfig.aktif;
     const isRoom = ['ruang_kelas', 'aula', 'laboratorium'].includes(facility.type);
 
-    const currentDate = selectedDate || availability?.date || new Date().toISOString().slice(0, 10);
+    const today = todayWibDate();
+    const latestDateValue = new Date(`${today}T00:00:00Z`);
+    latestDateValue.setUTCDate(latestDateValue.getUTCDate() + 90);
+    const latestDate = latestDateValue.toISOString().slice(0, 10);
+    const currentDate = selectedDate || availability?.date || today;
 
     const handleDateChange = (newDate: string) => {
+        setIsCalendarOpen(false);
         router.get(
             `/facilities/${facility.id}`,
             { date: newDate },
@@ -366,17 +394,40 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                             </div>
 
                             {/* Date Picker Control */}
-                            <div className="flex items-center gap-2">
-                                <label htmlFor="availability-date" className="text-xs font-medium text-[#667085] whitespace-nowrap">
+                            <div className="relative flex items-center gap-2">
+                                <span id="availability-date-label" className="text-xs font-medium text-[#667085] whitespace-nowrap">
                                     Pilih Tanggal:
-                                </label>
-                                <input
-                                    id="availability-date"
-                                    type="date"
-                                    value={currentDate}
-                                    onChange={(e) => handleDateChange(e.target.value)}
-                                    className="rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#111827] shadow-sm focus:border-[#2D4C79] focus:outline-none focus:ring-1 focus:ring-[#2D4C79]"
-                                />
+                                </span>
+                                <button
+                                    type="button"
+                                    aria-haspopup="dialog"
+                                    aria-expanded={isCalendarOpen}
+                                    aria-labelledby="availability-date-label availability-date-value"
+                                    onClick={() => setIsCalendarOpen((open) => !open)}
+                                    className="inline-flex min-w-44 items-center justify-between gap-3 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#111827] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/30"
+                                >
+                                    <span id="availability-date-value">{displayDateFormatter.format(new Date(`${currentDate}T00:00:00Z`))}</span>
+                                    <span aria-hidden="true" className="text-[#667085]">▾</span>
+                                </button>
+                                {isCalendarOpen && (
+                                    <div
+                                        role="dialog"
+                                        aria-label="Pilih tanggal ketersediaan"
+                                        onKeyDown={(event) => {
+                                            if (event.key === 'Escape') {
+                                                setIsCalendarOpen(false);
+                                            }
+                                        }}
+                                        className="absolute right-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg bg-white shadow-lg"
+                                    >
+                                        <DateCalendarGrid
+                                            value={currentDate}
+                                            minimumDate={today}
+                                            maximumDate={latestDate}
+                                            onSelect={handleDateChange}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
 
