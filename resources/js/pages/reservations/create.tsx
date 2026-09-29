@@ -101,7 +101,7 @@ export default function CreateReservation({ facility, reservable, success, serve
     const endTimeError = !endTime
         ? ''
         : !timeOptions.includes(endTime)
-            ? 'Jam selesai harus antara 07:00–20:00 WIB dengan interval 30 menit.'
+            ? 'Jam selesai harus antara 07:30–20:00 WIB dengan interval 30 menit.'
             : !startTime || endTime <= startTime
                 ? 'Jam selesai harus setelah jam mulai.'
                 : '';
