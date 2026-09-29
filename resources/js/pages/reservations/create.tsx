@@ -26,6 +26,7 @@ const timeOptions = Array.from({ length: 27 }, (_, index) => {
 
     return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
 });
+const startTimeOptions = timeOptions.slice(0, -1);
 
 function currentWibDateTime(): { date: string; time: string } {
     const parts = Object.fromEntries(wibDateTimeFormatter.formatToParts(new Date()).map(({ type, value }) => [type, value])) as Record<string, string>;
@@ -67,7 +68,7 @@ export default function CreateReservation({ facility, reservable, success }: Pro
     const requestedEndTime = requestedEnd.slice(11, 16);
     const initialDateIsValid = requestedDate >= currentWib.date && requestedDate <= latestDate;
     const initialStartIsValid = initialDateIsValid
-        && timeOptions.slice(0, -1).includes(requestedStartTime)
+        && startTimeOptions.includes(requestedStartTime)
         && (requestedDate !== currentWib.date || requestedStartTime >= minimumStartTime)
         && (requestedDate !== latestDate || requestedStartTime <= latestStartTime);
     const initialEndIsValid = initialStartIsValid
@@ -77,6 +78,22 @@ export default function CreateReservation({ facility, reservable, success }: Pro
     const [selectedDate, setSelectedDate] = useState(initialDateIsValid ? requestedDate : '');
     const [startTime, setStartTime] = useState(initialStartIsValid ? requestedStartTime : '');
     const [endTime, setEndTime] = useState(initialEndIsValid ? requestedEndTime : '');
+    const startTimeError = !startTime
+        ? ''
+        : !startTimeOptions.includes(startTime)
+            ? 'Jam mulai harus antara 07:00–19:30 WIB dengan interval 30 menit.'
+            : selectedDate === currentWib.date && startTime < minimumStartTime
+                ? `Jam mulai harus setelah ${minimumStartTime} WIB.`
+                : selectedDate === latestDate && startTime > latestStartTime
+                    ? `Jam mulai paling lambat ${latestStartTime} WIB.`
+                    : '';
+    const endTimeError = !endTime
+        ? ''
+        : !timeOptions.includes(endTime)
+            ? 'Jam selesai harus antara 07:00–20:00 WIB dengan interval 30 menit.'
+            : !startTime || endTime <= startTime
+                ? 'Jam selesai harus setelah jam mulai.'
+                : '';
 
     useEffect(() => {
         const interval = window.setInterval(() => setCurrentWib(currentWibDateTime()), 30_000);
@@ -88,13 +105,8 @@ export default function CreateReservation({ facility, reservable, success }: Pro
             setSelectedDate('');
             setStartTime('');
             setEndTime('');
-        } else if (selectedDate === currentWib.date && startTime && startTime < minimumStartTime) {
-            setStartTime('');
-            setEndTime('');
-        } else if (endTime && (!startTime || endTime <= startTime)) {
-            setEndTime('');
         }
-    }, [currentWib.date, endTime, latestDate, minimumStartTime, selectedDate, startTime]);
+    }, [currentWib.date, latestDate, selectedDate]);
 
     return (
         <>
@@ -134,41 +146,43 @@ export default function CreateReservation({ facility, reservable, success }: Pro
                                     </fieldset>
                                     <div>
                                         <label htmlFor="start_time_select" className="block text-sm font-medium">Mulai (WIB)</label>
-                                        <select
+                                        <input
                                             id="start_time_select"
+                                            type="time"
                                             value={startTime}
                                             required
                                             disabled={!selectedDate}
+                                            min={selectedDate === currentWib.date ? minimumStartTime : '07:00'}
+                                            max={selectedDate === latestDate && latestStartTime < '19:30' ? latestStartTime : '19:30'}
+                                            step={1800}
                                             onChange={(event) => {
                                                 setStartTime(event.currentTarget.value);
                                                 setEndTime('');
                                             }}
-                                            aria-invalid={!!errors.start_time}
+                                            aria-invalid={!!errors.start_time || !!startTimeError}
+                                            aria-describedby={startTimeError ? 'start_time_client_error' : undefined}
                                             className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 focus-visible:border-[#2D4C79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 disabled:cursor-not-allowed disabled:bg-[#F3F5F7] disabled:text-[#98A2B3]"
-                                        >
-                                            <option value="" disabled>{selectedDate ? 'Pilih waktu mulai' : 'Pilih tanggal dahulu'}</option>
-                                            {timeOptions.slice(0, -1).map((time) => (
-                                                <option key={time} value={time} disabled={(selectedDate === currentWib.date && time < minimumStartTime) || (selectedDate === latestDate && time > latestStartTime)}>{time} WIB</option>
-                                            ))}
-                                        </select>
+                                        />
+                                        {startTimeError && <p id="start_time_client_error" role="alert" className="mt-1 text-sm text-red-700">{startTimeError}</p>}
                                         {errors.start_time && <p role="alert" className="mt-1 text-sm text-red-700">{errors.start_time}</p>}
                                     </div>
                                     <div>
                                         <label htmlFor="end_time_select" className="block text-sm font-medium">Selesai (WIB)</label>
-                                        <select
+                                        <input
                                             id="end_time_select"
+                                            type="time"
                                             value={endTime}
                                             required
                                             disabled={!selectedDate || !startTime}
+                                            min={startTime ? nextWibSlot(startTime) : '07:30'}
+                                            max="20:00"
+                                            step={1800}
                                             onChange={(event) => setEndTime(event.currentTarget.value)}
-                                            aria-invalid={!!errors.end_time}
+                                            aria-invalid={!!errors.end_time || !!endTimeError}
+                                            aria-describedby={endTimeError ? 'end_time_client_error' : undefined}
                                             className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 focus-visible:border-[#2D4C79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 disabled:cursor-not-allowed disabled:bg-[#F3F5F7] disabled:text-[#98A2B3]"
-                                        >
-                                            <option value="" disabled>{startTime ? 'Pilih waktu selesai' : 'Pilih waktu mulai dahulu'}</option>
-                                            {timeOptions.filter((time) => time > startTime).map((time) => (
-                                                <option key={time} value={time}>{time} WIB</option>
-                                            ))}
-                                        </select>
+                                        />
+                                        {endTimeError && <p id="end_time_client_error" role="alert" className="mt-1 text-sm text-red-700">{endTimeError}</p>}
                                         {errors.end_time && <p role="alert" className="mt-1 text-sm text-red-700">{errors.end_time}</p>}
                                     </div>
                                 </div>
@@ -183,7 +197,7 @@ export default function CreateReservation({ facility, reservable, success }: Pro
                                     {errors.tujuan && <p role="alert" className="mt-1 text-sm text-red-700">{errors.tujuan}</p>}
                                 </div>
                                 <p className="text-sm text-[#667085]">Jam operasional 07:00–20:00 WIB, dalam slot 30 menit. Waktu yang sudah lewat tidak dapat dipilih. Pengajuan menunggu persetujuan Petugas.</p>
-                                <button type="submit" disabled={processing || !reservable || !selectedDate || !startTime || !endTime} className="rounded-md bg-[#2D4C79] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                                <button type="submit" disabled={processing || !reservable || !selectedDate || !startTime || !endTime || !!startTimeError || !!endTimeError} className="rounded-md bg-[#2D4C79] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
                                     {processing ? 'Mengirim...' : 'Kirim pengajuan'}
                                 </button>
                             </>
