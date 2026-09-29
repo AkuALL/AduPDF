@@ -42,6 +42,7 @@ class ReservationController extends Controller
             'facility' => $facility->only(['id', 'name', 'location']),
             'reservable' => $conditions->isReservable($facility),
             'success' => $request->session()->get('success'),
+            'server_now' => CarbonImmutable::now('Asia/Jakarta')->toIso8601String(),
         ]);
     }
 
