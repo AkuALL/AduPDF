@@ -45,7 +45,7 @@ export default function DateCalendarGrid({ value, minimumDate, maximumDate, onSe
 
         const date = `${visibleMonth}-${String(index - firstWeekday + 1).padStart(2, '0')}`;
 
-        return date < minimumDate ? null : date;
+        return date;
     });
 
     useEffect(() => {
@@ -57,13 +57,13 @@ export default function DateCalendarGrid({ value, minimumDate, maximumDate, onSe
     }, [maximumDate, minimumDate, visibleMonth]);
 
     return (
-        <div className="rounded-md border border-[#D0D5DD] bg-white p-3">
+        <div className="rounded-md border border-[#D0D5DD] bg-white p-2">
             <div className="flex gap-2">
                 <select
                     aria-label="Bulan"
                     value={visibleMonth}
                     onChange={(event) => setVisibleMonth(event.currentTarget.value)}
-                    className="min-w-0 flex-1 rounded-md border border-[#D0D5DD] bg-white px-2 py-2 text-sm focus-visible:border-[#2D4C79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20"
+                    className="min-w-0 flex-1 rounded-md border border-[#D0D5DD] bg-white px-2 py-1 text-xs focus-visible:border-[#2D4C79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20"
                 >
                     {months.filter(({ year }) => year === visibleYear).map(({ value: month, label }) => (
                         <option key={month} value={month}>{label}</option>
@@ -73,12 +73,12 @@ export default function DateCalendarGrid({ value, minimumDate, maximumDate, onSe
                     aria-label="Tahun"
                     value={visibleYear}
                     onChange={(event) => setVisibleMonth(months.find(({ year }) => year === Number(event.currentTarget.value))?.value ?? visibleMonth)}
-                    className="rounded-md border border-[#D0D5DD] bg-white px-2 py-2 text-sm focus-visible:border-[#2D4C79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20"
+                    className="rounded-md border border-[#D0D5DD] bg-white px-2 py-1 text-xs focus-visible:border-[#2D4C79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20"
                 >
                     {years.map((year) => <option key={year} value={year}>{year}</option>)}
                 </select>
             </div>
-            <div className="mt-3 grid grid-cols-7 gap-1 text-center text-xs font-semibold text-[#667085]">
+            <div className="mt-2 grid grid-cols-7 gap-1 text-center text-[10px] font-semibold text-[#667085]">
                 {weekdays.map((day) => <span key={day}>{day}</span>)}
             </div>
             <div className="mt-1 grid grid-cols-7 gap-1">
@@ -87,7 +87,7 @@ export default function DateCalendarGrid({ value, minimumDate, maximumDate, onSe
                         return <span key={`empty-${index}`} aria-hidden="true" />;
                     }
 
-                    const isDisabled = date > maximumDate;
+                    const isDisabled = date < minimumDate || date > maximumDate;
                     const isSelected = value === date;
 
                     return (
@@ -98,7 +98,7 @@ export default function DateCalendarGrid({ value, minimumDate, maximumDate, onSe
                             aria-label={dateFormatter.format(new Date(`${date}T00:00:00Z`))}
                             aria-pressed={isSelected}
                             onClick={() => onSelect(date)}
-                            className={`h-9 rounded-md text-sm transition-colors ${isSelected ? 'bg-[#2D4C79] font-semibold text-white' : isDisabled ? 'cursor-not-allowed bg-[#F3F5F7] text-[#98A2B3]' : 'text-[#111827] hover:bg-[#EAF0F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/30'} ${date === minimumDate && !isSelected ? 'ring-1 ring-[#2D4C79]' : ''}`}
+                            className={`h-6 rounded-md text-[11px] transition-colors ${isSelected ? 'bg-[#2D4C79] font-semibold text-white' : isDisabled ? 'cursor-not-allowed bg-[#F3F5F7] text-[#98A2B3]' : 'text-[#111827] hover:bg-[#EAF0F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/30'} ${date === minimumDate && !isSelected ? 'ring-1 ring-[#2D4C79]' : ''}`}
                         >
                             {Number(date.slice(-2))}
                         </button>

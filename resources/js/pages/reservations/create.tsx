@@ -102,7 +102,7 @@ export default function CreateReservation({ facility, reservable, success }: Pro
             <main className="min-h-screen bg-[#F7F8FA] px-4 py-10 text-[#111827]">
                 <div className="w-full">
                     <Link href={`/facilities/${facility.id}`} className="text-sm font-medium text-[#2D4C79] hover:underline">
-                        Kembali ke detail fasilitas
+                        <span aria-hidden="true">←</span> Kembali
                     </Link>
                     <h1 className="mt-6 text-2xl font-bold">Ajukan reservasi</h1>
                     <p className="mt-2 text-sm text-[#667085]">{facility.name} · {facility.location}</p>
@@ -130,7 +130,7 @@ export default function CreateReservation({ facility, reservable, success }: Pro
                                                 setEndTime('');
                                             }}
                                         />
-                                        <p id="reservation_date_hint" className="mt-1 text-xs text-[#667085]">Pilih tanggal hari ini sampai 90 hari ke depan.</p>
+                                        <p id="reservation_date_hint" className="mt-1 text-xs text-[#667085]">Tanggal lampau berwarna abu-abu dan tidak dapat dipilih.</p>
                                     </fieldset>
                                     <div>
                                         <label htmlFor="start_time_select" className="block text-sm font-medium">Mulai (WIB)</label>

@@ -342,40 +342,6 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                             </div>
                         )}
 
-                        {/* Action Area */}
-                        <div className="mt-8 flex flex-col gap-3 border-t border-[#E5E7EB] pt-6 sm:flex-row sm:items-center sm:justify-between">
-                            <span className="text-xs text-[#667085]">
-                                {user
-                                    ? (availability?.is_reservable ? 'Fasilitas ini dapat diajukan untuk reservasi kegiatan akademik atau organisasi.' : 'Fasilitas ini sedang tidak menerima pengajuan reservasi.')
-                                    : 'Ingin memesan fasilitas ini? Silakan masuk ke akun Anda.'}
-                            </span>
-                            <div className="flex gap-2">
-                                {user ? (
-                                    availability?.is_reservable ? (
-                                        <Link
-                                            href={`/reservations/create?facility_id=${facility.id}`}
-                                            className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
-                                        >
-                                            Ajukan Reservasi Fasilitas Ini
-                                        </Link>
-                                    ) : (
-                                        <button
-                                            disabled
-                                            className="inline-flex h-9 cursor-not-allowed items-center justify-center rounded-md bg-[#E5E7EB] px-4 text-xs font-semibold text-[#98A2B3]"
-                                        >
-                                            Tidak Tersedia untuk Reservasi
-                                        </button>
-                                    )
-                                ) : (
-                                    <a
-                                        href="/login"
-                                        className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
-                                    >
-                                        Masuk untuk Reservasi
-                                    </a>
-                                )}
-                            </div>
-                        </div>
                     </article>
 
                     {/* Availability Schedule Section (AG-04, FR-01, FR-02) */}
@@ -527,7 +493,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                             <div className="flex gap-2">
                                 {availability?.is_reservable ? (
                                     <Link
-                                        href="/login"
+                                        href={user ? `/reservations/create?facility_id=${facility.id}` : '/login'}
                                         className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
                                     >
                                         Ajukan Reservasi Fasilitas Ini
