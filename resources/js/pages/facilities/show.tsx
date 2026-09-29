@@ -225,7 +225,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                             href="/facilities"
                             className="inline-flex items-center text-xs font-semibold text-[#2D4C79] hover:underline"
                         >
-                            ← Kembali ke Katalog Fasilitas
+                            ← Kembali
                         </Link>
                     </div>
 

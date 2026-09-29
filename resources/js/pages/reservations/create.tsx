@@ -28,8 +28,8 @@ const timeOptions = Array.from({ length: 27 }, (_, index) => {
 });
 const startTimeOptions = timeOptions.slice(0, -1);
 
-function currentWibDateTime(): { date: string; time: string } {
-    const parts = Object.fromEntries(wibDateTimeFormatter.formatToParts(new Date()).map(({ type, value }) => [type, value])) as Record<string, string>;
+function currentWibDateTime(reference: Date = new Date()): { date: string; time: string } {
+    const parts = Object.fromEntries(wibDateTimeFormatter.formatToParts(reference).map(({ type, value }) => [type, value])) as Record<string, string>;
 
     return {
         date: `${parts.year}-${parts.month}-${parts.day}`,
@@ -48,11 +48,19 @@ type Props = {
     facility: { id: number; name: string; location: string };
     reservable: boolean;
     success: string | null;
+    server_now: string;
 };
 
-export default function CreateReservation({ facility, reservable, success }: Props) {
-    const [currentWib, setCurrentWib] = useState(currentWibDateTime);
+export default function CreateReservation({ facility, reservable, success, server_now }: Props) {
+    const serverTimestamp = new Date(server_now).getTime();
+    const [currentWib, setCurrentWib] = useState(() => currentWibDateTime(new Date(serverTimestamp)));
     const minimumStartTime = nextWibSlot(currentWib.time);
+    const todayUnavailable = minimumStartTime > '19:30';
+    const firstReservableDateValue = new Date(`${currentWib.date}T00:00:00Z`);
+    if (todayUnavailable) {
+        firstReservableDateValue.setUTCDate(firstReservableDateValue.getUTCDate() + 1);
+    }
+    const firstReservableDate = firstReservableDateValue.toISOString().slice(0, 10);
     const latestDateValue = new Date(`${currentWib.date}T00:00:00Z`);
     latestDateValue.setUTCDate(latestDateValue.getUTCDate() + 90);
     const latestDate = latestDateValue.toISOString().slice(0, 10);
@@ -66,7 +74,7 @@ export default function CreateReservation({ facility, reservable, success }: Pro
     const requestedDate = requestedStart.slice(0, 10);
     const requestedStartTime = requestedStart.slice(11, 16);
     const requestedEndTime = requestedEnd.slice(11, 16);
-    const initialDateIsValid = requestedDate >= currentWib.date && requestedDate <= latestDate;
+    const initialDateIsValid = requestedDate >= firstReservableDate && requestedDate <= latestDate;
     const initialStartIsValid = initialDateIsValid
         && startTimeOptions.includes(requestedStartTime)
         && (requestedDate !== currentWib.date || requestedStartTime >= minimumStartTime)
@@ -78,7 +86,10 @@ export default function CreateReservation({ facility, reservable, success }: Pro
     const [selectedDate, setSelectedDate] = useState(initialDateIsValid ? requestedDate : '');
     const [startTime, setStartTime] = useState(initialStartIsValid ? requestedStartTime : '');
     const [endTime, setEndTime] = useState(initialEndIsValid ? requestedEndTime : '');
-    const startTimeError = !startTime
+    const noCurrentDaySlots = selectedDate === currentWib.date && todayUnavailable;
+    const startTimeError = noCurrentDaySlots
+        ? 'Tanggal ini tidak tersedia karena jam operasional sudah berakhir. Pilih tanggal lain.'
+        : !startTime
         ? ''
         : !startTimeOptions.includes(startTime)
             ? 'Jam mulai harus antara 07:00–19:30 WIB dengan interval 30 menit.'
@@ -90,23 +101,27 @@ export default function CreateReservation({ facility, reservable, success }: Pro
     const endTimeError = !endTime
         ? ''
         : !timeOptions.includes(endTime)
-            ? 'Jam selesai harus antara 07:00–20:00 WIB dengan interval 30 menit.'
+            ? 'Jam selesai harus antara 07:30–20:00 WIB dengan interval 30 menit.'
             : !startTime || endTime <= startTime
                 ? 'Jam selesai harus setelah jam mulai.'
                 : '';
 
     useEffect(() => {
-        const interval = window.setInterval(() => setCurrentWib(currentWibDateTime()), 30_000);
+        const serverClockOffset = serverTimestamp - Date.now();
+        const interval = window.setInterval(() => {
+            setCurrentWib(currentWibDateTime(new Date(Date.now() + serverClockOffset)));
+        }, 30_000);
+
         return () => window.clearInterval(interval);
-    }, []);
+    }, [serverTimestamp]);
 
     useEffect(() => {
-        if (selectedDate && (selectedDate < currentWib.date || selectedDate > latestDate)) {
+        if (selectedDate && (selectedDate < firstReservableDate || selectedDate > latestDate)) {
             setSelectedDate('');
             setStartTime('');
             setEndTime('');
         }
-    }, [currentWib.date, latestDate, selectedDate]);
+    }, [firstReservableDate, latestDate, selectedDate]);
 
     return (
         <>
@@ -134,7 +149,7 @@ export default function CreateReservation({ facility, reservable, success }: Pro
                                         <legend className="text-sm font-medium">Tanggal</legend>
                                         <DateCalendarGrid
                                             value={selectedDate}
-                                            minimumDate={currentWib.date}
+                                            minimumDate={firstReservableDate}
                                             maximumDate={latestDate}
                                             onSelect={(date) => {
                                                 setSelectedDate(date);
@@ -142,7 +157,9 @@ export default function CreateReservation({ facility, reservable, success }: Pro
                                                 setEndTime('');
                                             }}
                                         />
-                                        <p id="reservation_date_hint" className="mt-1 text-xs text-[#667085]">Tanggal lampau berwarna abu-abu dan tidak dapat dipilih.</p>
+                                        <p id="reservation_date_hint" className="mt-1 text-xs text-[#667085]">
+                                            {todayUnavailable ? 'Hari ini tidak tersedia karena jam operasional sudah berakhir.' : 'Tanggal lampau berwarna abu-abu dan tidak dapat dipilih.'}
+                                        </p>
                                     </fieldset>
                                     <div>
                                         <label htmlFor="start_time_select" className="block text-sm font-medium">Mulai (WIB)</label>
@@ -151,8 +168,8 @@ export default function CreateReservation({ facility, reservable, success }: Pro
                                             type="time"
                                             value={startTime}
                                             required
-                                            disabled={!selectedDate}
-                                            min={selectedDate === currentWib.date ? minimumStartTime : '07:00'}
+                                            disabled={!selectedDate || noCurrentDaySlots}
+                                            min={selectedDate === currentWib.date && !noCurrentDaySlots ? minimumStartTime : '07:00'}
                                             max={selectedDate === latestDate && latestStartTime < '19:30' ? latestStartTime : '19:30'}
                                             step={1800}
                                             onChange={(event) => {
