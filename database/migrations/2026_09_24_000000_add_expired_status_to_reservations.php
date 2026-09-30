@@ -17,7 +17,7 @@ return new class extends Migration
     public function down(): void
     {
         if (DB::table('reservations')->where('status', 'kedaluwarsa')->exists()) {
-            throw new \RuntimeException('Cannot remove expired status while expired reservations exist.');
+            throw new RuntimeException('Cannot remove expired status while expired reservations exist.');
         }
 
         Schema::table('reservations', function (Blueprint $table): void {

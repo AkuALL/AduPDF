@@ -130,7 +130,7 @@ class AccountManagementController extends Controller
 
         return redirect()->route('admin.users.index')->with(
             'success',
-            'Akun '.$nama.' berhasil dihapus (soft-delete).'
+            'Akun '.$nama.' berhasil dihapus.'
         );
     }
 }

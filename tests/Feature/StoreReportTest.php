@@ -10,7 +10,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 test('Pengguna can view the report form without legacy account approval', function () {
     $this->withoutVite();
-    $user = User::factory()->pending()->create();
+    $user = User::factory()->pengguna()->create();
     $facility = Facility::factory()->create(['name' => 'Laboratorium Komputer']);
 
     $response = $this->actingAs($user)->get(route('reports.create'));
@@ -39,7 +39,7 @@ test('Petugas cannot create a report', function () {
 
 test('Pengguna can create a damage report with supporting photos without legacy account approval', function () {
     Storage::fake('local');
-    $user = User::factory()->pending()->create();
+    $user = User::factory()->pengguna()->create();
     $facility = Facility::factory()->create();
 
     $response = $this->actingAs($user)->post(route('reports.store'), [

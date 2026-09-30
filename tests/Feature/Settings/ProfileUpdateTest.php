@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -171,5 +172,5 @@ test('profile password can be updated via profile form (FR-17, GAL-05)', functio
         ->assertRedirect(route('profile.edit'));
 
     $user->refresh();
-    expect(\Illuminate\Support\Facades\Hash::check('new-password-123', $user->password))->toBeTrue();
+    expect(Hash::check('new-password-123', $user->password))->toBeTrue();
 });

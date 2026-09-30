@@ -1,4 +1,5 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { FlashAlert } from '@/components/flash-alert';
 import PetugasLayout from '@/layouts/petugas-layout';
 
 type ReservationItem = {
@@ -55,14 +56,10 @@ export default function PetugasDashboard({
                 <main className="mx-auto max-w-[1360px] px-4 py-8 sm:px-6 lg:px-8">
                     {/* Flash messages */}
                     {flash?.success && (
-                        <div role="status" className="mb-6 rounded-md border border-[#B7E2CB] bg-[#EAF7F0] p-4 text-sm text-[#16794A]">
-                            {flash.success}
-                        </div>
+                        <FlashAlert key={`success-${flash.success}`} type="success" message={flash.success} autoCloseDelay={5000} className="mb-6" />
                     )}
                     {flash?.error && (
-                        <div role="alert" className="mb-6 rounded-md border border-[#F2B8B5] bg-[#FDECEC] p-4 text-sm text-[#B42318]">
-                            {flash.error}
-                        </div>
+                        <FlashAlert key={`error-${flash.error}`} type="error" message={flash.error} autoCloseDelay={5000} className="mb-6" />
                     )}
 
                     {/* Page Title */}

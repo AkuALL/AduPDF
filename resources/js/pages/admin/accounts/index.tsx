@@ -1,4 +1,15 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { Loader2, Trash2, UserX } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import AdminLayout from '@/layouts/admin-layout';
 
 type User = {
@@ -28,15 +39,19 @@ const identityLabels: Record<string, string> = {
 };
 
 export default function Index({ users }: Props) {
-    function handleDelete(user: User) {
-        const displayName = user.nama || user.name || user.email;
-        if (
-            window.confirm(
-                `Apakah Anda yakin ingin menonaktifkan akun "${displayName}"? Akun yang dihapus (soft-delete) tidak akan dapat masuk kembali, namun seluruh riwayat data transaksi tetap tersimpan di sistem.`
-            )
-        ) {
-            router.delete(`/admin/users/${user.id}`);
-        }
+    const [userToDelete, setUserToDelete] = useState<User | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    function confirmDelete() {
+        if (!userToDelete) return;
+        router.delete(`/admin/users/${userToDelete.id}`, {
+            preserveScroll: true,
+            onStart: () => setIsDeleting(true),
+            onFinish: () => {
+                setIsDeleting(false);
+                setUserToDelete(null);
+            },
+        });
     }
 
     return (
@@ -48,7 +63,7 @@ export default function Index({ users }: Props) {
                     <div>
                         <h1 className="text-xl font-bold text-slate-900">Kelola Akun</h1>
                         <p className="mt-1 text-xs text-slate-500">
-                            Daftar seluruh akun Petugas dan Pengguna aktif. Admin dapat membuat akun Petugas/Pengguna serta menonaktifkan akun (soft-delete).
+                            Daftar seluruh akun Petugas dan Pengguna aktif.
                         </p>
                     </div>
                     <div className="flex gap-2">
@@ -137,9 +152,10 @@ export default function Index({ users }: Props) {
                                         <td className="px-6 py-4 text-right">
                                             <button
                                                 type="button"
-                                                onClick={() => handleDelete(user)}
-                                                className="rounded border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition"
+                                                onClick={() => setUserToDelete(user)}
+                                                className="inline-flex items-center gap-1.5 rounded border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition cursor-pointer"
                                             >
+                                                <Trash2 className="h-3.5 w-3.5" />
                                                 Hapus
                                             </button>
                                         </td>
@@ -171,6 +187,88 @@ export default function Index({ users }: Props) {
                     </div>
                 )}
             </div>
+
+            {/* Interactive Confirmation Dialog */}
+            <Dialog
+                open={userToDelete !== null}
+                onOpenChange={(open) => {
+                    if (!open && !isDeleting) {
+                        setUserToDelete(null);
+                    }
+                }}
+            >
+                <DialogContent className="max-w-md border-slate-200 bg-white p-6 shadow-xl sm:rounded-2xl">
+                    <DialogHeader className="flex flex-col items-center sm:items-start">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-600 mb-2">
+                            <UserX className="h-6 w-6" />
+                        </div>
+                        <DialogTitle className="text-lg font-bold text-slate-900">
+                            Nonaktifkan Akun
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-slate-600">
+                            Apakah Anda yakin ingin menonaktifkan akun ini? Pengguna tidak akan dapat masuk kembali ke sistem, namun seluruh riwayat data transaksi dan aktivitas tetap tersimpan dengan aman.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {userToDelete && (
+                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-2 text-xs">
+                            <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                                <span className="text-slate-500">Nama Lengkap:</span>
+                                <span className="font-semibold text-slate-900">
+                                    {userToDelete.nama ?? userToDelete.name ?? '-'}
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                                <span className="text-slate-500">Email:</span>
+                                <span className="font-mono text-slate-700">{userToDelete.email}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-slate-500">Peran:</span>
+                                <span
+                                    className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                                        userToDelete.role === 'petugas'
+                                            ? 'bg-blue-100 text-blue-800'
+                                            : 'bg-emerald-100 text-emerald-800'
+                                    }`}
+                                >
+                                    {roleLabels[userToDelete.role] ?? userToDelete.role}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+
+                    <DialogFooter className="mt-4 gap-2 sm:gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setUserToDelete(null)}
+                            disabled={isDeleting}
+                            className="rounded-lg border-slate-300 text-slate-700 hover:bg-slate-100"
+                        >
+                            Batal
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={confirmDelete}
+                            disabled={isDeleting}
+                            className="rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-medium shadow-sm transition"
+                        >
+                            {isDeleting ? (
+                                <>
+                                    <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                                    Menonaktifkan...
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 className="mr-1.5 h-4 w-4" />
+                                    Ya, Nonaktifkan Akun
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AdminLayout>
     );
 }
