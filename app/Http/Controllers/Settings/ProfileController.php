@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileDeleteRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -33,7 +35,7 @@ class ProfileController extends Controller
         $validated = $request->validated();
 
         if (! empty($validated['password'])) {
-            $validated['password'] = \Illuminate\Support\Facades\Hash::make($validated['password']);
+            $validated['password'] = Hash::make($validated['password']);
         } else {
             unset($validated['password']);
         }
@@ -67,7 +69,7 @@ class ProfileController extends Controller
         $user = $request->user();
 
         // BR-26 & FR-16: Sistem harus mencegah penghapusan Admin terakhir
-        if ($user->isAdmin() && \App\Models\User::where('role', 'admin')->count() <= 1) {
+        if ($user->isAdmin() && User::where('role', 'admin')->count() <= 1) {
             return back()->with('error', 'Admin terakhir tidak dapat dihapus.');
         }
 

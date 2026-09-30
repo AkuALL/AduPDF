@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureUserRole
@@ -22,7 +23,7 @@ class EnsureUserRole
         }
 
         if ($user->trashed()) {
-            \Illuminate\Support\Facades\Auth::logout();
+            Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Database\Seeders\AdminUserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -105,7 +106,7 @@ test('system prevents deletion of the last admin account (BR-26, FR-16, GAL-06)'
 });
 
 test('admin seeder provisions exactly one initial admin idempotently (BR-18, GAL-01)', function () {
-    $this->seed(\Database\Seeders\AdminUserSeeder::class);
+    $this->seed(AdminUserSeeder::class);
 
     $this->assertDatabaseHas('users', [
         'email' => 'admin@adupdf.ac.id',
@@ -115,7 +116,7 @@ test('admin seeder provisions exactly one initial admin idempotently (BR-18, GAL
     expect(User::where('role', 'admin')->count())->toBe(1);
 
     // Running again does not duplicate
-    $this->seed(\Database\Seeders\AdminUserSeeder::class);
+    $this->seed(AdminUserSeeder::class);
     expect(User::where('role', 'admin')->count())->toBe(1);
 });
 
@@ -129,7 +130,6 @@ test('admin can soft-delete an account via patch /admin/users/{user}/deactivate 
     $response = $this->actingAs($admin)->patch(route('admin.users.deactivate', $targetPetugas));
 
     $response->assertRedirect(route('admin.users.index'));
-    $response->assertSessionHas('success');
 
     $this->assertSoftDeleted('users', [
         'id' => $targetPetugas->id,

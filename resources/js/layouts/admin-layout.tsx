@@ -1,50 +1,189 @@
 import { Link, usePage } from '@inertiajs/react';
+import { ChevronDown, KeyRound, LogOut, Menu, Shield, UserCheck, UserPlus, Users } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
+import { FlashAlert } from '@/components/flash-alert';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
-type AuthUser = { name?: string; nama?: string };
+type AuthUser = { name?: string; nama?: string; email?: string };
 
 const navigation = [
-    ['Kelola Akun', '/admin/users'],
-    ['Tambah Petugas', '/admin/users/petugas/create'],
-    ['Tambah Pengguna', '/admin/users/pengguna/create'],
-    ['Ganti Password', '/admin/change-password'],
-] as const;
+    {
+        label: 'Kelola Akun',
+        href: '/admin/users',
+        icon: Users,
+        isActive: (currentUrl: string) =>
+            currentUrl === '/admin/users' ||
+            (currentUrl.startsWith('/admin/users') &&
+                !currentUrl.startsWith('/admin/users/petugas') &&
+                !currentUrl.startsWith('/admin/users/pengguna')),
+    },
+    {
+        label: 'Tambah Petugas',
+        href: '/admin/users/petugas/create',
+        icon: UserCheck,
+        isActive: (currentUrl: string) => currentUrl.startsWith('/admin/users/petugas'),
+    },
+    {
+        label: 'Tambah Pengguna',
+        href: '/admin/users/pengguna/create',
+        icon: UserPlus,
+        isActive: (currentUrl: string) => currentUrl.startsWith('/admin/users/pengguna'),
+    },
+];
 
 export default function AdminLayout({ children }: PropsWithChildren) {
-    const { auth, flash } = usePage<{
+    const page = usePage<{
         auth: { user: AuthUser };
         flash?: { success?: string; error?: string };
-    }>().props;
+    }>();
+    const { auth, flash } = page.props;
+    const currentUrl = page.url;
+
+    const displayName = auth.user.nama ?? auth.user.name ?? 'Admin';
+    const initial = displayName.charAt(0).toUpperCase();
 
     return (
         <div className="flex min-h-screen flex-col bg-slate-100 text-slate-800 antialiased">
-            <header className="bg-[#2D4C79] text-white shadow">
+            <header className="sticky top-0 z-40 bg-[#2D4C79] text-white shadow-md border-b border-[#243E63]">
                 <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-6">
-                        <Link href="/admin/users" className="flex items-center gap-2">
-                            <span className="text-2xl font-bold tracking-wider">AduPDF</span>
-                            <span className="rounded border border-amber-400/40 bg-amber-500/30 px-2 py-0.5 text-xs font-semibold text-amber-200">ADMIN</span>
+                        <Link href="/admin/users" className="flex items-center gap-2 group">
+                            <span className="text-2xl font-bold tracking-wider group-hover:text-amber-200 transition">AduPDF</span>
+                            <span className="rounded-md border border-amber-400/40 bg-amber-500/30 px-2 py-0.5 text-xs font-semibold text-amber-200 shadow-xs">
+                                ADMIN
+                            </span>
                         </Link>
-                        <nav className="hidden gap-2 md:flex">
-                            {navigation.map(([label, href]) => (
-                                <Link key={href} href={href} className="rounded-md px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10 hover:text-white">
-                                    {label}
-                                </Link>
-                            ))}
+                        <nav className="hidden items-center gap-1.5 md:flex" aria-label="Navigasi Menu Admin">
+                            {navigation.map((item) => {
+                                const active = item.isActive(currentUrl);
+                                const Icon = item.icon;
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        aria-current={active ? 'page' : undefined}
+                                        className={`group flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-all duration-200 ${
+                                            active
+                                                ? 'bg-white text-[#2D4C79] font-bold shadow-md shadow-black/10 ring-1 ring-white/20'
+                                                : 'text-slate-200 hover:bg-white/10 hover:text-white'
+                                        }`}
+                                    >
+                                        <Icon className={`h-4 w-4 transition-colors ${active ? 'text-[#2D4C79]' : 'text-slate-300 group-hover:text-white'}`} />
+                                        <span>{item.label}</span>
+                                        {active && (
+                                            <span className="h-1.5 w-1.5 rounded-full bg-[#2D4C79]" />
+                                        )}
+                                    </Link>
+                                );
+                            })}
                         </nav>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <div className="hidden text-right sm:block"><div className="text-sm font-semibold">{auth.user.nama ?? auth.user.name}</div><div className="text-xs text-slate-300">Administrator Tunggal</div></div>
-                        <Link href="/logout" method="post" as="button" className="rounded bg-red-600/80 px-3 py-1.5 text-xs text-white transition hover:bg-red-700">Keluar</Link>
+
+                    <div className="flex items-center gap-3">
+                        {/* Admin Profile Dropdown */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button
+                                    type="button"
+                                    className="flex items-center gap-2.5 rounded-lg p-1.5 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40 cursor-pointer"
+                                >
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-400/20 border border-amber-300/40 text-amber-200 font-bold text-sm">
+                                        {initial}
+                                    </div>
+                                    <div className="hidden text-left sm:block">
+                                        <div className="flex items-center gap-1 text-sm font-semibold leading-tight text-white">
+                                            <span>{displayName}</span>
+                                            <ChevronDown className="h-3.5 w-3.5 text-slate-300 opacity-80" />
+                                        </div>
+                                        <div className="text-[11px] text-slate-300">Administrator</div>
+                                    </div>
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56 rounded-xl border border-slate-200 bg-white p-1.5 text-slate-800 shadow-lg">
+                                <DropdownMenuLabel className="px-3 py-2">
+                                    <div className="font-semibold text-slate-900">{displayName}</div>
+                                    {auth.user.email && (
+                                        <div className="truncate text-xs text-slate-500 font-normal">{auth.user.email}</div>
+                                    )}
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator className="my-1 bg-slate-100" />
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        href="/admin/change-password"
+                                        className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
+                                    >
+                                        <KeyRound className="h-4 w-4 text-slate-500" />
+                                        <span>Ganti Password</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator className="my-1 bg-slate-100" />
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        href="/logout"
+                                        method="post"
+                                        as="button"
+                                        className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-rose-600 transition hover:bg-rose-50 hover:text-rose-700"
+                                    >
+                                        <LogOut className="h-4 w-4 text-rose-500" />
+                                        <span>Keluar</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        {/* Mobile Nav Toggle */}
+                        <details className="relative md:hidden">
+                            <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-lg border border-white/20 bg-white/10 hover:bg-white/20">
+                                <Menu className="h-5 w-5 text-white" />
+                            </summary>
+                            <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-white/15 bg-[#243E63] p-2 shadow-xl">
+                                <nav className="grid gap-1">
+                                    {navigation.map((item) => {
+                                        const active = item.isActive(currentUrl);
+                                        const Icon = item.icon;
+                                        return (
+                                            <Link
+                                                key={item.href}
+                                                href={item.href}
+                                                aria-current={active ? 'page' : undefined}
+                                                className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                                                    active
+                                                        ? 'bg-white text-[#2D4C79] font-bold shadow-sm'
+                                                        : 'text-slate-200 hover:bg-white/10 hover:text-white'
+                                                }`}
+                                            >
+                                                <Icon className={`h-4 w-4 ${active ? 'text-[#2D4C79]' : 'text-slate-300'}`} />
+                                                <span>{item.label}</span>
+                                            </Link>
+                                        );
+                                    })}
+                                </nav>
+                            </div>
+                        </details>
                     </div>
                 </div>
             </header>
+
             <main className="w-full min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
-                {flash?.success && <div role="status" className="mb-4 rounded border-l-4 border-emerald-600 bg-emerald-50 p-4 text-sm text-emerald-800">{flash.success}</div>}
-                {flash?.error && <div role="alert" className="mb-4 rounded border-l-4 border-rose-600 bg-rose-50 p-4 text-sm text-rose-800">{flash.error}</div>}
+                {flash?.success && (
+                    <FlashAlert key={`success-${flash.success}`} type="success" message={flash.success} autoCloseDelay={5000} />
+                )}
+                {flash?.error && (
+                    <FlashAlert key={`error-${flash.error}`} type="error" message={flash.error} autoCloseDelay={5000} />
+                )}
                 {children}
             </main>
-            <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">© {new Date().getFullYear()} AduPDF. Sistem Reservasi & Pelaporan Fasilitas Kampus.</footer>
+
+            <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
+                © {new Date().getFullYear()} AduPDF. Sistem Reservasi & Pelaporan Fasilitas Kampus.
+            </footer>
         </div>
     );
 }
