@@ -110,9 +110,11 @@ class ReservationController extends Controller
         return [
             'id' => $reservation->id,
             'tujuan' => $reservation->tujuan,
-            'start_time' => $reservation->start_time->setTimezone('Asia/Jakarta')->format('d M Y, H:i'),
-            'end_time' => $reservation->end_time->setTimezone('Asia/Jakarta')->format('d M Y, H:i'),
+            'start_time' => $reservation->start_time->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i'),
+            'end_time' => $reservation->end_time->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i'),
             'status' => $reservation->status->value,
+            'alasan_penolakan' => $reservation->alasan_penolakan,
+            'ditolak_pada' => $reservation->ditolak_pada?->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i'),
             'alasan_pembatalan' => $reservation->alasan_pembatalan,
             'facility' => [
                 'id' => $reservation->facility->id,

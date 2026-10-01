@@ -52,7 +52,10 @@ test('deactivating a facility via deactivate endpoint automatically rejects pend
     expect($facility->refresh()->condition)->toBe(FacilityCondition::Inactive);
 
     // Assert future reservations are transitioned
-    expect($pendingReservation->refresh()->status)->toBe(ReservationStatus::Rejected)
+    $pendingReservation->refresh();
+    expect($pendingReservation->status)->toBe(ReservationStatus::Rejected)
+        ->and($pendingReservation->alasan_penolakan)->toBe('Fasilitas dinonaktifkan dan tidak lagi tersedia untuk reservasi.')
+        ->and($pendingReservation->ditolak_pada)->not->toBeNull()
         ->and($approvedReservation->refresh()->status)->toBe(ReservationStatus::Cancelled)
         // Assert past reservation is preserved
         ->and($pastReservation->refresh()->status)->toBe(ReservationStatus::Approved);
@@ -110,9 +113,12 @@ test('deactivating a room also cancels and rejects reservations on its child too
         ->and(app(FacilityConditionService::class)->isReservable($tool))->toBeFalse();
 
     // Assert reservations on both room and tool are cancelled/rejected
+    $toolPending->refresh();
     expect($roomApproved->refresh()->status)->toBe(ReservationStatus::Cancelled)
         ->and($toolApproved->refresh()->status)->toBe(ReservationStatus::Cancelled)
-        ->and($toolPending->refresh()->status)->toBe(ReservationStatus::Rejected);
+        ->and($toolPending->status)->toBe(ReservationStatus::Rejected)
+        ->and($toolPending->alasan_penolakan)->toBe('Fasilitas dinonaktifkan dan tidak lagi tersedia untuk reservasi.')
+        ->and($toolPending->ditolak_pada)->not->toBeNull();
 });
 
 test('updating facility condition to nonaktif via edit form also triggers deactivation impact (AG-06)', function () {

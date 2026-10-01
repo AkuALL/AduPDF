@@ -149,7 +149,7 @@ export default function PetugasDashboard({
                                                                 <div className="text-[#667085]">{res.created_at_human}</div>
                                                             </td>
                                                             <td className="whitespace-nowrap px-4 py-3 text-right">
-                                                                <div className="inline-flex gap-2">
+                                                                <div className="inline-flex items-start gap-2">
                                                                     <Form action={`/petugas/reservations/${res.id}/approve`} method="patch">
                                                                         {({ processing }) => (
                                                                             <button
@@ -161,15 +161,29 @@ export default function PetugasDashboard({
                                                                             </button>
                                                                         )}
                                                                     </Form>
-                                                                    <Form action={`/petugas/reservations/${res.id}/reject`} method="patch">
-                                                                        {({ processing }) => (
-                                                                            <button
-                                                                                type="submit"
-                                                                                disabled={processing}
-                                                                                className="rounded border border-[#F2B8B5] bg-[#FDECEC] px-3 py-1.5 text-xs font-semibold text-[#B42318] hover:bg-[#FCD8D8] disabled:opacity-50"
-                                                                            >
-                                                                                Tolak
-                                                                            </button>
+                                                                    <Form action={`/petugas/reservations/${res.id}/reject`} method="patch" className="w-48 text-left">
+                                                                        {({ errors, processing }) => (
+                                                                            <>
+                                                                                <label htmlFor={`dashboard-rejection-reason-${res.id}`} className="sr-only">Alasan penolakan</label>
+                                                                                <textarea
+                                                                                    id={`dashboard-rejection-reason-${res.id}`}
+                                                                                    name="alasan_penolakan"
+                                                                                    required
+                                                                                    maxLength={5000}
+                                                                                    rows={2}
+                                                                                    placeholder="Alasan penolakan"
+                                                                                    aria-invalid={!!errors.alasan_penolakan}
+                                                                                    className="w-full rounded border border-[#D0D5DD] px-2 py-1.5 text-xs"
+                                                                                />
+                                                                                {(errors.alasan_penolakan || errors.reservation) && <p role="alert" className="mt-1 text-xs text-[#B42318]">{errors.alasan_penolakan || errors.reservation}</p>}
+                                                                                <button
+                                                                                    type="submit"
+                                                                                    disabled={processing}
+                                                                                    className="mt-1.5 rounded border border-[#F2B8B5] bg-[#FDECEC] px-3 py-1.5 text-xs font-semibold text-[#B42318] hover:bg-[#FCD8D8] disabled:opacity-50"
+                                                                                >
+                                                                                    {processing ? 'Menolak...' : 'Tolak'}
+                                                                                </button>
+                                                                            </>
                                                                         )}
                                                                     </Form>
                                                                 </div>

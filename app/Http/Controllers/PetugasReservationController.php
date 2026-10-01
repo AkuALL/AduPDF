@@ -28,8 +28,8 @@ class PetugasReservationController extends Controller
                 'facility' => $reservation->facility->name,
                 'location' => $reservation->facility->location,
                 'tujuan' => $reservation->tujuan,
-                'start_time' => $reservation->start_time->setTimezone('Asia/Jakarta')->format('d M Y, H:i'),
-                'end_time' => $reservation->end_time->setTimezone('Asia/Jakarta')->format('d M Y, H:i'),
+                'start_time' => $reservation->start_time->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i'),
+                'end_time' => $reservation->end_time->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i'),
             ])
             ->values();
 
@@ -44,8 +44,8 @@ class PetugasReservationController extends Controller
                 'user' => $reservation->user->name,
                 'facility' => $reservation->facility->name,
                 'location' => $reservation->facility->location,
-                'start_time' => $reservation->start_time->setTimezone('Asia/Jakarta')->format('d M Y, H:i'),
-                'end_time' => $reservation->end_time->setTimezone('Asia/Jakarta')->format('d M Y, H:i'),
+                'start_time' => $reservation->start_time->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i'),
+                'end_time' => $reservation->end_time->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i'),
             ])
             ->values();
 
@@ -98,7 +98,11 @@ class PetugasReservationController extends Controller
 
             Reservation::query()
                 ->whereIn('id', $conflictingIds)
-                ->update(['status' => ReservationStatus::Rejected]);
+                ->update([
+                    'status' => ReservationStatus::Rejected,
+                    'alasan_penolakan' => 'Jadwal berbenturan dengan reservasi lain yang telah disetujui.',
+                    'ditolak_pada' => now(),
+                ]);
 
             return $conflictingIds->count();
         });
@@ -111,12 +115,24 @@ class PetugasReservationController extends Controller
         return redirect()->route('petugas.reservations.index')->with('success', $message);
     }
 
-    public function reject(Reservation $reservation): RedirectResponse
+    public function reject(Request $request, Reservation $reservation): RedirectResponse
     {
+        $input = $request->validate([
+            'alasan_penolakan' => ['required', 'string', 'max:5000'],
+        ], [
+            'alasan_penolakan.required' => 'Alasan penolakan wajib diisi.',
+            'alasan_penolakan.string' => 'Alasan penolakan harus berupa teks.',
+            'alasan_penolakan.max' => 'Alasan penolakan maksimal 5.000 karakter.',
+        ]);
+
         $updated = Reservation::query()
             ->whereKey($reservation->id)
             ->where('status', ReservationStatus::Pending->value)
-            ->update(['status' => ReservationStatus::Rejected]);
+            ->update([
+                'status' => ReservationStatus::Rejected,
+                'alasan_penolakan' => $input['alasan_penolakan'],
+                'ditolak_pada' => now(),
+            ]);
 
         if ($updated === 0) {
             throw ValidationException::withMessages(['reservation' => 'Reservasi ini tidak lagi menunggu keputusan.']);

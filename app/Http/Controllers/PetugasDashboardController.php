@@ -52,12 +52,12 @@ class PetugasDashboardController extends Controller
                     6 => 'Sabtu',
                 ];
                 $dayName = $dayNames[(int) $start->format('w')] ?? '';
-                $slotLabel = $dayName.', '.$start->format('d M Y').' · '.$start->format('H:i').' – '.$end->format('H:i').' WIB';
+                $slotLabel = $dayName.', '.$start->locale('id')->translatedFormat('d F Y').' · '.$start->format('H:i').' – '.$end->format('H:i').' WIB';
 
                 return [
                     'slot_key' => $slotKey,
                     'slot_label' => $slotLabel,
-                    'start_time' => $start->format('d M Y, H:i'),
+                    'start_time' => $start->locale('id')->translatedFormat('d F Y, H:i'),
                     'end_time' => $end->format('H:i'),
                     'count' => $reservations->count(),
                     'reservations' => $reservations->map(fn (Reservation $reservation): array => [
@@ -67,7 +67,7 @@ class PetugasDashboardController extends Controller
                         'facility_location' => $reservation->facility->location,
                         'tujuan' => $reservation->tujuan,
                         'status' => $reservation->status->value ?? (string) $reservation->status,
-                        'created_at' => $reservation->created_at?->setTimezone('Asia/Jakarta')->format('d M Y, H:i') ?? '—',
+                        'created_at' => $reservation->created_at?->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i') ?? '—',
                         'created_at_human' => $reservation->created_at?->diffForHumans() ?? '—',
                     ])->values()->all(),
                 ];

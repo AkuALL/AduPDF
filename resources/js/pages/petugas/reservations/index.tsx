@@ -37,12 +37,19 @@ export default function PetugasReservationIndex({ reservations, approved_reserva
                                     <p className="mt-1 text-sm text-[#667085]">{reservation.start_time}–{reservation.end_time} WIB · {reservation.location}</p>
                                     <p className="mt-3 text-sm"><span className="font-medium">Pengaju:</span> {reservation.user}</p>
                                     <p className="mt-2 whitespace-pre-wrap text-sm text-[#667085]">{reservation.tujuan}</p>
-                                    <div className="mt-5 flex gap-3">
+                                    <div className="mt-5 flex flex-wrap items-start gap-3">
                                         <Form action={`/petugas/reservations/${reservation.id}/approve`} method="patch">
                                             {({ processing }) => <button type="submit" disabled={processing} className="rounded-md bg-[#2D4C79] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Setujui</button>}
                                         </Form>
-                                        <Form action={`/petugas/reservations/${reservation.id}/reject`} method="patch">
-                                            {({ processing }) => <button type="submit" disabled={processing} className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">Tolak</button>}
+                                        <Form action={`/petugas/reservations/${reservation.id}/reject`} method="patch" className="w-full max-w-xl">
+                                            {({ errors, processing }) => (
+                                                <>
+                                                    <label htmlFor={`rejection-reason-${reservation.id}`} className="block text-sm font-medium">Alasan penolakan</label>
+                                                    <textarea id={`rejection-reason-${reservation.id}`} name="alasan_penolakan" required maxLength={5000} rows={2} aria-invalid={!!errors.alasan_penolakan} className="mt-1 w-full rounded-md border border-[#D0D5DD] px-3 py-2 text-sm" />
+                                                    {(errors.alasan_penolakan || errors.reservation) && <p role="alert" className="mt-1 text-sm text-red-700">{errors.alasan_penolakan || errors.reservation}</p>}
+                                                    <button type="submit" disabled={processing} className="mt-3 rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">{processing ? 'Menolak...' : 'Tolak'}</button>
+                                                </>
+                                            )}
                                         </Form>
                                     </div>
                                 </article>
