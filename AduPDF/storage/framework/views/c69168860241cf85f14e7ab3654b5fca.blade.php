@@ -1,1 +1,0 @@
-<x-alert type="danger" message="Fasilitas sedang tidak dapat dipesan" />

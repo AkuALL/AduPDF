@@ -1,1 +1,0 @@
-<x-alert type="info" message="Periksa jadwal terlebih dahulu" />

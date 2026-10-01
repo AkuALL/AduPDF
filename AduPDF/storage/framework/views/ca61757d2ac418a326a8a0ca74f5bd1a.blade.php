@@ -1,1 +1,0 @@
-<x-card title="Detail Informasi">Isi konten kartu</x-card>

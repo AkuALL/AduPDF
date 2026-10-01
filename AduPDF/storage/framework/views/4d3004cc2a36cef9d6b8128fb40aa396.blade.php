@@ -1,1 +1,0 @@
-<x-empty-state title="Belum ada reservasi" description="Reservasi yang kamu ajukan akan muncul di sini." action-text="Lihat Fasilitas" action-url="/facilities" />
