@@ -53,6 +53,8 @@ test('deactivating a facility via deactivate endpoint automatically rejects pend
 
     // Assert future reservations are transitioned
     expect($pendingReservation->refresh()->status)->toBe(ReservationStatus::Rejected)
+        ->and($pendingReservation->alasan_penolakan)->toBe('Fasilitas dinonaktifkan dan tidak lagi tersedia untuk reservasi.')
+        ->and($pendingReservation->ditolak_pada)->not->toBeNull()
         ->and($approvedReservation->refresh()->status)->toBe(ReservationStatus::Cancelled)
         // Assert past reservation is preserved
         ->and($pastReservation->refresh()->status)->toBe(ReservationStatus::Approved);

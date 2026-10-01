@@ -6,6 +6,8 @@ type Reservation = {
     start_time: string;
     end_time: string;
     status: string;
+    alasan_penolakan: string | null;
+    ditolak_pada: string | null;
     alasan_pembatalan: string | null;
     facility: { id: number; name: string; location: string };
 };
@@ -31,6 +33,7 @@ export default function ReservationShow({ reservation, can_cancel, success }: Pr
                         <dl className="mt-6 space-y-4 border-y border-[#E5E7EB] py-5 text-sm">
                             <div><dt className="text-[#667085]">Waktu</dt><dd className="mt-1 font-medium">{reservation.start_time}–{reservation.end_time} WIB</dd></div>
                             <div><dt className="text-[#667085]">Tujuan</dt><dd className="mt-1 whitespace-pre-wrap">{reservation.tujuan}</dd></div>
+                            {reservation.status === 'ditolak' && <div className="rounded-md border border-[#F2B8B5] bg-[#FDECEC] p-3 text-[#7A271A]"><dt className="font-semibold">Alasan penolakan</dt><dd className="mt-1 whitespace-pre-wrap">{reservation.alasan_penolakan ?? 'Alasan penolakan tidak tersedia.'}</dd>{reservation.ditolak_pada && <dd className="mt-2 text-xs text-[#B42318]">Ditolak pada {reservation.ditolak_pada} WIB</dd>}</div>}
                             {reservation.alasan_pembatalan && <div><dt className="text-[#667085]">Alasan pembatalan</dt><dd className="mt-1">{reservation.alasan_pembatalan}</dd></div>}
                         </dl>
                         {can_cancel && (

@@ -6,6 +6,8 @@ type Reservation = {
     start_time: string;
     end_time: string;
     status: 'menunggu' | 'disetujui' | 'ditolak' | 'dibatalkan' | 'kedaluwarsa';
+    alasan_penolakan: string | null;
+    ditolak_pada: string | null;
     facility: { id: number; name: string; location: string };
 };
 
@@ -45,6 +47,12 @@ export default function ReservationIndex({ reservations, success }: Props) {
                                         <span className="rounded-full bg-[#E9EEF5] px-3 py-1 text-xs font-semibold text-[#2D4C79]">{statusLabel[reservation.status]}</span>
                                     </div>
                                     <p className="mt-3 line-clamp-2 text-sm text-[#667085]">{reservation.tujuan}</p>
+                                    {reservation.status === 'ditolak' && (
+                                        <div className="mt-4 rounded-md border border-[#F2B8B5] bg-[#FDECEC] p-3 text-sm text-[#7A271A]">
+                                            <p><span className="font-semibold">Alasan penolakan:</span> {reservation.alasan_penolakan ?? 'Alasan penolakan tidak tersedia.'}</p>
+                                            {reservation.ditolak_pada && <p className="mt-1 text-xs text-[#B42318]">Ditolak pada {reservation.ditolak_pada} WIB</p>}
+                                        </div>
+                                    )}
                                 </Link>
                             ))}
                         </div>

@@ -1,0 +1,1 @@
+import{n as e,t}from"./jsx-runtime-CCDjJoMN.js";import n from"./account-form-BsUinKvq.js";var r=e(),i=t();function a(){let e=(0,r.c)(1),t;return e[0]===Symbol.for(`react.memo_cache_sentinel`)?(t=(0,i.jsx)(n,{role:`Pengguna`}),e[0]=t):t=e[0],t}export{a as default};
