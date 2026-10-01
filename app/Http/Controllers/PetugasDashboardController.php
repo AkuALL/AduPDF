@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\FacilityCondition;
+use App\Enums\ReservationStatus;
+use App\Models\Facility;
 use App\Models\Report;
 use App\Models\Reservation;
 use App\Queries\ReportQueueQuery;
@@ -87,11 +90,54 @@ class PetugasDashboardController extends Controller
             'created_at_human' => $report->created_at?->diffForHumans() ?? '—',
         ])->values()->all();
 
+        $todayReservations = Reservation::query()
+            ->with(['facility:id,name,location', 'user:id,nama'])
+            ->where('status', ReservationStatus::Approved->value)
+            ->whereDate('start_time', today())
+            ->oldest('start_time')
+            ->get();
+
+        $underRepairFacilities = Facility::query()
+            ->where('condition', FacilityCondition::UnderRepair->value)
+            ->withCount(['childTools'])
+            ->oldest('name')
+            ->get();
+
+        $formattedTodayReservations = $todayReservations->map(function (Reservation $reservation): array {
+            $start = $reservation->start_time->setTimezone('Asia/Jakarta');
+            $end = $reservation->end_time->setTimezone('Asia/Jakarta');
+
+            return [
+                'id' => $reservation->id,
+                'user_name' => $reservation->user->nama ?? $reservation->user->name ?? 'Pengguna',
+                'facility_name' => $reservation->facility->name,
+                'facility_location' => $reservation->facility->location,
+                'tujuan' => $reservation->tujuan,
+                'status' => $reservation->status->value ?? (string) $reservation->status,
+                'time_range' => $start->format('H:i').' – '.$end->format('H:i').' WIB',
+                'start_time' => $start->locale('id')->translatedFormat('d F Y, H:i'),
+                'end_time' => $end->format('H:i'),
+            ];
+        })->values()->all();
+
+        $formattedUnderRepairFacilities = $underRepairFacilities->map(fn (Facility $facility): array => [
+            'id' => $facility->id,
+            'name' => $facility->name,
+            'type' => $facility->type->value ?? (string) $facility->type,
+            'location' => $facility->location,
+            'condition' => $facility->condition->value ?? (string) $facility->condition,
+            'child_tools_count' => $facility->child_tools_count ?? 0,
+        ])->values()->all();
+
         $data = [
             'pending_reservations_count' => $pendingReservations->count(),
             'new_reports_count' => $newReports->count(),
+            'today_reservations_count' => $todayReservations->count(),
+            'under_repair_facilities_count' => $underRepairFacilities->count(),
             'reservation_segments' => $reservationSegments->all(),
             'reports' => $formattedReports,
+            'today_reservations' => $formattedTodayReservations,
+            'under_repair_facilities' => $formattedUnderRepairFacilities,
         ];
 
         if ($request->header('X-Inertia') || $request->wantsJson()) {

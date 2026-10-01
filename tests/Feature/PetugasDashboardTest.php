@@ -3,6 +3,7 @@
 use App\Enums\FacilityCondition;
 use App\Enums\ReportStatus;
 use App\Enums\ReservationStatus;
+use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\Facility;
 use App\Models\Report;
 use App\Models\Reservation;
@@ -208,4 +209,90 @@ test('dashboard route redirects petugas to petugas dashboard (DA-02)', function 
     $response = $this->actingAs($petugas)->get(route('dashboard'));
 
     $response->assertRedirect(route('petugas.dashboard'));
+});
+
+test('petugas dashboard displays 4 operational metrics, today agenda, and under repair facilities (DA-02, FR-09)', function () {
+    $petugas = User::factory()->petugas()->create();
+    $user = User::factory()->pengguna()->create(['nama' => 'Dosen Pembimbing']);
+
+    $roomActive = Facility::factory()->create(['name' => 'Ruang Seminar Utama', 'location' => 'Gedung C Lt. 3', 'condition' => FacilityCondition::Active]);
+    $roomBroken = Facility::factory()->create(['name' => 'Lab Multimedia Rusak', 'location' => 'Gedung D Lt. 1', 'condition' => FacilityCondition::UnderRepair]);
+
+    // Today approved reservation
+    Reservation::create([
+        'user_id' => $user->id,
+        'facility_id' => $roomActive->id,
+        'tujuan' => 'Sidang Skripsi Terbuka Hari Ini',
+        'start_time' => now()->setTime(10, 0, 0),
+        'end_time' => now()->setTime(12, 0, 0),
+        'status' => ReservationStatus::Approved,
+    ]);
+
+    // Tomorrow approved reservation (should not be in today agenda)
+    Reservation::create([
+        'user_id' => $user->id,
+        'facility_id' => $roomActive->id,
+        'tujuan' => 'Kuliah Tamu Besok Pagi',
+        'start_time' => now()->addDay()->setTime(9, 0, 0),
+        'end_time' => now()->addDay()->setTime(11, 0, 0),
+        'status' => ReservationStatus::Approved,
+    ]);
+
+    // Pending reservation
+    Reservation::create([
+        'user_id' => $user->id,
+        'facility_id' => $roomActive->id,
+        'tujuan' => 'Rapat Senat Akademik',
+        'start_time' => now()->addDays(2)->setTime(13, 0, 0),
+        'end_time' => now()->addDays(2)->setTime(15, 0, 0),
+        'status' => ReservationStatus::Pending,
+    ]);
+
+    // New report
+    Report::factory()->create([
+        'user_id' => $user->id,
+        'facility_id' => $roomBroken->id,
+        'kategori' => 'Kelistrikan',
+        'deskripsi' => 'Konsleting panel listrik',
+        'status_laporan' => ReportStatus::New,
+    ]);
+
+    $response = $this->actingAs($petugas)->get(route('petugas.dashboard'));
+
+    $response->assertOk();
+    $response->assertSee('Sidang Skripsi Terbuka Hari Ini');
+    $response->assertSee('Ruang Seminar Utama');
+    $response->assertSee('Lab Multimedia Rusak');
+    $response->assertDontSee('Kuliah Tamu Besok Pagi');
+});
+
+test('petugas dashboard inertia response returns complete operational props (DA-02, FR-09)', function () {
+    $petugas = User::factory()->petugas()->create();
+    $facility = Facility::factory()->create(['name' => 'Aula Garuda', 'condition' => FacilityCondition::UnderRepair]);
+    $user = User::factory()->pengguna()->create(['nama' => 'Koor Panitia']);
+
+    Reservation::create([
+        'user_id' => $user->id,
+        'facility_id' => $facility->id,
+        'tujuan' => 'Gladi Resik Yudisium',
+        'start_time' => now()->setTime(14, 0, 0),
+        'end_time' => now()->setTime(16, 0, 0),
+        'status' => ReservationStatus::Approved,
+    ]);
+
+    $version = app(HandleInertiaRequests::class)->version(request());
+
+    $response = $this->actingAs($petugas)
+        ->withHeaders([
+            'X-Inertia' => 'true',
+            'X-Inertia-Version' => (string) $version,
+        ])
+        ->get(route('petugas.dashboard'));
+
+    $response->assertOk();
+    $response->assertJsonPath('component', 'petugas/dashboard');
+    $response->assertJsonPath('props.today_reservations_count', 1);
+    $response->assertJsonPath('props.under_repair_facilities_count', 1);
+    $response->assertJsonPath('props.today_reservations.0.tujuan', 'Gladi Resik Yudisium');
+    $response->assertJsonPath('props.under_repair_facilities.0.name', 'Aula Garuda');
 });
