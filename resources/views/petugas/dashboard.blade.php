@@ -34,9 +34,9 @@
     </x-slot:header>
 
     <div class="space-y-8">
-        {{-- Ringkasan Antrean Operasional (Restrained Metrics) --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {{-- Kartu Metrik Reservasi Menunggu --}}
+        {{-- Ringkasan Operasional 4 Metrik (DA-02, FR-09) --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {{-- Kartu 1: Reservasi Menunggu --}}
             <div class="bg-white border border-[#E5E7EB] rounded-lg p-5 shadow-2xs flex items-center justify-between">
                 <div>
                     <div class="flex items-center gap-2">
@@ -45,17 +45,36 @@
                     </div>
                     <div class="mt-2 flex items-baseline gap-2">
                         <span class="text-3xl font-bold text-[#111827]">{{ $pending_reservations_count }}</span>
-                        <span class="text-xs text-[#667085]">pengajuan menunggu persetujuan</span>
+                        <span class="text-xs text-[#667085]">pengajuan menunggu</span>
                     </div>
                 </div>
-                <div class="w-12 h-12 rounded-lg bg-[#FFF5E6] border border-[#F5D6A6] flex items-center justify-center text-[#A15C00]">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-11 h-11 rounded-lg bg-[#FFF5E6] border border-[#F5D6A6] flex items-center justify-center text-[#A15C00]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </div>
             </div>
 
-            {{-- Kartu Metrik Laporan Baru --}}
+            {{-- Kartu 2: Agenda Pemakaian Hari Ini --}}
+            <div class="bg-white border border-[#E5E7EB] rounded-lg p-5 shadow-2xs flex items-center justify-between">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-[#667085] uppercase tracking-wider">Agenda Hari Ini</span>
+                        <x-status-badge status="disetujui" size="sm" />
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span class="text-3xl font-bold text-[#111827]">{{ $today_reservations_count ?? 0 }}</span>
+                        <span class="text-xs text-[#667085]">kegiatan disetujui</span>
+                    </div>
+                </div>
+                <div class="w-11 h-11 rounded-lg bg-[#EAF7F0] border border-[#B7E2CB] flex items-center justify-center text-[#16794A]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+
+            {{-- Kartu 3: Laporan Kerusakan Baru --}}
             <div class="bg-white border border-[#E5E7EB] rounded-lg p-5 shadow-2xs flex items-center justify-between">
                 <div>
                     <div class="flex items-center gap-2">
@@ -64,12 +83,31 @@
                     </div>
                     <div class="mt-2 flex items-baseline gap-2">
                         <span class="text-3xl font-bold text-[#111827]">{{ $new_reports_count }}</span>
-                        <span class="text-xs text-[#667085]">laporan baru perlu diproses</span>
+                        <span class="text-xs text-[#667085]">laporan baru</span>
                     </div>
                 </div>
-                <div class="w-12 h-12 rounded-lg bg-[#FFF5E6] border border-[#F5D6A6] flex items-center justify-center text-[#A15C00]">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-11 h-11 rounded-lg bg-[#FFF5E6] border border-[#F5D6A6] flex items-center justify-center text-[#A15C00]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+            </div>
+
+            {{-- Kartu 4: Fasilitas Dalam Perbaikan --}}
+            <div class="bg-white border border-[#E5E7EB] rounded-lg p-5 shadow-2xs flex items-center justify-between">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-[#667085] uppercase tracking-wider">Dalam Perbaikan</span>
+                        <x-status-badge status="dalam_perbaikan" size="sm" />
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span class="text-3xl font-bold text-[#111827]">{{ $under_repair_facilities_count ?? 0 }}</span>
+                        <span class="text-xs text-[#667085]">fasilitas diperbaiki</span>
+                    </div>
+                </div>
+                <div class="w-11 h-11 rounded-lg bg-[#FFF0E8] border border-[#F5C6A7] flex items-center justify-center text-[#B54708]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
                     </svg>
                 </div>
             </div>
@@ -275,6 +313,138 @@
                                             >
                                                 Detail & Proses →
                                             </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+        </section>
+
+        {{-- SEKSI 3: Agenda Pemakaian Fasilitas Hari Ini (DA-02 Enhancement) --}}
+        <section aria-labelledby="section-today" class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#E5E7EB] pb-3">
+                <div>
+                    <h2 id="section-today" class="text-lg font-bold text-[#111827] flex items-center gap-2">
+                        <span>Agenda Pemakaian Fasilitas Hari Ini</span>
+                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-[#16794A]/10 text-[#16794A]">
+                            {{ $today_reservations_count ?? 0 }}
+                        </span>
+                    </h2>
+                    <p class="text-xs text-[#667085] mt-0.5">
+                        Jadwal kegiatan yang telah disetujui untuk berlangsung pada hari ini. Memudahkan Petugas memantau penggunaan riil fasilitas kampus.
+                    </p>
+                </div>
+            </div>
+
+            @if(empty($today_reservations) || ($today_reservations_count ?? 0) === 0)
+                <div class="bg-white border border-[#E5E7EB] rounded-lg p-8 text-center">
+                    <div class="w-10 h-10 rounded-full bg-[#F3F5F7] text-[#667085] flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-sm font-semibold text-[#111827]">Tidak Ada Agenda Penggunaan Hari Ini</h3>
+                    <p class="mt-1 text-xs text-[#667085] max-w-sm mx-auto">Tidak ada jadwal reservasi yang berstatus disetujui untuk hari ini.</p>
+                </div>
+            @else
+                <div class="bg-white border border-[#E5E7EB] rounded-lg overflow-hidden shadow-2xs">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-[#111827]">
+                            <thead class="bg-[#F7F8FA] text-xs font-semibold text-[#667085] uppercase tracking-wider border-b border-[#E5E7EB]">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3">Waktu Pemakaian</th>
+                                    <th scope="col" class="px-4 py-3">Fasilitas & Lokasi</th>
+                                    <th scope="col" class="px-4 py-3">Pemesan</th>
+                                    <th scope="col" class="px-4 py-3">Tujuan Kegiatan</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#E5E7EB]">
+                                @foreach($today_reservations as $todayRes)
+                                    <tr class="hover:bg-[#F8FAFC] transition">
+                                        <td class="px-4 py-3.5 whitespace-nowrap">
+                                            <div class="font-semibold text-[#111827]">{{ $todayRes['time_range'] }}</div>
+                                            <div class="text-xs text-[#667085]">Hari ini</div>
+                                        </td>
+                                        <td class="px-4 py-3.5">
+                                            <div class="font-semibold text-[#111827]">{{ $todayRes['facility_name'] }}</div>
+                                            <div class="text-xs text-[#667085] mt-0.5">{{ $todayRes['facility_location'] }}</div>
+                                        </td>
+                                        <td class="px-4 py-3.5 font-medium text-[#111827]">
+                                            {{ $todayRes['user_name'] }}
+                                        </td>
+                                        <td class="px-4 py-3.5 max-w-xs">
+                                            <div class="text-xs text-[#111827] line-clamp-2" title="{{ $todayRes['tujuan'] }}">
+                                                {{ $todayRes['tujuan'] }}
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right whitespace-nowrap">
+                                            <x-status-badge :status="$todayRes['status']" size="sm" />
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+        </section>
+
+        {{-- SEKSI 4: Fasilitas Dalam Perbaikan (FR-14 & DA-02 Monitoring) --}}
+        <section aria-labelledby="section-repair" class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#E5E7EB] pb-3">
+                <div>
+                    <h2 id="section-repair" class="text-lg font-bold text-[#111827] flex items-center gap-2">
+                        <span>Monitoring Fasilitas Dalam Perbaikan</span>
+                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-[#B54708]/10 text-[#B54708]">
+                            {{ $under_repair_facilities_count ?? 0 }}
+                        </span>
+                    </h2>
+                    <p class="text-xs text-[#667085] mt-0.5">
+                        Daftar aset kampus yang saat ini dinonaktifkan sementara untuk perbaikan teknis.
+                    </p>
+                </div>
+            </div>
+
+            @if(empty($under_repair_facilities) || ($under_repair_facilities_count ?? 0) === 0)
+                <div class="bg-white border border-[#E5E7EB] rounded-lg p-8 text-center">
+                    <div class="w-10 h-10 rounded-full bg-[#EAF7F0] text-[#16794A] flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <h3 class="text-sm font-semibold text-[#111827]">Semua Fasilitas Berfungsi Baik</h3>
+                    <p class="mt-1 text-xs text-[#667085] max-w-sm mx-auto">Saat ini tidak ada fasilitas maupun peralatan yang sedang dalam status perbaikan.</p>
+                </div>
+            @else
+                <div class="bg-white border border-[#E5E7EB] rounded-lg overflow-hidden shadow-2xs">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-[#111827]">
+                            <thead class="bg-[#F7F8FA] text-xs font-semibold text-[#667085] uppercase tracking-wider border-b border-[#E5E7EB]">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3">Nama Fasilitas</th>
+                                    <th scope="col" class="px-4 py-3">Tipe & Lokasi</th>
+                                    <th scope="col" class="px-4 py-3">Peralatan Terkait</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Kondisi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#E5E7EB]">
+                                @foreach($under_repair_facilities as $fac)
+                                    <tr class="hover:bg-[#F8FAFC] transition">
+                                        <td class="px-4 py-3.5 font-semibold text-[#111827]">
+                                            {{ $fac['name'] }}
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs text-[#667085]">
+                                            <span class="capitalize">{{ str_replace('_', ' ', $fac['type']) }}</span> · {{ $fac['location'] }}
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs text-[#667085]">
+                                            {{ $fac['child_tools_count'] > 0 ? $fac['child_tools_count'].' alat terpasang' : '—' }}
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right whitespace-nowrap">
+                                            <x-status-badge status="dalam_perbaikan" size="sm" />
                                         </td>
                                     </tr>
                                 @endforeach
