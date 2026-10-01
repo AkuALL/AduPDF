@@ -3,7 +3,7 @@ Repository untuk tugas besar PPK Kelas B
 Kelompok 1
 
 How to run locally:
-Di lokal directory, via terminal, run:
+Di lokal directory, via terminal, run these sequentially:
 1. git clone https://github.com/AkuALL/AduPDF.git
 2. cd Adupdf/
 3. npm install
