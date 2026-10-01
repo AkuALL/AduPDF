@@ -12,3 +12,4 @@ Di lokal directory, via terminal, run:
 5. php artisan key:generate
 6. php artisan migrate --seed
 7. composer run dev
+8. open http://127.0.0.1:8000/
