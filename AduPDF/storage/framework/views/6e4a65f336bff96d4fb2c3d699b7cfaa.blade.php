@@ -1,0 +1,1 @@
+<x-layouts.app><div>Halaman Utama Konten</div></x-layouts.app>

@@ -16,9 +16,11 @@ use Illuminate\Support\Carbon;
  * @property Carbon $start_time
  * @property Carbon $end_time
  * @property ReservationStatus $status
+ * @property string|null $alasan_penolakan
+ * @property Carbon|null $ditolak_pada
  * @property string|null $alasan_pembatalan
  */
-#[Fillable(['user_id', 'facility_id', 'tujuan', 'start_time', 'end_time', 'status', 'alasan_pembatalan'])]
+#[Fillable(['user_id', 'facility_id', 'tujuan', 'start_time', 'end_time', 'status', 'alasan_penolakan', 'ditolak_pada', 'alasan_pembatalan'])]
 class Reservation extends Model
 {
     /**
@@ -52,6 +54,7 @@ class Reservation extends Model
             'start_time' => 'datetime',
             'end_time' => 'datetime',
             'status' => ReservationStatus::class,
+            'ditolak_pada' => 'datetime',
         ];
     }
 }

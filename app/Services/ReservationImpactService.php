@@ -28,7 +28,11 @@ class ReservationImpactService
             return [
                 'rejected' => (clone $query)
                     ->where('status', ReservationStatus::Pending->value)
-                    ->update(['status' => ReservationStatus::Rejected]),
+                    ->update([
+                        'status' => ReservationStatus::Rejected,
+                        'alasan_penolakan' => 'Fasilitas dinonaktifkan dan tidak lagi tersedia untuk reservasi.',
+                        'ditolak_pada' => now(),
+                    ]),
                 'cancelled' => $query
                     ->where('status', ReservationStatus::Approved->value)
                     ->update(['status' => ReservationStatus::Cancelled]),

@@ -1,0 +1,1 @@
+<x-button variant="primary">Kirim</x-button>
