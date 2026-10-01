@@ -1,4 +1,6 @@
+import UserPageLayout from '@/layouts/user-page-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { ArrowLeft, Building2, MapPin, UsersRound } from 'lucide-react';
 
 type AuthUser = {
     id: number;
@@ -99,118 +101,32 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
     return (
         <>
             <Head title={`${facility.name} — AduPDF`} />
-            <div className="min-h-screen bg-[#F7F8FA] text-[#111827] font-sans antialiased">
-                {/* Navigation Bar */}
-                <header className="sticky top-0 z-30 border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm">
-                    <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
-                        <div className="flex items-center gap-8">
-                            <Link href="/" className="flex items-center gap-2">
-                                <span className="text-xl font-bold tracking-tight text-[#2D4C79]">
-                                    AduPDF
-                                </span>
-                                <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-xs font-semibold text-[#2D4C79]">
-                                    Kampus
-                                </span>
-                            </Link>
-                            <nav className="hidden sm:flex sm:gap-6 text-sm">
-                                <Link
-                                    href="/facilities"
-                                    className="font-semibold text-[#2D4C79] border-b-2 border-[#2D4C79] pb-4 pt-4"
-                                >
-                                    Fasilitas
-                                </Link>
-                                {user?.role === 'pengguna' && (
-                                    <Link
-                                        href="/reservations"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                    >
-                                        Reservasi Saya
-                                    </Link>
-                                )}
-                                {user?.role === 'petugas' && (
-                                    <Link
-                                        href="/petugas/reservations"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                    >
-                                        Panel Petugas
-                                    </Link>
-                                )}
-                                {user?.role === 'admin' && (
-                                    <a
-                                        href="/admin/facilities"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                    >
-                                        Kelola Fasilitas
-                                    </a>
-                                )}
-                            </nav>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            {user ? (
-                                <>
-                                    <Link
-                                        href="/profile"
-                                        aria-label="Buka profil"
-                                        className="group hidden rounded-md text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79] sm:block"
-                                    >
-                                        <span className="block text-xs font-semibold text-[#111827] group-hover:text-[#2D4C79]">
-                                            {user.nama || user.name}
-                                        </span>
-                                        <span className="block text-[10px] text-[#667085] capitalize">
-                                            {user.role}
-                                        </span>
-                                    </Link>
-                                    <Link
-                                        href="/logout"
-                                        method="post"
-                                        as="button"
-                                        className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#5D6673] hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition shadow-sm"
-                                    >
-                                        Keluar
-                                    </Link>
-                                </>
-                            ) : (
-                                <>
-                                    <a
-                                        href="/login"
-                                        className="inline-flex h-9 items-center justify-center rounded-md px-3.5 text-sm font-medium text-[#111827] hover:bg-[#F3F5F7] transition"
-                                    >
-                                        Masuk
-                                    </a>
-                                    <a
-                                        href="/register"
-                                        className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
-                                    >
-                                        Daftar
-                                    </a>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </header>
-
-                {/* Main Content Area */}
-                <main className="w-full px-4 py-8 sm:px-6 lg:px-8">
+            <UserPageLayout active="facilities">
+                <main className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
                     {/* Back Breadcrumb */}
                     <div className="mb-6">
                         <Link
                             href="/facilities"
-                            className="inline-flex items-center text-xs font-semibold text-[#2D4C79] hover:underline"
+                            className="inline-flex items-center gap-2 text-sm font-bold text-slate-600 transition hover:text-[#17324D]"
                         >
-                            ← Kembali ke Katalog Fasilitas
+                            <ArrowLeft className="size-4" /> Kembali ke katalog
                         </Link>
                     </div>
 
                     {/* Facility Detail Card (Design Section 15.1) */}
-                    <article className="rounded-lg border border-[#E5E7EB] bg-white p-6 shadow-[0_1px_2px_rgba(16,24,40,0.03)] sm:p-8">
+                    <article className="ui-card relative overflow-hidden p-6 sm:p-8">
+                        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-400 via-blue-500 to-indigo-500" />
                         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-                            <div>
+                            <div className="flex items-start gap-4">
+                                <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-slate-100 to-teal-50 text-[#245578]"><Building2 className="size-7" /></span>
+                                <div>
                                 <span className="text-xs font-semibold text-[#2D4C79]">
                                     {typeLabels[facility.type] || facility.type}
                                 </span>
                                 <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl">
                                     {facility.name}
                                 </h1>
+                                </div>
                             </div>
                             <span
                                 className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${status.classes}`}
@@ -223,13 +139,13 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                         {/* Metadata Grid */}
                         <dl className="mt-6 grid grid-cols-2 gap-4 border-y border-[#E5E7EB] py-5 sm:grid-cols-3">
                             <div>
-                                <dt className="text-xs font-medium text-[#667085]">Lokasi</dt>
+                                <dt className="flex items-center gap-1.5 text-xs font-medium text-[#667085]"><MapPin className="size-3.5 text-teal-600" />Lokasi</dt>
                                 <dd className="mt-1 text-sm font-semibold text-[#111827]">
                                     {facility.location}
                                 </dd>
                             </div>
                             <div>
-                                <dt className="text-xs font-medium text-[#667085]">Kapasitas</dt>
+                                <dt className="flex items-center gap-1.5 text-xs font-medium text-[#667085]"><UsersRound className="size-3.5 text-teal-600" />Kapasitas</dt>
                                 <dd className="mt-1 text-sm font-semibold text-[#111827]">
                                     {facility.capacity} orang
                                 </dd>
@@ -493,7 +409,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                         </div>
                     </section>
                 </main>
-            </div>
+            </UserPageLayout>
         </>
     );
 }

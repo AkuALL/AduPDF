@@ -1,4 +1,6 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import UserPageLayout from '@/layouts/user-page-layout';
+import { Head, Link, router } from '@inertiajs/react';
+import { ArrowRight, Building2, MapPin, Search, SlidersHorizontal, UsersRound } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 
 type Facility = {
@@ -60,23 +62,12 @@ const conditionConfig: Record<
     },
 };
 
-type AuthUser = {
-    id: number;
-    name?: string;
-    nama?: string;
-    email: string;
-    role: string;
-};
-
 export default function FacilityIndex({
     facilities,
     filters,
     locations,
     types,
 }: Props) {
-    const { auth } = usePage<{ auth?: { user?: AuthUser | null } }>().props;
-    const user = auth?.user;
-
     const [form, setForm] = useState<Filters>(filters);
 
     function submit(event: FormEvent<HTMLFormElement>) {
@@ -96,113 +87,24 @@ export default function FacilityIndex({
     return (
         <>
             <Head title="Katalog Fasilitas — AduPDF" />
-            <div className="min-h-screen bg-[#F7F8FA] text-[#111827] font-sans antialiased">
-                {/* Navigation Bar */}
-                <header className="sticky top-0 z-30 border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm">
-                    <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
-                        <div className="flex items-center gap-8">
-                            <Link href="/" className="flex items-center gap-2">
-                                <span className="text-xl font-bold tracking-tight text-[#2D4C79]">
-                                    AduPDF
-                                </span>
-                                <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-xs font-semibold text-[#2D4C79]">
-                                    Kampus
-                                </span>
-                            </Link>
-                            <nav className="hidden sm:flex sm:gap-6 text-sm">
-                                <Link
-                                    href="/facilities"
-                                    className="font-semibold text-[#2D4C79] border-b-2 border-[#2D4C79] pb-4 pt-4"
-                                >
-                                    Fasilitas
-                                </Link>
-                                {user?.role === 'pengguna' && (
-                                    <Link
-                                        href="/reservations"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                    >
-                                        Reservasi Saya
-                                    </Link>
-                                )}
-                                {user?.role === 'petugas' && (
-                                    <Link
-                                        href="/petugas/reservations"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                    >
-                                        Panel Petugas
-                                    </Link>
-                                )}
-                                {user?.role === 'admin' && (
-                                    <a
-                                        href="/admin/facilities"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                    >
-                                        Kelola Fasilitas
-                                    </a>
-                                )}
-                            </nav>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            {user ? (
-                                <>
-                                    <Link
-                                        href="/profile"
-                                        aria-label="Buka profil"
-                                        className="group hidden rounded-md text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79] sm:block"
-                                    >
-                                        <span className="block text-xs font-semibold text-[#111827] group-hover:text-[#2D4C79]">
-                                            {user.nama || user.name}
-                                        </span>
-                                        <span className="block text-[10px] text-[#667085] capitalize">
-                                            {user.role}
-                                        </span>
-                                    </Link>
-                                    <Link
-                                        href="/logout"
-                                        method="post"
-                                        as="button"
-                                        className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#5D6673] hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition shadow-sm"
-                                    >
-                                        Keluar
-                                    </Link>
-                                </>
-                            ) : (
-                                <>
-                                    <a
-                                        href="/login"
-                                        className="inline-flex h-9 items-center justify-center rounded-md px-3.5 text-sm font-medium text-[#111827] hover:bg-[#F3F5F7] transition"
-                                    >
-                                        Masuk
-                                    </a>
-                                    <a
-                                        href="/register"
-                                        className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
-                                    >
-                                        Daftar
-                                    </a>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </header>
-
-                {/* Main Content Area */}
-                <main className="w-full px-4 py-8 sm:px-6 lg:px-8">
+            <UserPageLayout active="facilities">
+                <main className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
                     {/* Header */}
-                    <div className="mb-6">
-                        <h1 className="text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl">
-                            Fasilitas Kampus
-                        </h1>
-                        <p className="mt-1 text-sm text-[#667085]">
-                            Temukan fasilitas ruangan dan peralatan untuk kegiatan akademik dan organisasi.
-                        </p>
+                    <div className="relative mb-6 overflow-hidden rounded-3xl bg-gradient-to-br from-[#17324D] via-[#214B68] to-[#167C77] px-6 py-9 text-white shadow-[0_28px_70px_-34px_rgba(15,23,42,0.8)] sm:px-8 sm:py-12">
+                        <div aria-hidden="true" className="absolute -right-14 -top-24 size-72 rounded-full border-[36px] border-white/5" />
+                        <div className="relative max-w-3xl">
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-200">Eksplorasi ruang kampus</p>
+                            <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.045em] sm:text-5xl">Temukan ruang yang tepat untuk setiap kegiatan.</h1>
+                            <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-200 sm:text-base">Cari ruang kelas, laboratorium, aula, lapangan, dan peralatan kampus berdasarkan lokasi serta kapasitas yang Anda butuhkan.</p>
+                        </div>
                     </div>
 
                     {/* Filter Toolbar (Design Section 13) */}
                     <form
                         onSubmit={submit}
-                        className="mb-8 rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)]"
+                        className="ui-card mb-8 p-5 sm:p-6"
                     >
+                        <div className="mb-5 flex items-center gap-3"><span className="grid size-10 place-items-center rounded-xl bg-teal-50 text-teal-700"><SlidersHorizontal className="size-5" /></span><div><h2 className="text-sm font-extrabold text-slate-900">Filter fasilitas</h2><p className="text-xs text-slate-500">Persempit hasil sesuai kebutuhan Anda.</p></div></div>
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             <div className="sm:col-span-2 lg:col-span-1">
                                 <label className="mb-1.5 block text-xs font-semibold text-[#111827]">
@@ -213,7 +115,7 @@ export default function FacilityIndex({
                                     value={form.search}
                                     onChange={(e) => setForm({ ...form, search: e.target.value })}
                                     placeholder="Nama atau lokasi..."
-                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                    className="ui-input"
                                 />
                             </div>
 
@@ -224,7 +126,7 @@ export default function FacilityIndex({
                                 <select
                                     value={form.type}
                                     onChange={(e) => setForm({ ...form, type: e.target.value })}
-                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                    className="ui-input"
                                 >
                                     <option value="">Semua tipe</option>
                                     {types.map((type) => (
@@ -242,7 +144,7 @@ export default function FacilityIndex({
                                 <select
                                     value={form.location}
                                     onChange={(e) => setForm({ ...form, location: e.target.value })}
-                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                    className="ui-input"
                                 >
                                     <option value="">Semua lokasi</option>
                                     {locations.map((loc) => (
@@ -269,7 +171,7 @@ export default function FacilityIndex({
                                         })
                                     }
                                     placeholder="0 orang"
-                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                    className="ui-input"
                                 />
                             </div>
                         </div>
@@ -282,15 +184,15 @@ export default function FacilityIndex({
                                 <button
                                     type="button"
                                     onClick={resetFilters}
-                                    className="h-9 rounded-md border border-[#D0D5DD] bg-white px-3.5 text-xs font-semibold text-[#111827] hover:bg-[#F3F5F7] transition"
+                                    className="ui-button-secondary py-2 text-xs"
                                 >
                                     Reset
                                 </button>
                                 <button
                                     type="submit"
-                                    className="h-9 rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
+                                    className="ui-button-primary py-2 text-xs"
                                 >
-                                    Terapkan Filter
+                                    <Search className="size-3.5" />Terapkan Filter
                                 </button>
                             </div>
                         </div>
@@ -298,7 +200,8 @@ export default function FacilityIndex({
 
                     {/* Facility List (Design Section 14) */}
                     {facilities.length === 0 ? (
-                        <div className="rounded-lg border border-dashed border-[#D0D5DD] bg-white p-12 text-center">
+                        <div className="ui-card grid place-items-center border-dashed p-12 text-center">
+                            <span className="mb-4 grid size-14 place-items-center rounded-2xl bg-slate-100 text-slate-500"><Search className="size-6" /></span>
                             <p className="text-sm font-semibold text-[#111827]">
                                 Fasilitas tidak ditemukan
                             </p>
@@ -321,9 +224,10 @@ export default function FacilityIndex({
                                 return (
                                     <article
                                         key={fac.id}
-                                        className="flex flex-col justify-between rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#D0D5DD] transition"
+                                        className="group ui-card relative flex flex-col justify-between overflow-hidden p-5 transition duration-300 hover:-translate-y-1 hover:border-teal-200 hover:shadow-[0_24px_55px_-30px_rgba(15,118,110,0.45)]"
                                     >
                                         <div>
+                                            <div className="mb-5 grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-slate-100 to-teal-50 text-[#245578] transition group-hover:scale-105"><Building2 className="size-6" /></div>
                                             <div className="flex items-center justify-between gap-2">
                                                 <span className="text-xs font-semibold text-[#2D4C79]">
                                                     {typeLabels[fac.type] || fac.type}
@@ -340,15 +244,15 @@ export default function FacilityIndex({
                                                 {fac.name}
                                             </h2>
 
-                                            <dl className="mt-3 space-y-1.5 text-xs text-[#667085]">
+                                            <dl className="mt-4 space-y-2.5 rounded-2xl bg-slate-50 p-4 text-xs text-[#667085]">
                                                 <div className="flex justify-between">
-                                                    <dt>Lokasi:</dt>
+                                                    <dt className="flex items-center gap-1.5"><MapPin className="size-3.5 text-teal-600" />Lokasi</dt>
                                                     <dd className="font-medium text-[#111827]">
                                                         {fac.location}
                                                     </dd>
                                                 </div>
                                                 <div className="flex justify-between">
-                                                    <dt>Kapasitas:</dt>
+                                                    <dt className="flex items-center gap-1.5"><UsersRound className="size-3.5 text-teal-600" />Kapasitas</dt>
                                                     <dd className="font-medium text-[#111827]">
                                                         {fac.capacity} orang
                                                     </dd>
@@ -373,9 +277,9 @@ export default function FacilityIndex({
                                         <div className="mt-5 pt-4 border-t border-[#E5E7EB]">
                                             <Link
                                                 href={`/facilities/${fac.id}`}
-                                                className="inline-flex h-9 w-full items-center justify-center rounded-md border border-[#D0D5DD] bg-white text-xs font-semibold text-[#2D4C79] hover:bg-[#E9EEF5] hover:border-[#2D4C79] transition"
+                                                className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 text-xs font-bold text-white transition hover:bg-[#17324D]"
                                             >
-                                                Lihat Detail & Jadwal →
+                                                Lihat detail & jadwal <ArrowRight className="size-3.5 transition group-hover:translate-x-1" />
                                             </Link>
                                         </div>
                                     </article>
@@ -384,7 +288,7 @@ export default function FacilityIndex({
                         </div>
                     )}
                 </main>
-            </div>
+            </UserPageLayout>
         </>
     );
 }

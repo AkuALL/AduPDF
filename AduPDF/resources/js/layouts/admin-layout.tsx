@@ -1,14 +1,15 @@
 import { Link, usePage } from '@inertiajs/react';
+import { Building2, KeyRound, LogOut, ShieldCheck, UserPlus, UsersRound, Wrench } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 
 type AuthUser = { name?: string; nama?: string };
 
 const navigation = [
-    ['Kelola Akun', '/admin/users'],
-    ['Tambah Petugas', '/admin/users/petugas/create'],
-    ['Tambah Pengguna', '/admin/users/pengguna/create'],
-    ['Kelola Fasilitas', '/admin/facilities'],
-    ['Ganti Password', '/admin/change-password'],
+    ['Kelola Akun', '/admin/users', UsersRound],
+    ['Tambah Petugas', '/admin/users/petugas/create', ShieldCheck],
+    ['Tambah Pengguna', '/admin/users/pengguna/create', UserPlus],
+    ['Kelola Fasilitas', '/admin/facilities', Wrench],
+    ['Ganti Password', '/admin/change-password', KeyRound],
 ] as const;
 
 export default function AdminLayout({ children }: PropsWithChildren) {
@@ -18,34 +19,35 @@ export default function AdminLayout({ children }: PropsWithChildren) {
     }>().props;
 
     return (
-        <div className="flex min-h-screen flex-col bg-slate-100 text-slate-800 antialiased">
-            <header className="bg-[#2D4C79] text-white shadow">
-                <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-[#F4F7FB] text-slate-800 antialiased">
+            <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_12%_0%,rgba(20,184,166,0.12),transparent_35%),radial-gradient(circle_at_90%_10%,rgba(59,130,246,0.10),transparent_30%)]" />
+            <header className="sticky top-0 z-40 border-b border-white/10 bg-[#112A42]/95 text-white shadow-xl shadow-slate-900/10 backdrop-blur-xl">
+                <div className="mx-auto flex h-18 max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-6">
-                        <Link href="/admin/users" className="flex items-center gap-2">
-                            <span className="text-2xl font-bold tracking-wider">AduPDF</span>
-                            <span className="rounded border border-amber-400/40 bg-amber-500/30 px-2 py-0.5 text-xs font-semibold text-amber-200">ADMIN</span>
+                        <Link href="/admin/users" className="flex items-center gap-3">
+                            <span className="grid size-10 place-items-center rounded-2xl bg-teal-400/15 text-teal-300 ring-1 ring-inset ring-teal-300/20"><Building2 className="size-5" /></span>
+                            <span><span className="block text-lg font-extrabold leading-none tracking-[-0.03em]">AduPDF</span><span className="mt-1 block text-[10px] font-bold uppercase tracking-[0.18em] text-teal-300">Admin Console</span></span>
                         </Link>
                         <nav className="hidden gap-2 md:flex">
-                            {navigation.map(([label, href]) => (
-                                <Link key={href} href={href} className="rounded-md px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10 hover:text-white">
-                                    {label}
+                            {navigation.map(([label, href, Icon]) => (
+                                <Link key={href} href={href} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white">
+                                    <Icon className="size-4" />{label}
                                 </Link>
                             ))}
                         </nav>
                     </div>
                     <div className="flex items-center gap-4">
-                        <div className="hidden text-right sm:block"><div className="text-sm font-semibold">{auth.user.nama ?? auth.user.name}</div><div className="text-xs text-slate-300">Administrator Tunggal</div></div>
-                        <Link href="/logout" method="post" as="button" className="rounded bg-red-600/80 px-3 py-1.5 text-xs text-white transition hover:bg-red-700">Keluar</Link>
+                        <div className="hidden text-right sm:block"><div className="text-sm font-semibold">{auth.user.nama ?? auth.user.name}</div><div className="text-[10px] font-bold uppercase tracking-wider text-teal-300">Administrator</div></div>
+                        <Link href="/logout" method="post" as="button" aria-label="Keluar" className="grid size-9 place-items-center rounded-xl text-slate-300 transition hover:bg-rose-500/15 hover:text-rose-200"><LogOut className="size-4" /></Link>
                     </div>
                 </div>
             </header>
-            <main className="w-full min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
-                {flash?.success && <div role="status" className="mb-4 rounded border-l-4 border-emerald-600 bg-emerald-50 p-4 text-sm text-emerald-800">{flash.success}</div>}
-                {flash?.error && <div role="alert" className="mb-4 rounded border-l-4 border-rose-600 bg-rose-50 p-4 text-sm text-rose-800">{flash.error}</div>}
+            <main className="relative z-10 mx-auto w-full max-w-[1440px] min-w-0 flex-1 px-4 py-8 sm:px-6 lg:px-8">
+                {flash?.success && <div role="status" className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50/90 p-4 text-sm font-medium text-emerald-800 shadow-sm">{flash.success}</div>}
+                {flash?.error && <div role="alert" className="mb-5 rounded-2xl border border-rose-200 bg-rose-50/90 p-4 text-sm font-medium text-rose-800 shadow-sm">{flash.error}</div>}
                 {children}
             </main>
-            <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">© {new Date().getFullYear()} AduPDF. Sistem Reservasi & Pelaporan Fasilitas Kampus.</footer>
+            <footer className="relative z-10 border-t border-white/80 bg-white/50 py-5 text-center text-xs font-medium text-slate-500 backdrop-blur">© {new Date().getFullYear()} AduPDF · Admin Console</footer>
         </div>
     );
 }

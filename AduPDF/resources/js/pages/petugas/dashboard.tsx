@@ -1,4 +1,6 @@
+import PetugasLayout from '@/layouts/petugas-layout';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { CalendarCheck2, ClipboardCheck, TrendingUp } from 'lucide-react';
 
 type ReservationItem = {
     id: number;
@@ -51,32 +53,8 @@ export default function PetugasDashboard({
     return (
         <>
             <Head title="Dashboard Petugas — AduPDF" />
-            <div className="min-h-screen bg-[#F7F8FA] text-[#111827]">
-                {/* Header Top Bar */}
-                <header className="border-b border-[#E5E7EB] bg-white">
-                    <div className="mx-auto flex max-w-[1360px] items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-                        <div className="flex items-center gap-3">
-                            <span className="text-xl font-bold tracking-tight text-[#2D4C79]">AduPDF</span>
-                            <span className="rounded bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-800">PETUGAS</span>
-                        </div>
-                        <nav className="flex items-center gap-4 text-sm font-medium">
-                            <Link href="/petugas/dashboard" className="text-[#2D4C79] font-bold">
-                                Dashboard
-                            </Link>
-                            <Link href="/petugas/reservations" className="text-[#667085] hover:text-[#111827]">
-                                Antrean Reservasi
-                            </Link>
-                            <Link href="/petugas/reports" className="text-[#667085] hover:text-[#111827]">
-                                Antrean Laporan
-                            </Link>
-                            <Link href="/facilities" className="text-[#667085] hover:text-[#111827]">
-                                Katalog Fasilitas
-                            </Link>
-                        </nav>
-                    </div>
-                </header>
-
-                <main className="mx-auto max-w-[1360px] px-4 py-8 sm:px-6 lg:px-8">
+            <PetugasLayout active="dashboard">
+                <main className="mx-auto max-w-[1440px] px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
                     {/* Flash messages */}
                     {flash?.success && (
                         <div role="status" className="mb-6 rounded-md border border-[#B7E2CB] bg-[#EAF7F0] p-4 text-sm text-[#16794A]">
@@ -90,34 +68,31 @@ export default function PetugasDashboard({
                     )}
 
                     {/* Page Title */}
-                    <div className="mb-8">
-                        <h1 className="text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl">Dashboard Operasional Petugas</h1>
-                        <p className="mt-1 text-sm text-[#667085]">
+                    <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                        <div><p className="ui-eyebrow">Ringkasan hari ini</p><h1 className="mt-2 text-3xl font-extrabold tracking-[-0.04em] text-slate-900 sm:text-4xl">Dashboard operasional</h1>
+                        <p className="mt-2 text-sm text-slate-500">
                             Pantau antrean reservasi menunggu persetujuan dan laporan kerusakan baru dari sivitas akademika.
-                        </p>
+                        </p></div>
+                        <span className="inline-flex w-fit items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-700"><TrendingUp className="size-4" />Data diperbarui otomatis</span>
                     </div>
 
                     {/* Metrics Grid */}
                     <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div className="flex items-center justify-between rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-sm">
+                        <div className="ui-card flex items-center justify-between p-6">
                             <div>
                                 <span className="text-xs font-semibold uppercase tracking-wider text-[#667085]">Antrean Reservasi</span>
                                 <div className="mt-1 text-3xl font-bold text-[#111827]">{pending_reservations_count}</div>
                                 <span className="text-xs text-[#667085]">pengajuan menunggu persetujuan</span>
                             </div>
-                            <span className="rounded-full border border-[#F5D6A6] bg-[#FFF5E6] px-3 py-1 text-xs font-semibold text-[#A15C00]">
-                                ○ Menunggu
-                            </span>
+                            <span className="grid size-12 place-items-center rounded-2xl bg-amber-50 text-amber-600"><CalendarCheck2 className="size-6" /></span>
                         </div>
-                        <div className="flex items-center justify-between rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-sm">
+                        <div className="ui-card flex items-center justify-between p-6">
                             <div>
                                 <span className="text-xs font-semibold uppercase tracking-wider text-[#667085]">Antrean Kerusakan</span>
                                 <div className="mt-1 text-3xl font-bold text-[#111827]">{new_reports_count}</div>
                                 <span className="text-xs text-[#667085]">laporan baru perlu diproses</span>
                             </div>
-                            <span className="rounded-full border border-[#F5D6A6] bg-[#FFF5E6] px-3 py-1 text-xs font-semibold text-[#A15C00]">
-                                ○ Baru
-                            </span>
+                            <span className="grid size-12 place-items-center rounded-2xl bg-blue-50 text-blue-600"><ClipboardCheck className="size-6" /></span>
                         </div>
                     </div>
 
@@ -138,7 +113,7 @@ export default function PetugasDashboard({
                         ) : (
                             <div className="space-y-6">
                                 {reservation_segments.map((segment) => (
-                                    <div key={segment.slot_key} className="overflow-hidden rounded-lg border border-[#E5E7EB] bg-white shadow-sm">
+                                    <div key={segment.slot_key} className="ui-card overflow-hidden">
                                         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E7EB] bg-[#F8FAFC] px-4 py-3">
                                             <div>
                                                 <div className="text-sm font-bold text-[#111827]">{segment.slot_label}</div>
@@ -227,7 +202,7 @@ export default function PetugasDashboard({
                                 <p className="mt-1 text-sm text-[#667085]">Belum ada laporan kerusakan baru yang perlu diproses.</p>
                             </div>
                         ) : (
-                            <div className="overflow-hidden rounded-lg border border-[#E5E7EB] bg-white shadow-sm">
+                            <div className="ui-card overflow-hidden">
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left text-sm">
                                         <thead className="border-b border-[#E5E7EB] bg-[#F7F8FA] text-xs font-semibold uppercase text-[#667085]">
@@ -276,7 +251,7 @@ export default function PetugasDashboard({
                         )}
                     </section>
                 </main>
-            </div>
+            </PetugasLayout>
         </>
     );
 }

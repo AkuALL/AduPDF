@@ -1,4 +1,6 @@
-import { Form, Head, Link } from '@inertiajs/react';
+import PetugasLayout from '@/layouts/petugas-layout';
+import { Form, Head } from '@inertiajs/react';
+import { CalendarCheck2, Check, Clock3, MapPin, UserRound, X } from 'lucide-react';
 
 type Reservation = {
     id: number;
@@ -20,29 +22,27 @@ type Props = {
 
 export default function PetugasReservationIndex({ reservations, approved_reservations, success }: Props) {
     return (
-        <>
+        <PetugasLayout active="reservations">
             <Head title="Antrian Reservasi" />
-            <main className="min-h-screen bg-[#F7F8FA] px-4 py-10 text-[#111827]">
+            <main className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
                 <div className="w-full">
-                    <Link href="/facilities" className="text-sm font-medium text-[#2D4C79] hover:underline">Kembali ke fasilitas</Link>
-                    <h1 className="mt-6 text-2xl font-bold">Antrian reservasi</h1>
+                    <p className="ui-eyebrow">Persetujuan jadwal</p><h1 className="mt-2 text-3xl font-extrabold tracking-[-0.04em] text-slate-900">Antrean reservasi</h1><p className="mt-2 text-sm text-slate-500">Tinjau pengajuan berdasarkan jadwal dan kebutuhan pengguna.</p>
                     {success && <p role="status" className="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
                     {reservations.length === 0 ? (
-                        <p className="mt-6 rounded-lg border border-[#E5E7EB] bg-white p-6 text-sm text-[#667085]">Tidak ada pengajuan yang menunggu.</p>
+                        <div className="ui-card mt-6 grid place-items-center p-12 text-center"><span className="grid size-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-600"><Check className="size-7" /></span><p className="mt-4 font-bold text-slate-800">Tidak ada pengajuan yang menunggu</p><p className="mt-1 text-sm text-slate-500">Semua antrean reservasi sudah diproses.</p></div>
                     ) : (
                         <div className="mt-6 space-y-3">
                             {reservations.map((reservation) => (
-                                <article key={reservation.id} className="rounded-lg border border-[#E5E7EB] bg-white p-5">
-                                    <h2 className="font-semibold">{reservation.facility}</h2>
-                                    <p className="mt-1 text-sm text-[#667085]">{reservation.start_time}–{reservation.end_time} WIB · {reservation.location}</p>
-                                    <p className="mt-3 text-sm"><span className="font-medium">Pengaju:</span> {reservation.user}</p>
+                                <article key={reservation.id} className="ui-card p-5 sm:p-6">
+                                    <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-lg font-extrabold text-slate-900">{reservation.facility}</h2><p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500"><MapPin className="size-3.5 text-teal-600" />{reservation.location}</p></div><span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700"><Clock3 className="size-3.5" />Menunggu</span></div>
+                                    <div className="mt-4 grid gap-3 rounded-2xl bg-slate-50 p-4 text-sm sm:grid-cols-2"><p className="flex items-center gap-2 font-semibold text-slate-700"><CalendarCheck2 className="size-4 text-teal-600" />{reservation.start_time}–{reservation.end_time} WIB</p><p className="flex items-center gap-2 text-slate-600"><UserRound className="size-4 text-teal-600" />{reservation.user}</p></div>
                                     <p className="mt-2 whitespace-pre-wrap text-sm text-[#667085]">{reservation.tujuan}</p>
                                     <div className="mt-5 flex gap-3">
                                         <Form action={`/petugas/reservations/${reservation.id}/approve`} method="patch">
-                                            {({ processing }) => <button type="submit" disabled={processing} className="rounded-md bg-[#2D4C79] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Setujui</button>}
+                                            {({ processing }) => <button type="submit" disabled={processing} className="ui-button-primary"><Check className="size-4" />Setujui</button>}
                                         </Form>
                                         <Form action={`/petugas/reservations/${reservation.id}/reject`} method="patch">
-                                            {({ processing }) => <button type="submit" disabled={processing} className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">Tolak</button>}
+                                            {({ processing }) => <button type="submit" disabled={processing} className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-bold text-rose-700 hover:bg-rose-50 disabled:opacity-50"><X className="size-4" />Tolak</button>}
                                         </Form>
                                     </div>
                                 </article>
@@ -56,7 +56,7 @@ export default function PetugasReservationIndex({ reservations, approved_reserva
                         ) : (
                             <div className="mt-4 space-y-3">
                                 {approved_reservations.map((reservation) => (
-                                    <article key={reservation.id} className="rounded-lg border border-[#E5E7EB] bg-white p-5">
+                                    <article key={reservation.id} className="ui-card p-5">
                                         <h3 className="font-semibold">{reservation.facility}</h3>
                                         <p className="mt-1 text-sm text-[#667085]">{reservation.start_time}–{reservation.end_time} WIB · {reservation.location}</p>
                                         <p className="mt-3 text-sm"><span className="font-medium">Pengaju:</span> {reservation.user}</p>
@@ -86,6 +86,6 @@ export default function PetugasReservationIndex({ reservations, approved_reserva
                     </section>
                 </div>
             </main>
-        </>
+        </PetugasLayout>
     );
 }
