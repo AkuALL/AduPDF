@@ -1,1 +1,0 @@
-<x-layouts.app><div>Konten Petugas</div></x-layouts.app>

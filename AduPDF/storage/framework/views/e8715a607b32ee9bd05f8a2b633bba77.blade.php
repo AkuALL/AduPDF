@@ -1,1 +1,0 @@
-<x-status-badge status="ditolak" />

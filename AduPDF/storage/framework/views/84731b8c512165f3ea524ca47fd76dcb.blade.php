@@ -1,1 +1,0 @@
-<x-layouts.app><div>Konten Pengguna</div></x-layouts.app>

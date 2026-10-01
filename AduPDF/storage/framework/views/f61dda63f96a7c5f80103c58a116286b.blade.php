@@ -1,1 +1,0 @@
-<x-alert type="warning" message="Batas waktu reservasi hampir habis" />

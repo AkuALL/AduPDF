@@ -1,1 +1,0 @@
-<x-modal-confirm id="modal-test" title="Hapus Reservasi" resource="Lab Komputer" consequence="Tindakan ini tidak dapat diurungkan." action="/test" />

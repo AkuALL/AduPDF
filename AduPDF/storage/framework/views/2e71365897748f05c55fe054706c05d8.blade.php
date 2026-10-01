@@ -1,1 +1,0 @@
-<x-layouts.app><div>Konten Admin</div></x-layouts.app>
