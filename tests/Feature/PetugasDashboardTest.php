@@ -191,13 +191,14 @@ test('petugas can reject a pending reservation directly from the dashboard (DA-0
     ]);
 
     $response = $this->actingAs($petugas)->patch(route('petugas.reservations.reject', $reservation), [
-        'alasan_penolakan' => 'Kegiatan belum memiliki izin dekanat.',
+        'alasan_penolakan' => 'Kegiatan belum mendapatkan izin dekanat.',
     ]);
 
     $response->assertRedirect(route('petugas.reservations.index'));
     $response->assertSessionHas('success');
-    expect($reservation->refresh()->status)->toBe(ReservationStatus::Rejected)
-        ->and($reservation->alasan_penolakan)->toBe('Kegiatan belum memiliki izin dekanat.')
+    $reservation->refresh();
+    expect($reservation->status)->toBe(ReservationStatus::Rejected)
+        ->and($reservation->alasan_penolakan)->toBe('Kegiatan belum mendapatkan izin dekanat.')
         ->and($reservation->ditolak_pada)->not->toBeNull();
 });
 

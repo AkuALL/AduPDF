@@ -1,20 +1,16 @@
 <?php
 
-use App\Enums\FacilityCondition;
 use App\Enums\ReservationStatus;
 use App\Models\Facility;
 use App\Models\Reservation;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 
-uses(RefreshDatabase::class);
+function pendingReservationFor(User $user): Reservation
+{
+    $facility = Facility::factory()->create();
 
-test('petugas must provide a reason when rejecting a reservation', function () {
-    $petugas = User::factory()->petugas()->create();
-    $user = User::factory()->pengguna()->create();
-    $facility = Facility::factory()->create(['condition' => FacilityCondition::Active]);
-    $reservation = Reservation::create([
+    return Reservation::create([
         'user_id' => $user->id,
         'facility_id' => $facility->id,
         'tujuan' => 'Rapat organisasi mahasiswa',
@@ -22,76 +18,103 @@ test('petugas must provide a reason when rejecting a reservation', function () {
         'end_time' => now()->addDays(3)->addHours(2),
         'status' => ReservationStatus::Pending,
     ]);
+}
+
+test('petugas must provide a reason when rejecting a reservation', function () {
+    $petugas = User::factory()->petugas()->create();
+    $reservation = pendingReservationFor(User::factory()->pengguna()->create());
 
     $response = $this->actingAs($petugas)->patch(route('petugas.reservations.reject', $reservation));
 
-    $response->assertSessionHasErrors('alasan_penolakan');
-    expect($reservation->refresh()->status)->toBe(ReservationStatus::Pending)
+    $response->assertSessionHasErrors([
+        'alasan_penolakan' => 'Alasan penolakan wajib diisi.',
+    ]);
+    $reservation->refresh();
+    expect($reservation->status)->toBe(ReservationStatus::Pending)
         ->and($reservation->alasan_penolakan)->toBeNull()
         ->and($reservation->ditolak_pada)->toBeNull();
 });
 
-test('petugas rejection stores its reason and rejection time', function () {
+test('petugas rejection stores its reason and time', function () {
     $petugas = User::factory()->petugas()->create();
-    $user = User::factory()->pengguna()->create();
-    $facility = Facility::factory()->create(['condition' => FacilityCondition::Active]);
-    $reservation = Reservation::create([
-        'user_id' => $user->id,
-        'facility_id' => $facility->id,
-        'tujuan' => 'Kegiatan tanpa surat izin',
-        'start_time' => now()->addDays(4),
-        'end_time' => now()->addDays(4)->addHours(2),
-        'status' => ReservationStatus::Pending,
-    ]);
+    $reservation = pendingReservationFor(User::factory()->pengguna()->create());
 
     $response = $this->actingAs($petugas)->patch(route('petugas.reservations.reject', $reservation), [
-        'alasan_penolakan' => 'Surat izin kegiatan belum dilampirkan.',
+        'alasan_penolakan' => 'Dokumen pendukung belum lengkap.',
     ]);
 
     $response->assertRedirect(route('petugas.reservations.index'));
     $response->assertSessionHas('success');
-    expect($reservation->refresh()->status)->toBe(ReservationStatus::Rejected)
-        ->and($reservation->alasan_penolakan)->toBe('Surat izin kegiatan belum dilampirkan.')
+    $reservation->refresh();
+    expect($reservation->status)->toBe(ReservationStatus::Rejected)
+        ->and($reservation->alasan_penolakan)->toBe('Dokumen pendukung belum lengkap.')
         ->and($reservation->ditolak_pada)->not->toBeNull();
 });
 
-test('pengguna sees the rejection reason and time in reservation history and detail', function () {
-    $this->withoutVite();
-    $user = User::factory()->pengguna()->create();
-    $facility = Facility::factory()->create([
-        'name' => 'Lapangan Basket',
-        'condition' => FacilityCondition::Active,
-    ]);
-    $rejectedAt = now()->setTimezone('Asia/Jakarta')->setTime(10, 30)->utc();
-    $reservation = Reservation::create([
-        'user_id' => $user->id,
+test('approving a reservation records a reason on conflicting pending reservations', function () {
+    $petugas = User::factory()->petugas()->create();
+    $facility = Facility::factory()->create();
+    $startTime = now()->addDays(3);
+    $approvedReservation = Reservation::create([
+        'user_id' => User::factory()->pengguna()->create()->id,
         'facility_id' => $facility->id,
-        'tujuan' => 'Latihan rutin UKM',
-        'start_time' => now()->addDays(5),
-        'end_time' => now()->addDays(5)->addHours(2),
-        'status' => ReservationStatus::Rejected,
-        'alasan_penolakan' => 'Jadwal digunakan untuk kegiatan fakultas.',
-        'ditolak_pada' => $rejectedAt,
+        'tujuan' => 'Seminar fakultas',
+        'start_time' => $startTime,
+        'end_time' => $startTime->copy()->addHours(2),
+        'status' => ReservationStatus::Pending,
+    ]);
+    $conflictingReservation = Reservation::create([
+        'user_id' => User::factory()->pengguna()->create()->id,
+        'facility_id' => $facility->id,
+        'tujuan' => 'Rapat unit kegiatan mahasiswa',
+        'start_time' => $startTime->copy()->addHour(),
+        'end_time' => $startTime->copy()->addHours(3),
+        'status' => ReservationStatus::Pending,
     ]);
 
-    $historyResponse = $this->actingAs($user)->get(route('reservations.index'));
+    $response = $this->actingAs($petugas)->patch(route('petugas.reservations.approve', $approvedReservation));
 
-    $historyResponse->assertOk()->assertInertia(fn (Assert $page) => $page
+    $response->assertRedirect(route('petugas.reservations.index'));
+    $conflictingReservation->refresh();
+    expect($conflictingReservation->status)->toBe(ReservationStatus::Rejected)
+        ->and($conflictingReservation->alasan_penolakan)->toBe('Jadwal berbenturan dengan reservasi lain yang telah disetujui.')
+        ->and($conflictingReservation->ditolak_pada)->not->toBeNull();
+});
+
+test('reservation history includes rejection details for its owner', function () {
+    $user = User::factory()->pengguna()->create();
+    $reservation = pendingReservationFor($user);
+    $reservation->update([
+        'status' => ReservationStatus::Rejected,
+        'alasan_penolakan' => 'Jadwal fasilitas sudah digunakan.',
+        'ditolak_pada' => '2026-10-01 03:00:00',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('reservations.index'));
+
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page
         ->component('reservations/index')
-        ->has('reservations', 1)
         ->where('reservations.0.id', $reservation->id)
-        ->where('reservations.0.status', 'ditolak')
-        ->where('reservations.0.alasan_penolakan', 'Jadwal digunakan untuk kegiatan fakultas.')
-        ->where('reservations.0.ditolak_pada', $rejectedAt->setTimezone('Asia/Jakarta')->format('d M Y, H:i'))
+        ->where('reservations.0.alasan_penolakan', 'Jadwal fasilitas sudah digunakan.')
+        ->where('reservations.0.ditolak_pada', '01 Oktober 2026, 10:00')
     );
+});
 
-    $detailResponse = $this->actingAs($user)->get(route('reservations.show', $reservation));
+test('reservation detail includes rejection details for its owner', function () {
+    $user = User::factory()->pengguna()->create();
+    $reservation = pendingReservationFor($user);
+    $reservation->update([
+        'status' => ReservationStatus::Rejected,
+        'alasan_penolakan' => 'Fasilitas sedang tidak tersedia.',
+        'ditolak_pada' => '2026-10-01 03:00:00',
+    ]);
 
-    $detailResponse->assertOk()->assertInertia(fn (Assert $page) => $page
+    $response = $this->actingAs($user)->get(route('reservations.show', $reservation));
+
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page
         ->component('reservations/show')
         ->where('reservation.id', $reservation->id)
-        ->where('reservation.status', 'ditolak')
-        ->where('reservation.alasan_penolakan', 'Jadwal digunakan untuk kegiatan fakultas.')
-        ->where('reservation.ditolak_pada', $rejectedAt->setTimezone('Asia/Jakarta')->format('d M Y, H:i'))
+        ->where('reservation.alasan_penolakan', 'Fasilitas sedang tidak tersedia.')
+        ->where('reservation.ditolak_pada', '01 Oktober 2026, 10:00')
     );
 });

@@ -47,10 +47,10 @@ export default function ReservationIndex({ reservations, success }: Props) {
                                         <span className="rounded-full bg-[#E9EEF5] px-3 py-1 text-xs font-semibold text-[#2D4C79]">{statusLabel[reservation.status]}</span>
                                     </div>
                                     <p className="mt-3 line-clamp-2 text-sm text-[#667085]">{reservation.tujuan}</p>
-                                    {reservation.status === 'ditolak' && (
-                                        <div className="mt-4 rounded-md border border-[#F2B8B5] bg-[#FDECEC] p-3 text-sm text-[#7A271A]">
-                                            <p><span className="font-semibold">Alasan penolakan:</span> {reservation.alasan_penolakan ?? 'Alasan penolakan tidak tersedia.'}</p>
-                                            {reservation.ditolak_pada && <p className="mt-1 text-xs text-[#B42318]">Ditolak pada {reservation.ditolak_pada} WIB</p>}
+                                    {reservation.status === 'ditolak' && reservation.alasan_penolakan && (
+                                        <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+                                            <p><span className="font-semibold">Alasan penolakan:</span> {reservation.alasan_penolakan}</p>
+                                            {reservation.ditolak_pada && <p className="mt-1 text-xs text-red-700">Ditolak pada {reservation.ditolak_pada} WIB</p>}
                                         </div>
                                     )}
                                 </Link>
