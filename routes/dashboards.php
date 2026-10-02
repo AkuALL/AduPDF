@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\PetugasDashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -8,8 +9,8 @@ use Illuminate\Support\Facades\Route;
 | Dashboards Routes (Owned by Daniel)
 |--------------------------------------------------------------------------
 | Handles role-based dashboard redirection and operational queues.
-| Detailed implementations for DA-02 (Petugas Dashboard) will be wired
-| when backend query contracts from AL (AL-07) and Abhi (AB-06) are ready.
+| - DA-02: Petugas operational dashboard
+| - DA-03: Admin executive dashboard
 */
 
 Route::middleware(['auth'])->group(function () {
@@ -17,6 +18,10 @@ Route::middleware(['auth'])->group(function () {
         $user = auth()->user();
 
         if ($user->isAdmin()) {
+            if (Route::has('admin.dashboard')) {
+                return redirect()->route('admin.dashboard');
+            }
+
             if (Route::has('admin.users.index')) {
                 return redirect()->route('admin.users.index');
             }
@@ -54,4 +59,8 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth', 'role:petugas'])->prefix('petugas')->name('petugas.')->group(function () {
     Route::get('/dashboard', [PetugasDashboardController::class, 'index'])->name('dashboard');
+});
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 });

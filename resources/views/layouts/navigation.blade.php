@@ -148,6 +148,32 @@
 
                         {{-- Admin Role Navigation --}}
                         @if(auth()->user()->isAdmin())
+                            @if(Route::has('admin.dashboard'))
+                                <a
+                                    href="{{ route('admin.dashboard') }}"
+                                    @class([
+                                        'px-3 py-2 rounded-md transition duration-150',
+                                        'bg-white/20 text-white font-semibold' => request()->routeIs('admin.dashboard'),
+                                        'text-slate-200 hover:bg-white/10 hover:text-white' => !request()->routeIs('admin.dashboard'),
+                                    ])
+                                >
+                                    Dashboard
+                                </a>
+                            @endif
+
+                            @if(Route::has('admin.facilities.index'))
+                                <a
+                                    href="{{ route('admin.facilities.index') }}"
+                                    @class([
+                                        'px-3 py-2 rounded-md transition duration-150',
+                                        'bg-white/20 text-white font-semibold' => request()->routeIs('admin.facilities.*'),
+                                        'text-slate-200 hover:bg-white/10 hover:text-white' => !request()->routeIs('admin.facilities.*'),
+                                    ])
+                                >
+                                    Kelola Fasilitas
+                                </a>
+                            @endif
+
                             @if(Route::has('admin.users.index'))
                                 <a
                                     href="{{ route('admin.users.index') }}"
@@ -196,7 +222,7 @@
                                         'text-slate-200 hover:bg-white/10 hover:text-white' => !request()->routeIs('admin.recap.*'),
                                     ])
                                 >
-                                    Rekap Okupansi
+                                    Rekap & Analitik
                                 </a>
                             @endif
 
@@ -391,6 +417,22 @@
             @endif
 
             @if(auth()->user()->isAdmin())
+                @if(Route::has('admin.dashboard'))
+                    <a
+                        href="{{ route('admin.dashboard') }}"
+                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.dashboard') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
+                    >
+                        Dashboard
+                    </a>
+                @endif
+                @if(Route::has('admin.facilities.index'))
+                    <a
+                        href="{{ route('admin.facilities.index') }}"
+                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.facilities.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
+                    >
+                        Kelola Fasilitas
+                    </a>
+                @endif
                 @if(Route::has('admin.users.index'))
                     <a
                         href="{{ route('admin.users.index') }}"
@@ -420,7 +462,7 @@
                         href="{{ route('admin.recap.index') }}"
                         class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.recap.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
                     >
-                        Rekap Okupansi
+                        Rekap & Analitik
                     </a>
                 @endif
                 @if(Route::has('admin.password.edit'))
