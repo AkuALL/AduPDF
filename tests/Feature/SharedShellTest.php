@@ -189,5 +189,5 @@ test('dashboard route redirects authenticated users based on role', function () 
     $admin = User::factory()->admin()->create();
     $this->actingAs($admin)
         ->get(route('dashboard'))
-        ->assertRedirect(route('admin.users.index'));
+        ->assertRedirect(route('admin.dashboard'));
 });
