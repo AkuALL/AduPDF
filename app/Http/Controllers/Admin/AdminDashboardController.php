@@ -13,7 +13,6 @@ use App\Queries\DamageStatisticsQuery;
 use App\Queries\ReservationStatisticsQuery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\View\View;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -29,7 +28,7 @@ class AdminDashboardController extends Controller
         Request $request,
         ReservationStatisticsQuery $reservationQuery,
         DamageStatisticsQuery $damageQuery,
-    ): View|Response {
+    ): Response {
         $startOfMonth = now()->startOfMonth();
         $endOfMonth = now()->endOfMonth();
 
@@ -165,10 +164,6 @@ class AdminDashboardController extends Controller
             ],
         ];
 
-        if ($request->header('X-Inertia') || $request->wantsJson()) {
-            return Inertia::render('admin/dashboard', $data);
-        }
-
-        return view('admin.dashboard', $data);
+        return Inertia::render('admin/dashboard', $data);
     }
 }

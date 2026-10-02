@@ -10,6 +10,7 @@ use App\Models\Report;
 use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
@@ -40,10 +41,11 @@ test('admin can visit executive dashboard with empty state (DA-01, DA-03)', func
 
     $response = $this->actingAs($admin)->get(route('admin.dashboard'));
 
-    $response->assertOk();
-    $response->assertSee('Dashboard Administrasi');
-    $response->assertSee('Semua Fasilitas Beroperasi Normal');
-    $response->assertSeeText('Rekap & Ekspor');
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('admin/dashboard')
+        ->where('facility_stats.total', 0)
+        ->where('maintenance_stats.under_repair_count', 0)
+    );
 });
 
 test('dashboard route redirects admin to admin dashboard (DA-01, DA-03)', function () {
@@ -93,21 +95,24 @@ test('admin dashboard presents facility infrastructure, occupancy highlights, an
 
     $response = $this->actingAs($admin)->get(route('admin.dashboard'));
 
-    $response->assertOk();
-    $response->assertSee('Aula Utama Sukarno');
-    $response->assertSee('Lab Komputer 03');
-    $response->assertSee('Gedung Teknik Lt. 2');
-    $response->assertSee('1 kali');
-
-    // Check view props
-    $facilityStats = $response->viewData('facility_stats');
-    expect($facilityStats['total'])->toBe(2)
-        ->and($facilityStats['active'])->toBe(1)
-        ->and($facilityStats['under_repair'])->toBe(1);
-
-    $usageStats = $response->viewData('usage_stats');
-    expect($usageStats['total_reservations'])->toBe(1)
-        ->and($usageStats['total_hours'])->toBe(3.0);
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('admin/dashboard')
+        ->where('facility_stats.total', 2)
+        ->where('facility_stats.active', 1)
+        ->where('facility_stats.under_repair', 1)
+        ->where('usage_stats.total_reservations', 1)
+        ->where('usage_stats.total_hours', 3)
+        ->has('usage_stats.top_used_facilities', 1, fn (Assert $item) => $item
+            ->where('name', 'Aula Utama Sukarno')
+            ->where('usage_count', 1)
+            ->etc()
+        )
+        ->has('maintenance_stats.under_repair_list', 1, fn (Assert $item) => $item
+            ->where('name', 'Lab Komputer 03')
+            ->where('location', 'Gedung Teknik Lt. 2')
+            ->etc()
+        )
+    );
 });
 
 test('admin dashboard inertia response returns complete executive props (DA-01, DA-03)', function () {
