@@ -9,16 +9,21 @@ use App\Models\Facility;
 use App\Models\Reservation;
 use App\Queries\DamageStatisticsQuery;
 use App\Queries\ReservationStatisticsQuery;
+use App\Services\Export\CsvRecapExporter;
+use App\Services\Export\ExcelRecapExporter;
+use App\Services\Export\PdfRecapExporter;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class RecapController extends Controller
 {
@@ -40,18 +45,21 @@ class RecapController extends Controller
     }
 
     /**
-     * Export the recap to CSV or return an informative error for unsupported formats (DA-04, FR-19).
+     * Export the recap to CSV, Excel, or PDF, handling empty data and generation errors (DA-04, FR-19).
      */
     public function export(
         Request $request,
         ReservationStatisticsQuery $reservationQuery,
         DamageStatisticsQuery $damageQuery,
+        CsvRecapExporter $csvExporter,
+        ExcelRecapExporter $excelExporter,
+        PdfRecapExporter $pdfExporter,
     ): StreamedResponse|HttpResponse|RedirectResponse {
-        $format = strtolower($request->query('format', 'csv'));
+        $format = strtolower((string) $request->query('format', 'csv'));
 
-        if (! in_array($format, ['csv'], true)) {
+        if (! in_array($format, ['csv', 'excel', 'xlsx', 'xls', 'pdf'], true)) {
             $message = sprintf(
-                'Format ekspor "%s" belum didukung. Silakan gunakan format CSV untuk mengunduh rekap secara instan.',
+                'Format ekspor "%s" tidak didukung. Silakan gunakan format CSV, Excel, atau PDF.',
                 strtoupper($format)
             );
 
@@ -62,110 +70,64 @@ class RecapController extends Controller
             return back()->with('error', $message);
         }
 
-        $recapData = $this->buildRecapData($request, $reservationQuery, $damageQuery);
-        $filename = sprintf('rekap-okupansi-kerusakan-adupdf-%s.csv', now()->format('Ymd_His'));
-
-        return response()->streamDownload(function () use ($recapData): void {
-            $handle = fopen('php://output', 'w');
-            if ($handle === false) {
-                return;
+        try {
+            // Optional testing hook for verifying generation error handling without breaking normal operation
+            if ($request->boolean('simulate_error')) {
+                throw new \RuntimeException('Simulasi kegagalan generator berkas.');
             }
 
-            // UTF-8 BOM for Microsoft Excel compatibility
-            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+            $recapData = $this->buildRecapData($request, $reservationQuery, $damageQuery);
+            $timestamp = now()->format('Ymd_His');
 
-            // Section 1: Header metadata
-            fputcsv($handle, ['=== REKAPITULASI OKUPANSI & KERUSAKAN FASILITAS (ADUPDF) ===']);
-            fputcsv($handle, ['Tanggal Cetak', now()->setTimezone('Asia/Jakarta')->format('d F Y, H:i').' WIB']);
-            fputcsv($handle, ['Periode Filter', $recapData['filter_label']]);
-            fputcsv($handle, ['Rentang Waktu', $recapData['start_date']->format('d/m/Y').' s/d '.$recapData['end_date']->format('d/m/Y')]);
-            fputcsv($handle, ['Total Fasilitas Terdata', count($recapData['facilities'])]);
-            fputcsv($handle, ['Total Reservasi Disetujui', $recapData['summary']['total_reservations']]);
-            fputcsv($handle, ['Total Jam Penggunaan', $recapData['summary']['total_hours_used'].' Jam']);
-            fputcsv($handle, ['Total Laporan Kerusakan', $recapData['summary']['total_damage_reports']]);
-            fputcsv($handle, []);
+            if ($format === 'pdf') {
+                $content = $pdfExporter->generate($recapData);
+                $filename = sprintf('rekap-okupansi-kerusakan-adupdf-%s.pdf', $timestamp);
 
-            // Rule BR-21 Note
-            fputcsv($handle, ['=== CATATAN ATURAN BISNIS BR-21 ===']);
-            fputcsv($handle, ['Reservasi penuh ruangan dihitung sebagai penggunaan ruangan.']);
-            fputcsv($handle, ['Penggunaan individual alat hanya dihitung dari reservasi alat yang dilakukan secara eksplisit.']);
-            fputcsv($handle, []);
-
-            // Section 2: Facility Occupancy & Usage Table
-            fputcsv($handle, ['--- BAGIAN 1: REKAP OKUPANSI & PENGGUNAAN FASILITAS ---']);
-            fputcsv($handle, [
-                'ID',
-                'Nama Fasilitas',
-                'Tipe',
-                'Ruangan Induk (Khusus Alat)',
-                'Lokasi',
-                'Kapasitas',
-                'Kondisi Saat Ini',
-                'Jumlah Reservasi Disetujui',
-                'Total Durasi (Jam)',
-                'Pengguna Unik',
-                'Estimasi Tingkat Okupansi (%)',
-            ]);
-
-            foreach ($recapData['facilities'] as $facility) {
-                fputcsv($handle, [
-                    $facility['id'],
-                    $facility['name'],
-                    $facility['type_label'],
-                    $facility['parent_room_name'] ?? '—',
-                    $facility['location'],
-                    $facility['capacity'],
-                    $facility['condition_label'],
-                    $facility['usage_count'],
-                    $facility['usage_hours'],
-                    $facility['unique_users_count'],
-                    $facility['occupancy_rate'].'%',
-                ]);
-            }
-            fputcsv($handle, []);
-
-            // Section 3: Damage Frequency per Facility
-            fputcsv($handle, ['--- BAGIAN 2: FREKUENSI KERUSAKAN PER FASILITAS ---']);
-            fputcsv($handle, [
-                'ID Fasilitas',
-                'Nama Fasilitas',
-                'Lokasi',
-                'Kondisi',
-                'Jumlah Laporan Kerusakan',
-            ]);
-
-            foreach ($recapData['damage_by_facility'] as $damage) {
-                fputcsv($handle, [
-                    $damage['id'],
-                    $damage['name'],
-                    $damage['location'],
-                    $damage['condition_label'] ?? '—',
-                    $damage['report_count'],
-                ]);
-            }
-            fputcsv($handle, []);
-
-            // Section 4: Damage Frequency per Location
-            fputcsv($handle, ['--- BAGIAN 3: FREKUENSI KERUSAKAN PER LOKASI ---']);
-            fputcsv($handle, [
-                'Lokasi / Gedung',
-                'Jumlah Fasilitas',
-                'Total Laporan Kerusakan',
-            ]);
-
-            foreach ($recapData['damage_by_location'] as $location) {
-                fputcsv($handle, [
-                    $location['location'],
-                    $location['facilities_count'],
-                    $location['total_reports'],
+                return response()->streamDownload(function () use ($content): void {
+                    echo $content;
+                }, $filename, [
+                    'Content-Type' => 'application/pdf',
                 ]);
             }
 
-            fclose($handle);
-        }, $filename, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => sprintf('attachment; filename="%s"', $filename),
-        ]);
+            if (in_array($format, ['excel', 'xlsx', 'xls'], true)) {
+                $content = $excelExporter->generate($recapData);
+                $filename = sprintf('rekap-okupansi-kerusakan-adupdf-%s.xls', $timestamp);
+
+                return response()->streamDownload(function () use ($content): void {
+                    echo $content;
+                }, $filename, [
+                    'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+                ]);
+            }
+
+            // Default: CSV
+            $content = $csvExporter->generate($recapData);
+            $filename = sprintf('rekap-okupansi-kerusakan-adupdf-%s.csv', $timestamp);
+
+            return response()->streamDownload(function () use ($content): void {
+                echo $content;
+            }, $filename, [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+            ]);
+        } catch (Throwable $e) {
+            Log::error('Kegagalan saat membuat berkas ekspor rekap: '.$e->getMessage(), [
+                'format' => $format,
+                'exception' => $e,
+            ]);
+
+            $message = sprintf(
+                'Terjadi kesalahan saat membuat berkas ekspor %s: %s. Data sistem tetap aman.',
+                strtoupper($format),
+                $e->getMessage()
+            );
+
+            if ($request->wantsJson()) {
+                return response()->json(['error' => $message], 500);
+            }
+
+            return back()->with('error', $message);
+        }
     }
 
     /**
