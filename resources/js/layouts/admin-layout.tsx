@@ -18,41 +18,42 @@ const navigation = [
         label: 'Dashboard',
         href: '/admin/dashboard',
         icon: LayoutDashboard,
-        isActive: (currentUrl: string) => currentUrl === '/admin/dashboard',
+        isActive: (currentPath: string) => currentPath === '/admin/dashboard' || currentPath === '/admin',
     },
     {
         label: 'Rekap & Analitik',
         href: '/admin/recap',
         icon: BarChart3,
-        isActive: (currentUrl: string) => currentUrl.startsWith('/admin/recap'),
+        isActive: (currentPath: string) => currentPath.startsWith('/admin/recap'),
     },
     {
         label: 'Kelola Fasilitas',
         href: '/admin/facilities',
         icon: Building2,
-        isActive: (currentUrl: string) => currentUrl.startsWith('/admin/facilities'),
+        isActive: (currentPath: string) => currentPath.startsWith('/admin/facilities'),
     },
     {
         label: 'Kelola Akun',
         href: '/admin/users',
         icon: Users,
-        isActive: (currentUrl: string) =>
-            currentUrl === '/admin/users' ||
-            (currentUrl.startsWith('/admin/users') &&
-                !currentUrl.startsWith('/admin/users/petugas') &&
-                !currentUrl.startsWith('/admin/users/pengguna')),
+        isActive: (currentPath: string) =>
+            currentPath === '/admin/users' ||
+            currentPath.startsWith('/admin/verifications') ||
+            (currentPath.startsWith('/admin/users') &&
+                !currentPath.startsWith('/admin/users/petugas') &&
+                !currentPath.startsWith('/admin/users/pengguna')),
     },
     {
         label: 'Tambah Petugas',
         href: '/admin/users/petugas/create',
         icon: UserCheck,
-        isActive: (currentUrl: string) => currentUrl.startsWith('/admin/users/petugas'),
+        isActive: (currentPath: string) => currentPath.startsWith('/admin/users/petugas'),
     },
     {
         label: 'Tambah Pengguna',
         href: '/admin/users/pengguna/create',
         icon: UserPlus,
-        isActive: (currentUrl: string) => currentUrl.startsWith('/admin/users/pengguna'),
+        isActive: (currentPath: string) => currentPath.startsWith('/admin/users/pengguna'),
     },
 ];
 
@@ -62,7 +63,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
         flash?: { success?: string; error?: string };
     }>();
     const { auth, flash } = page.props;
-    const currentUrl = page.url;
+    const currentPath = page.url.split('?')[0];
 
     const displayName = auth.user.nama ?? auth.user.name ?? 'Admin';
     const initial = displayName.charAt(0).toUpperCase();
@@ -72,7 +73,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
             <header className="sticky top-0 z-40 bg-[#2D4C79] text-white shadow-md border-b border-[#243E63]">
                 <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-6">
-                        <Link href="/admin/users" className="flex items-center gap-2 group">
+                        <Link href="/admin/dashboard" className="flex items-center gap-2 group">
                             <span className="text-2xl font-bold tracking-wider group-hover:text-amber-200 transition">AduPDF</span>
                             <span className="rounded-md border border-amber-400/40 bg-amber-500/30 px-2 py-0.5 text-xs font-semibold text-amber-200 shadow-xs">
                                 ADMIN
@@ -80,7 +81,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                         </Link>
                         <nav className="hidden items-center gap-1.5 md:flex" aria-label="Navigasi Menu Admin">
                             {navigation.map((item) => {
-                                const active = item.isActive(currentUrl);
+                                const active = item.isActive(currentPath);
                                 const Icon = item.icon;
                                 return (
                                     <Link
@@ -164,7 +165,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                             <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-white/15 bg-[#243E63] p-2 shadow-xl">
                                 <nav className="grid gap-1">
                                     {navigation.map((item) => {
-                                        const active = item.isActive(currentUrl);
+                                        const active = item.isActive(currentPath);
                                         const Icon = item.icon;
                                         return (
                                             <Link
