@@ -1,4 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import FlashAlert from '@/components/flash-alert';
 import PasswordField from '@/components/password-field';
 import AuthPageLayout from '@/layouts/auth-page-layout';
 
@@ -18,9 +19,22 @@ export default function Login({ status }: { status?: string }) {
                 </div>
                 <div className="p-6">
                     {successMessage && (
-                        <div role="status" className="mb-4 rounded border-l-4 border-emerald-600 bg-emerald-50 p-3 text-sm text-emerald-800">
-                            {successMessage}
-                        </div>
+                        <FlashAlert
+                            key={`status-${successMessage}`}
+                            type="success"
+                            message={successMessage}
+                            autoCloseDelay={5000}
+                            className="mb-4"
+                        />
+                    )}
+                    {flash?.error && (
+                        <FlashAlert
+                            key={`error-${flash.error}`}
+                            type="error"
+                            message={flash.error}
+                            autoCloseDelay={5000}
+                            className="mb-4"
+                        />
                     )}
                     {errors.length > 0 && (
                         <div role="alert" className="mb-4 rounded border-l-4 border-rose-500 bg-rose-50 p-3 text-sm text-rose-800">
