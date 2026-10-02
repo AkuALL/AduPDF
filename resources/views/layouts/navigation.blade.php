@@ -3,17 +3,11 @@
         <div class="flex justify-between h-16 items-center">
             <!-- Left: Brand & Desktop Navigation Links -->
             <div class="flex items-center gap-6 lg:gap-8">
-                <a href="{{ auth()->check() && auth()->user()->isAdmin() ? (Route::has('admin.dashboard') ? route('admin.dashboard') : route('home')) : route('home') }}" class="flex items-center gap-2.5 focus:outline-none focus:ring-2 focus:ring-white/40 rounded-md py-1 group">
-                    <span class="text-2xl font-bold tracking-wider text-white select-none group-hover:text-amber-200 transition">AduPDF</span>
-                    @if(auth()->check() && auth()->user()->isAdmin())
-                        <span class="rounded-md border border-amber-400/40 bg-amber-500/30 px-2 py-0.5 text-xs font-semibold text-amber-200 shadow-xs">
-                            ADMIN
-                        </span>
-                    @else
-                        <span class="text-[11px] bg-white/15 text-white/90 border border-white/20 px-2 py-0.5 rounded font-medium tracking-wide">
-                            KAMPUS
-                        </span>
-                    @endif
+                <a href="{{ route('home') }}" class="flex items-center gap-2.5 focus:outline-none focus:ring-2 focus:ring-white/40 rounded-md py-1">
+                    <span class="text-2xl font-bold tracking-wider text-white select-none">AduPDF</span>
+                    <span class="text-[11px] bg-white/15 text-white/90 border border-white/20 px-2 py-0.5 rounded font-medium tracking-wide">
+                        KAMPUS
+                    </span>
                 </a>
 
                 <!-- Desktop Nav Items -->
@@ -158,37 +152,12 @@
                                 <a
                                     href="{{ route('admin.dashboard') }}"
                                     @class([
-                                        'group flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-all duration-200',
-                                        'bg-white text-[#2D4C79] font-bold shadow-md shadow-black/10 ring-1 ring-white/20' => request()->routeIs('admin.dashboard'),
+                                        'px-3 py-2 rounded-md transition duration-150',
+                                        'bg-white/20 text-white font-semibold' => request()->routeIs('admin.dashboard'),
                                         'text-slate-200 hover:bg-white/10 hover:text-white' => !request()->routeIs('admin.dashboard'),
                                     ])
                                 >
-                                    <svg class="h-4 w-4 transition-colors {{ request()->routeIs('admin.dashboard') ? 'text-[#2D4C79]' : 'text-slate-300 group-hover:text-white' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                    </svg>
-                                    <span>Dashboard</span>
-                                    @if(request()->routeIs('admin.dashboard'))
-                                        <span class="h-1.5 w-1.5 rounded-full bg-[#2D4C79]"></span>
-                                    @endif
-                                </a>
-                            @endif
-
-                            @if(Route::has('admin.recap.index'))
-                                <a
-                                    href="{{ route('admin.recap.index') }}"
-                                    @class([
-                                        'group flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-all duration-200',
-                                        'bg-white text-[#2D4C79] font-bold shadow-md shadow-black/10 ring-1 ring-white/20' => request()->routeIs('admin.recap.*'),
-                                        'text-slate-200 hover:bg-white/10 hover:text-white' => !request()->routeIs('admin.recap.*'),
-                                    ])
-                                >
-                                    <svg class="h-4 w-4 transition-colors {{ request()->routeIs('admin.recap.*') ? 'text-[#2D4C79]' : 'text-slate-300 group-hover:text-white' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                    </svg>
-                                    <span>Rekap & Analitik</span>
-                                    @if(request()->routeIs('admin.recap.*'))
-                                        <span class="h-1.5 w-1.5 rounded-full bg-[#2D4C79]"></span>
-                                    @endif
+                                    Dashboard
                                 </a>
                             @endif
 
@@ -196,18 +165,12 @@
                                 <a
                                     href="{{ route('admin.facilities.index') }}"
                                     @class([
-                                        'group flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-all duration-200',
-                                        'bg-white text-[#2D4C79] font-bold shadow-md shadow-black/10 ring-1 ring-white/20' => request()->routeIs('admin.facilities.*'),
+                                        'px-3 py-2 rounded-md transition duration-150',
+                                        'bg-white/20 text-white font-semibold' => request()->routeIs('admin.facilities.*'),
                                         'text-slate-200 hover:bg-white/10 hover:text-white' => !request()->routeIs('admin.facilities.*'),
                                     ])
                                 >
-                                    <svg class="h-4 w-4 transition-colors {{ request()->routeIs('admin.facilities.*') ? 'text-[#2D4C79]' : 'text-slate-300 group-hover:text-white' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                    </svg>
-                                    <span>Kelola Fasilitas</span>
-                                    @if(request()->routeIs('admin.facilities.*'))
-                                        <span class="h-1.5 w-1.5 rounded-full bg-[#2D4C79]"></span>
-                                    @endif
+                                    Kelola Fasilitas
                                 </a>
                             @endif
 
@@ -215,18 +178,12 @@
                                 <a
                                     href="{{ route('admin.users.index') }}"
                                     @class([
-                                        'group flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-all duration-200',
-                                        'bg-white text-[#2D4C79] font-bold shadow-md shadow-black/10 ring-1 ring-white/20' => (request()->routeIs('admin.users.index') || request()->routeIs('admin.verifications.*')) && !request()->routeIs('admin.users.petugas.*') && !request()->routeIs('admin.users.pengguna.*'),
-                                        'text-slate-200 hover:bg-white/10 hover:text-white' => !((request()->routeIs('admin.users.index') || request()->routeIs('admin.verifications.*')) && !request()->routeIs('admin.users.petugas.*') && !request()->routeIs('admin.users.pengguna.*')),
+                                        'px-3 py-2 rounded-md transition duration-150',
+                                        'bg-white/20 text-white font-semibold' => request()->routeIs('admin.users.index'),
+                                        'text-slate-200 hover:bg-white/10 hover:text-white' => !request()->routeIs('admin.users.index'),
                                     ])
                                 >
-                                    <svg class="h-4 w-4 transition-colors {{ (request()->routeIs('admin.users.index') || request()->routeIs('admin.verifications.*')) && !request()->routeIs('admin.users.petugas.*') && !request()->routeIs('admin.users.pengguna.*') ? 'text-[#2D4C79]' : 'text-slate-300 group-hover:text-white' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                    </svg>
-                                    <span>Kelola Akun</span>
-                                    @if((request()->routeIs('admin.users.index') || request()->routeIs('admin.verifications.*')) && !request()->routeIs('admin.users.petugas.*') && !request()->routeIs('admin.users.pengguna.*'))
-                                        <span class="h-1.5 w-1.5 rounded-full bg-[#2D4C79]"></span>
-                                    @endif
+                                    Kelola Akun
                                 </a>
                             @endif
 
@@ -234,18 +191,12 @@
                                 <a
                                     href="{{ route('admin.users.petugas.create') }}"
                                     @class([
-                                        'group flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-all duration-200',
-                                        'bg-white text-[#2D4C79] font-bold shadow-md shadow-black/10 ring-1 ring-white/20' => request()->routeIs('admin.users.petugas.*'),
+                                        'px-3 py-2 rounded-md transition duration-150',
+                                        'bg-white/20 text-white font-semibold' => request()->routeIs('admin.users.petugas.*'),
                                         'text-slate-200 hover:bg-white/10 hover:text-white' => !request()->routeIs('admin.users.petugas.*'),
                                     ])
                                 >
-                                    <svg class="h-4 w-4 transition-colors {{ request()->routeIs('admin.users.petugas.*') ? 'text-[#2D4C79]' : 'text-slate-300 group-hover:text-white' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span>Tambah Petugas</span>
-                                    @if(request()->routeIs('admin.users.petugas.*'))
-                                        <span class="h-1.5 w-1.5 rounded-full bg-[#2D4C79]"></span>
-                                    @endif
+                                    Tambah Petugas
                                 </a>
                             @endif
 
@@ -253,18 +204,38 @@
                                 <a
                                     href="{{ route('admin.users.pengguna.create') }}"
                                     @class([
-                                        'group flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-all duration-200',
-                                        'bg-white text-[#2D4C79] font-bold shadow-md shadow-black/10 ring-1 ring-white/20' => request()->routeIs('admin.users.pengguna.*'),
+                                        'px-3 py-2 rounded-md transition duration-150',
+                                        'bg-white/20 text-white font-semibold' => request()->routeIs('admin.users.pengguna.*'),
                                         'text-slate-200 hover:bg-white/10 hover:text-white' => !request()->routeIs('admin.users.pengguna.*'),
                                     ])
                                 >
-                                    <svg class="h-4 w-4 transition-colors {{ request()->routeIs('admin.users.pengguna.*') ? 'text-[#2D4C79]' : 'text-slate-300 group-hover:text-white' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                                    </svg>
-                                    <span>Tambah Pengguna</span>
-                                    @if(request()->routeIs('admin.users.pengguna.*'))
-                                        <span class="h-1.5 w-1.5 rounded-full bg-[#2D4C79]"></span>
-                                    @endif
+                                    Tambah Pengguna
+                                </a>
+                            @endif
+
+                            @if(Route::has('admin.recap.index'))
+                                <a
+                                    href="{{ route('admin.recap.index') }}"
+                                    @class([
+                                        'px-3 py-2 rounded-md transition duration-150',
+                                        'bg-white/20 text-white font-semibold' => request()->routeIs('admin.recap.*'),
+                                        'text-slate-200 hover:bg-white/10 hover:text-white' => !request()->routeIs('admin.recap.*'),
+                                    ])
+                                >
+                                    Rekap & Analitik
+                                </a>
+                            @endif
+
+                            @if(Route::has('admin.password.edit'))
+                                <a
+                                    href="{{ route('admin.password.edit') }}"
+                                    @class([
+                                        'px-3 py-2 rounded-md transition duration-150',
+                                        'bg-white/20 text-white font-semibold' => request()->routeIs('admin.password.*'),
+                                        'text-slate-200 hover:bg-white/10 hover:text-white' => !request()->routeIs('admin.password.*'),
+                                    ])
+                                >
+                                    Ganti Password
                                 </a>
                             @endif
                         @endif
@@ -308,18 +279,6 @@
                             </span>
                         </div>
                     </div>
-
-                    @if(auth()->user()->isAdmin() && Route::has('admin.password.edit'))
-                        <a
-                            href="{{ route('admin.password.edit') }}"
-                            class="inline-flex items-center gap-1.5 text-xs font-semibold bg-white/10 hover:bg-white/20 active:bg-white/30 text-white px-3 py-2 rounded-md transition duration-150 border border-white/20"
-                        >
-                            <svg class="w-3.5 h-3.5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-                            </svg>
-                            <span>Ganti Password</span>
-                        </a>
-                    @endif
 
                     @if(Route::has('logout'))
                         <form action="{{ route('logout') }}" method="POST" class="inline">
@@ -461,23 +420,15 @@
                 @if(Route::has('admin.dashboard'))
                     <a
                         href="{{ route('admin.dashboard') }}"
-                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.dashboard') ? 'bg-white text-[#2D4C79] font-bold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
+                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.dashboard') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
                     >
                         Dashboard
-                    </a>
-                @endif
-                @if(Route::has('admin.recap.index'))
-                    <a
-                        href="{{ route('admin.recap.index') }}"
-                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.recap.*') ? 'bg-white text-[#2D4C79] font-bold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
-                    >
-                        Rekap & Analitik
                     </a>
                 @endif
                 @if(Route::has('admin.facilities.index'))
                     <a
                         href="{{ route('admin.facilities.index') }}"
-                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.facilities.*') ? 'bg-white text-[#2D4C79] font-bold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
+                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.facilities.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
                     >
                         Kelola Fasilitas
                     </a>
@@ -485,7 +436,7 @@
                 @if(Route::has('admin.users.index'))
                     <a
                         href="{{ route('admin.users.index') }}"
-                        class="block px-3 py-2 rounded-md text-sm font-medium {{ (request()->routeIs('admin.users.index') || request()->routeIs('admin.verifications.*')) && !request()->routeIs('admin.users.petugas.*') && !request()->routeIs('admin.users.pengguna.*') ? 'bg-white text-[#2D4C79] font-bold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
+                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.users.index') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
                     >
                         Kelola Akun
                     </a>
@@ -493,7 +444,7 @@
                 @if(Route::has('admin.users.petugas.create'))
                     <a
                         href="{{ route('admin.users.petugas.create') }}"
-                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.users.petugas.*') ? 'bg-white text-[#2D4C79] font-bold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
+                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.users.petugas.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
                     >
                         Tambah Petugas
                     </a>
@@ -501,15 +452,23 @@
                 @if(Route::has('admin.users.pengguna.create'))
                     <a
                         href="{{ route('admin.users.pengguna.create') }}"
-                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.users.pengguna.*') ? 'bg-white text-[#2D4C79] font-bold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
+                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.users.pengguna.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
                     >
                         Tambah Pengguna
+                    </a>
+                @endif
+                @if(Route::has('admin.recap.index'))
+                    <a
+                        href="{{ route('admin.recap.index') }}"
+                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.recap.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
+                    >
+                        Rekap & Analitik
                     </a>
                 @endif
                 @if(Route::has('admin.password.edit'))
                     <a
                         href="{{ route('admin.password.edit') }}"
-                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.password.*') ? 'bg-white text-[#2D4C79] font-bold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
+                        class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.password.*') ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white' }}"
                     >
                         Ganti Password
                     </a>

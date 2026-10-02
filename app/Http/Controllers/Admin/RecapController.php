@@ -19,7 +19,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\View\View;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -34,14 +33,10 @@ class RecapController extends Controller
         Request $request,
         ReservationStatisticsQuery $reservationQuery,
         DamageStatisticsQuery $damageQuery,
-    ): View|Response {
+    ): Response {
         $recapData = $this->buildRecapData($request, $reservationQuery, $damageQuery);
 
-        if ($request->header('X-Inertia') || $request->wantsJson()) {
-            return Inertia::render('admin/recap/index', $recapData);
-        }
-
-        return view('admin.recap.index', $recapData);
+        return Inertia::render('admin/recap/index', $recapData);
     }
 
     /**

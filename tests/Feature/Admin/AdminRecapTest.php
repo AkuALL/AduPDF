@@ -34,14 +34,18 @@ test('petugas cannot access admin recap (DA-03, RBAC)', function () {
     $response->assertForbidden();
 });
 
+use Inertia\Testing\AssertableInertia as Assert;
+
 test('admin can access recap page with empty state (DA-03, FR-19)', function () {
     $admin = User::factory()->admin()->create();
 
     $response = $this->actingAs($admin)->get(route('admin.recap.index'));
 
-    $response->assertOk();
-    $response->assertSeeText('Rekapitulasi Okupansi & Kerusakan');
-    $response->assertSee('Aturan BR-21 Terverifikasi');
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('admin/recap/index')
+        ->where('period', 'this_month')
+        ->where('summary.total_reservations', 0)
+    );
 });
 
 test('full-room reservation counts as room usage only and does not count as tool usage (DA-03, FR-19, BR-21)', function () {
@@ -78,17 +82,17 @@ test('full-room reservation counts as room usage only and does not count as tool
 
     $response = $this->actingAs($admin)->get(route('admin.recap.index', ['period' => 'this_month']));
 
-    $response->assertOk();
+    $response->assertOk()->assertInertia(function (Assert $page) use ($room, $tool) {
+        $props = $page->toArray()['props'];
+        $facilities = $props['facilities'];
+        $roomRecap = collect($facilities)->firstWhere('id', $room->id);
+        $toolRecap = collect($facilities)->firstWhere('id', $tool->id);
 
-    // Verify room usage count = 1 and tool usage count = 0
-    $facilities = $response->viewData('facilities');
-    $roomRecap = collect($facilities)->firstWhere('id', $room->id);
-    $toolRecap = collect($facilities)->firstWhere('id', $tool->id);
-
-    expect($roomRecap['usage_count'])->toBe(1)
-        ->and($roomRecap['usage_hours'])->toBe(2.0)
-        ->and($toolRecap['usage_count'])->toBe(0)
-        ->and($toolRecap['usage_hours'])->toBe(0.0);
+        expect($roomRecap['usage_count'])->toBe(1)
+            ->and($roomRecap['usage_hours'])->toEqual(2)
+            ->and($toolRecap['usage_count'])->toBe(0)
+            ->and($toolRecap['usage_hours'])->toEqual(0);
+    });
 });
 
 test('individual tool usage is counted only from explicit tool reservation (DA-03, FR-19, BR-21)', function () {
@@ -124,17 +128,17 @@ test('individual tool usage is counted only from explicit tool reservation (DA-0
 
     $response = $this->actingAs($admin)->get(route('admin.recap.index', ['period' => 'this_month']));
 
-    $response->assertOk();
+    $response->assertOk()->assertInertia(function (Assert $page) use ($room, $tool) {
+        $props = $page->toArray()['props'];
+        $facilities = $props['facilities'];
+        $roomRecap = collect($facilities)->firstWhere('id', $room->id);
+        $toolRecap = collect($facilities)->firstWhere('id', $tool->id);
 
-    $facilities = $response->viewData('facilities');
-    $roomRecap = collect($facilities)->firstWhere('id', $room->id);
-    $toolRecap = collect($facilities)->firstWhere('id', $tool->id);
-
-    // Tool has 1 usage (3 hours), and Room has 0 usage
-    expect($toolRecap['usage_count'])->toBe(1)
-        ->and($toolRecap['usage_hours'])->toBe(3.0)
-        ->and($roomRecap['usage_count'])->toBe(0)
-        ->and($roomRecap['usage_hours'])->toBe(0.0);
+        expect($toolRecap['usage_count'])->toBe(1)
+            ->and($toolRecap['usage_hours'])->toEqual(3)
+            ->and($roomRecap['usage_count'])->toBe(0)
+            ->and($roomRecap['usage_hours'])->toEqual(0);
+    });
 });
 
 test('recap presents damage frequency per facility and per location (DA-03, FR-19)', function () {
@@ -179,22 +183,19 @@ test('recap presents damage frequency per facility and per location (DA-03, FR-1
 
     $response = $this->actingAs($admin)->get(route('admin.recap.index', ['period' => 'this_month']));
 
-    $response->assertOk();
-    $response->assertSee('Ruang 101');
-    $response->assertSee('Gedung Kuliah A');
-    $response->assertSee('Aula Gedung B');
-    $response->assertSee('Gedung Kuliah B');
+    $response->assertOk()->assertInertia(function (Assert $page) use ($facilityGedungA) {
+        $props = $page->toArray()['props'];
+        $damageByFacility = $props['damage_by_facility'];
+        $damageByLocation = $props['damage_by_location'];
 
-    $damageByFacility = $response->viewData('damage_by_facility');
-    $damageByLocation = $response->viewData('damage_by_location');
+        $facilityAStat = collect($damageByFacility)->firstWhere('id', $facilityGedungA->id);
+        expect($facilityAStat['report_count'])->toBe(2);
 
-    $facilityAStat = collect($damageByFacility)->firstWhere('id', $facilityGedungA->id);
-    expect($facilityAStat['report_count'])->toBe(2);
-
-    $locAStat = collect($damageByLocation)->firstWhere('location', 'Gedung Kuliah A');
-    $locBStat = collect($damageByLocation)->firstWhere('location', 'Gedung Kuliah B');
-    expect($locAStat['total_reports'])->toBe(2)
-        ->and($locBStat['total_reports'])->toBe(1);
+        $locAStat = collect($damageByLocation)->firstWhere('location', 'Gedung Kuliah A');
+        $locBStat = collect($damageByLocation)->firstWhere('location', 'Gedung Kuliah B');
+        expect($locAStat['total_reports'])->toBe(2)
+            ->and($locBStat['total_reports'])->toBe(1);
+    });
 });
 
 test('admin can export recap to CSV (DA-04, FR-19)', function () {
