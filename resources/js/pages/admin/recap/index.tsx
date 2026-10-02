@@ -4,6 +4,8 @@ import {
     BarChart3,
     Calendar,
     Download,
+    FileSpreadsheet,
+    FileText,
     Filter,
     HelpCircle,
     Info,
@@ -118,7 +120,10 @@ export default function RecapIndex({
         );
     }
 
-    const exportUrl = `/admin/recap/export?period=${encodeURIComponent(selectedPeriod)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}${facilityType ? `&facility_type=${encodeURIComponent(facilityType)}` : ''}${location ? `&location=${encodeURIComponent(location)}` : ''}${search ? `&search=${encodeURIComponent(search)}` : ''}&format=csv`;
+    const baseExportParams = `period=${encodeURIComponent(selectedPeriod)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}${facilityType ? `&facility_type=${encodeURIComponent(facilityType)}` : ''}${location ? `&location=${encodeURIComponent(location)}` : ''}${search ? `&search=${encodeURIComponent(search)}` : ''}`;
+    const exportCsvUrl = `/admin/recap/export?${baseExportParams}&format=csv`;
+    const exportExcelUrl = `/admin/recap/export?${baseExportParams}&format=excel`;
+    const exportPdfUrl = `/admin/recap/export?${baseExportParams}&format=pdf`;
 
     return (
         <AdminLayout>
@@ -133,7 +138,7 @@ export default function RecapIndex({
                                 Analitik & Pelaporan
                             </span>
                             <span className="text-xs text-[#667085]">·</span>
-                            <span className="text-xs text-[#667085]">Modul DA-03 (FR-19)</span>
+                            <span className="text-xs text-[#667085]">Modul DA-03 & DA-04 (FR-19)</span>
                             <span className="text-xs text-[#667085]">·</span>
                             <span className="text-xs text-[#667085]">Aturan BR-21 Terverifikasi</span>
                         </div>
@@ -144,19 +149,42 @@ export default function RecapIndex({
                             Okupansi penggunaan fasilitas dan frekuensi laporan kerusakan per fasilitas serta lokasi kampus.
                         </p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                        {/* CSV Export */}
                         <a
-                            href={exportUrl}
-                            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-md bg-[#2D4C79] text-white hover:bg-[#243E63] shadow-xs transition"
+                            href={exportCsvUrl}
+                            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-md border border-[#D0D5DD] bg-white text-[#111827] hover:bg-[#F3F5F7] shadow-2xs transition"
+                            title="Unduh rekap dalam format CSV mentah"
                         >
-                            <Download className="w-4 h-4" />
-                            Ekspor CSV
+                            <Download className="w-3.5 h-3.5 text-[#667085]" />
+                            CSV
                         </a>
+
+                        {/* Excel Export */}
+                        <a
+                            href={exportExcelUrl}
+                            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-md border border-[#16794A]/30 bg-[#EAF7F0] text-[#16794A] hover:bg-[#D4EFE0] shadow-2xs transition"
+                            title="Unduh rekap spreadsheet Excel terformat"
+                        >
+                            <FileSpreadsheet className="w-3.5 h-3.5 text-[#16794A]" />
+                            Excel (.xls)
+                        </a>
+
+                        {/* PDF Export */}
+                        <a
+                            href={exportPdfUrl}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-md bg-[#2D4C79] text-white hover:bg-[#243E63] shadow-xs transition"
+                            title="Unduh rekap dokumen PDF siap cetak"
+                        >
+                            <FileText className="w-3.5 h-3.5" />
+                            Dokumen PDF
+                        </a>
+
                         <Link
                             href="/admin/dashboard"
                             className="inline-flex items-center px-3.5 py-2 text-xs font-medium rounded-md border border-[#D0D5DD] bg-white text-[#2D4C79] hover:bg-[#F3F5F7] transition"
                         >
-                            Kembali ke Dashboard
+                            Dashboard
                         </Link>
                     </div>
                 </div>

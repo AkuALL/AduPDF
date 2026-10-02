@@ -18,21 +18,48 @@
                     Okupansi penggunaan fasilitas dan frekuensi laporan kerusakan per fasilitas serta lokasi kampus.
                 </p>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-2">
+                {{-- Ekspor CSV --}}
                 <a
                     href="{{ route('admin.recap.export', array_merge(request()->query(), ['format' => 'csv'])) }}"
-                    class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-md bg-[#2D4C79] text-white hover:bg-[#243E63] shadow-xs transition"
+                    class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-md border border-[#D0D5DD] bg-white text-[#111827] hover:bg-[#F3F5F7] shadow-2xs transition"
+                    title="Unduh rekap dalam format CSV mentah"
                 >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-3.5 h-3.5 text-[#667085]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    Ekspor CSV
+                    CSV
                 </a>
+
+                {{-- Ekspor Excel --}}
+                <a
+                    href="{{ route('admin.recap.export', array_merge(request()->query(), ['format' => 'excel'])) }}"
+                    class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-md border border-[#16794A]/30 bg-[#EAF7F0] text-[#16794A] hover:bg-[#D4EFE0] shadow-2xs transition"
+                    title="Unduh rekap spreadsheet Excel terformat"
+                >
+                    <svg class="w-3.5 h-3.5 text-[#16794A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Excel (.xls)
+                </a>
+
+                {{-- Ekspor PDF --}}
+                <a
+                    href="{{ route('admin.recap.export', array_merge(request()->query(), ['format' => 'pdf'])) }}"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-md bg-[#2D4C79] text-white hover:bg-[#243E63] shadow-xs transition"
+                    title="Unduh rekap dokumen PDF siap cetak"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Dokumen PDF
+                </a>
+
                 <a
                     href="{{ route('admin.dashboard') }}"
                     class="inline-flex items-center px-3.5 py-2 text-xs font-medium rounded-md border border-[#D0D5DD] bg-white text-[#2D4C79] hover:bg-[#F3F5F7] transition"
                 >
-                    Kembali ke Dashboard
+                    Dashboard
                 </a>
             </div>
         </div>

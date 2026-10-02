@@ -217,13 +217,152 @@ test('admin can export recap to CSV (DA-04, FR-19)', function () {
         ->and($content)->toContain('Gedung Rektorat Lt. 3');
 });
 
-test('unsupported export format returns informative error message (DA-04, FR-19)', function () {
+test('admin can export recap to Excel with worksheets, styling, and BR-21 note (DA-04, FR-19)', function () {
+    $admin = User::factory()->admin()->create();
+    Facility::factory()->create([
+        'name' => 'Auditorium Utama',
+        'type' => FacilityType::Hall,
+        'location' => 'Gedung Pusat Lt. 1',
+    ]);
+
+    $response = $this->actingAs($admin)->get(route('admin.recap.export', ['format' => 'excel']));
+
+    $response->assertOk();
+    $response->assertHeader('Content-Type', 'application/vnd.ms-excel; charset=UTF-8');
+
+    $content = $response->streamedContent();
+    expect($content)->toContain('<?xml version="1.0" encoding="UTF-8"?>')
+        ->and($content)->toContain('Worksheet ss:Name="Okupansi Fasilitas"')
+        ->and($content)->toContain('Worksheet ss:Name="Kerusakan per Fasilitas"')
+        ->and($content)->toContain('Worksheet ss:Name="Kerusakan per Lokasi"')
+        ->and($content)->toContain('Aturan BR-21')
+        ->and($content)->toContain('Auditorium Utama');
+});
+
+test('admin can export recap to PDF with valid PDF binary format (DA-04, FR-19)', function () {
+    $admin = User::factory()->admin()->create();
+    Facility::factory()->create([
+        'name' => 'Ruang Rapat Senat',
+        'type' => FacilityType::Hall,
+        'location' => 'Gedung Rektorat Lt. 2',
+    ]);
+
+    $response = $this->actingAs($admin)->get(route('admin.recap.export', ['format' => 'pdf']));
+
+    $response->assertOk();
+    $response->assertHeader('Content-Type', 'application/pdf');
+
+    $content = $response->streamedContent();
+    expect(str_starts_with($content, '%PDF-1.4'))->toBeTrue()
+        ->and(str_contains($content, '%%EOF'))->toBeTrue()
+        ->and($content)->toContain('ADUPDF')
+        ->and($content)->toContain('Ruang Rapat Senat');
+});
+
+test('export respects filters like facility_type and location (DA-04, FR-19)', function () {
     $admin = User::factory()->admin()->create();
 
-    $response = $this->actingAs($admin)->get(route('admin.recap.export', ['format' => 'xml']));
+    $matchingFacility = Facility::factory()->create([
+        'name' => 'Lab Software Engineering',
+        'type' => FacilityType::Laboratory,
+        'location' => 'Gedung FST Lt. 3',
+    ]);
+
+    $nonMatchingFacility = Facility::factory()->create([
+        'name' => 'Lapangan Basket',
+        'type' => FacilityType::Field,
+        'location' => 'Area Olahraga Barat',
+    ]);
+
+    $response = $this->actingAs($admin)->get(route('admin.recap.export', [
+        'format' => 'csv',
+        'facility_type' => FacilityType::Laboratory->value,
+        'location' => 'Gedung FST',
+    ]));
+
+    $response->assertOk();
+    $content = $response->streamedContent();
+    expect($content)->toContain('Lab Software Engineering')
+        ->and($content)->not->toContain('Lapangan Basket');
+});
+
+test('export handles empty data cleanly in CSV, Excel, and PDF (DA-04, FR-19)', function () {
+    $admin = User::factory()->admin()->create();
+
+    // 1. CSV empty data
+    $csvResponse = $this->actingAs($admin)->get(route('admin.recap.export', [
+        'format' => 'csv',
+        'search' => 'FasilitasYangPastiTidakAda123',
+    ]));
+    $csvResponse->assertOk();
+    $csvContent = $csvResponse->streamedContent();
+    expect($csvContent)->toContain('Tidak ada data fasilitas yang sesuai dengan filter yang dipilih.')
+        ->and($csvContent)->toContain('Tidak ada data laporan kerusakan untuk periode ini.');
+
+    // 2. Excel empty data
+    $excelResponse = $this->actingAs($admin)->get(route('admin.recap.export', [
+        'format' => 'excel',
+        'search' => 'FasilitasYangPastiTidakAda123',
+    ]));
+    $excelResponse->assertOk();
+    $excelContent = $excelResponse->streamedContent();
+    expect($excelContent)->toContain('Tidak ada data fasilitas yang sesuai dengan filter yang dipilih.')
+        ->and($excelContent)->toContain('Worksheet ss:Name="Okupansi Fasilitas"');
+
+    // 3. PDF empty data
+    $pdfResponse = $this->actingAs($admin)->get(route('admin.recap.export', [
+        'format' => 'pdf',
+        'search' => 'FasilitasYangPastiTidakAda123',
+    ]));
+    $pdfResponse->assertOk();
+    $pdfContent = $pdfResponse->streamedContent();
+    expect(str_starts_with($pdfContent, '%PDF-1.4'))->toBeTrue()
+        ->and($pdfContent)->toContain('Tidak ada data fasilitas yang sesuai');
+});
+
+test('generation error is caught and returns informative message without mutating database (DA-04, FR-19)', function () {
+    $admin = User::factory()->admin()->create();
+
+    $initialCount = Facility::count();
+
+    $response = $this->actingAs($admin)->get(route('admin.recap.export', [
+        'format' => 'csv',
+        'simulate_error' => 1,
+    ]));
 
     $response->assertSessionHas('error');
     $error = session('error');
-    expect($error)->toContain('XML')
-        ->and($error)->toContain('CSV');
+    expect($error)->toContain('Terjadi kesalahan saat membuat berkas ekspor CSV')
+        ->and($error)->toContain('Data sistem tetap aman.')
+        ->and(Facility::count())->toBe($initialCount);
+});
+
+test('unsupported export format returns informative error message (DA-04, FR-19)', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)->get(route('admin.recap.export', ['format' => 'word']));
+
+    $response->assertSessionHas('error');
+    $error = session('error');
+    expect($error)->toContain('WORD')
+        ->and($error)->toContain('CSV, Excel, atau PDF');
+});
+
+test('unauthorized users cannot export recap (DA-04, RBAC)', function () {
+    $pengguna = User::factory()->pengguna()->create();
+    $petugas = User::factory()->petugas()->create();
+
+    // Guest redirected to login
+    $this->get(route('admin.recap.export', ['format' => 'csv']))
+        ->assertRedirect(route('login'));
+
+    // Pengguna forbidden
+    $this->actingAs($pengguna)
+        ->get(route('admin.recap.export', ['format' => 'csv']))
+        ->assertForbidden();
+
+    // Petugas forbidden
+    $this->actingAs($petugas)
+        ->get(route('admin.recap.export', ['format' => 'csv']))
+        ->assertForbidden();
 });
