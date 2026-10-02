@@ -148,12 +148,20 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                     Fasilitas
                                 </Link>
                                 {user?.role === 'pengguna' && (
-                                    <Link
-                                        href="/reservations"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                    >
-                                        Reservasi Saya
-                                    </Link>
+                                    <>
+                                        <Link
+                                            href="/reservations"
+                                            className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                        >
+                                            Reservasi Saya
+                                        </Link>
+                                        <Link
+                                            href="/reports"
+                                            className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                        >
+                                            Lapor Kerusakan
+                                        </Link>
+                                    </>
                                 )}
                                 {user?.role === 'petugas' && (
                                     <Link

@@ -57,12 +57,20 @@ export default function Profile({
                                 Fasilitas
                             </Link>
                             {user.role === 'pengguna' && (
-                                <Link
-                                    href="/reservations"
-                                    className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
-                                >
-                                    Reservasi Saya
-                                </Link>
+                                <>
+                                    <Link
+                                        href="/reservations"
+                                        className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
+                                    >
+                                        Reservasi Saya
+                                    </Link>
+                                    <Link
+                                        href="/reports"
+                                        className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
+                                    >
+                                        Lapor Kerusakan
+                                    </Link>
+                                </>
                             )}
                             {user.role === 'petugas' && (
                                 <Link
