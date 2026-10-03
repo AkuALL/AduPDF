@@ -369,9 +369,10 @@ export default function FacilityIndex({
                                 const status = conditionConfig[fac.condition] || conditionConfig.aktif;
 
                                 return (
-                                    <article
+                                    <Link
                                         key={fac.id}
-                                        className="flex flex-col justify-between rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#D0D5DD] transition"
+                                        href={`/facilities/${fac.id}`}
+                                        className="group flex flex-col justify-between rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#2D4C79] hover:shadow-md transition"
                                     >
                                         <div>
                                             <div className="flex items-center justify-between gap-2">
@@ -386,7 +387,7 @@ export default function FacilityIndex({
                                                 </span>
                                             </div>
 
-                                            <h2 className="mt-3 text-lg font-semibold text-[#111827]">
+                                            <h2 className="mt-3 text-lg font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                                 {fac.name}
                                             </h2>
 
@@ -421,14 +422,11 @@ export default function FacilityIndex({
                                         </div>
 
                                         <div className="mt-5 pt-4 border-t border-[#E5E7EB]">
-                                            <Link
-                                                href={`/facilities/${fac.id}`}
-                                                className="inline-flex h-10 w-full items-center justify-center rounded-md border border-[#D0D5DD] bg-white text-sm font-semibold text-[#2D4C79] hover:bg-[#E9EEF5] hover:border-[#2D4C79] transition"
-                                            >
+                                            <div className="inline-flex h-10 w-full items-center justify-center rounded-md border border-[#D0D5DD] bg-white text-sm font-semibold text-[#2D4C79] group-hover:bg-[#E9EEF5] group-hover:border-[#2D4C79] transition">
                                                 Lihat Detail & Jadwal →
-                                            </Link>
+                                            </div>
                                         </div>
-                                    </article>
+                                    </Link>
                                 );
                             })}
                         </div>
