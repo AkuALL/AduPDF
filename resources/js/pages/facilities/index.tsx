@@ -102,16 +102,16 @@ export default function FacilityIndex({
                     <div className="relative flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
                         <div className="flex items-center">
                             <Link href="/" className="flex items-center gap-2">
-                                <span className="text-2xl font-bold tracking-tight text-[#2D4C79]">
+                                <span className="text-xl font-bold tracking-tight text-[#2D4C79]">
                                     AduPDF
                                 </span>
-                                <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-sm font-semibold text-[#2D4C79]">
+                                <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-base font-semibold text-[#2D4C79]">
                                     Universitas Diponegoro
                                 </span>
                             </Link>
                         </div>
 
-                        <nav className="hidden sm:flex sm:items-center sm:gap-6 text-lg absolute left-1/2 -translate-x-1/2">
+                        <nav className="hidden sm:flex sm:items-center sm:gap-6 text-base absolute left-1/2 -translate-x-1/2">
                             <Link
                                 href="/facilities"
                                 className="font-semibold text-[#2D4C79] border-b-2 border-[#2D4C79] pb-4 pt-4"
@@ -200,10 +200,10 @@ export default function FacilityIndex({
                 <main className="w-full px-4 py-8 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="mb-6">
-                        <h1 className="text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl">
+                        <h1 className="text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl text-center">
                             Fasilitas Kampus
                         </h1>
-                        <p className="mt-1 text-lg text-[#667085]">
+                        <p className="mt-1 text-lg text-[#667085] text-center">
                             Temukan fasilitas ruangan dan peralatan untuk kegiatan akademik dan organisasi.
                         </p>
                     </div>
