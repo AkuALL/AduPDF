@@ -130,8 +130,8 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
             <div className="min-h-screen bg-[#F7F8FA] text-[#111827] font-sans antialiased">
                 {/* Navigation Bar */}
                 <header className="sticky top-0 z-30 border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm">
-                    <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
-                        <div className="flex items-center gap-8">
+                    <div className="relative flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
+                        <div className="flex items-center">
                             <Link href="/" className="flex items-center gap-2">
                                 <span className="text-xl font-bold tracking-tight text-[#2D4C79]">
                                     AduPDF
@@ -140,47 +140,49 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                     Kampus
                                 </span>
                             </Link>
-                            <nav className="hidden sm:flex sm:gap-6 text-sm">
-                                <Link
-                                    href="/facilities"
-                                    className="font-semibold text-[#2D4C79] border-b-2 border-[#2D4C79] pb-4 pt-4"
-                                >
-                                    Fasilitas
-                                </Link>
-                                {user?.role === 'pengguna' && (
-                                    <>
-                                        <Link
-                                            href="/reservations"
-                                            className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                        >
-                                            Reservasi Saya
-                                        </Link>
-                                        <Link
-                                            href="/reports"
-                                            className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                        >
-                                            Lapor Kerusakan
-                                        </Link>
-                                    </>
-                                )}
-                                {user?.role === 'petugas' && (
-                                    <Link
-                                        href="/petugas/reservations"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                    >
-                                        Panel Petugas
-                                    </Link>
-                                )}
-                                {user?.role === 'admin' && (
-                                    <a
-                                        href="/admin/facilities"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                    >
-                                        Kelola Fasilitas
-                                    </a>
-                                )}
-                            </nav>
                         </div>
+
+                        <nav className="hidden sm:flex sm:items-center sm:gap-6 text-sm absolute left-1/2 -translate-x-1/2">
+                            <Link
+                                href="/facilities"
+                                className="font-semibold text-[#2D4C79] border-b-2 border-[#2D4C79] pb-4 pt-4"
+                            >
+                                Fasilitas
+                            </Link>
+                            {user?.role === 'pengguna' && (
+                                <>
+                                    <Link
+                                        href="/reservations"
+                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                    >
+                                        Reservasi Saya
+                                    </Link>
+                                    <Link
+                                        href="/reports"
+                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                    >
+                                        Lapor Fasilitas
+                                    </Link>
+                                </>
+                            )}
+                            {user?.role === 'petugas' && (
+                                <Link
+                                    href="/petugas/reservations"
+                                    className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                >
+                                    Panel Petugas
+                                </Link>
+                            )}
+                            {user?.role === 'admin' && (
+                                <a
+                                    href="/admin/facilities"
+                                    className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                >
+                                    Kelola Fasilitas
+                                </a>
+                            )}
+                        </nav>
+
                         <div className="flex items-center gap-3">
                             {user ? (
                                 <>

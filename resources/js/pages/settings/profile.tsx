@@ -39,8 +39,8 @@ export default function Profile({
             <h1 className="sr-only">Pengaturan Profil</h1>
 
             <header className="sticky top-0 z-30 border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm">
-                <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center gap-8">
+                <div className="relative flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center">
                         <Link href="/" className="flex items-center gap-2">
                             <span className="text-xl font-bold tracking-tight text-[#2D4C79]">
                                 AduPDF
@@ -49,47 +49,49 @@ export default function Profile({
                                 Kampus
                             </span>
                         </Link>
-                        <nav className="hidden sm:flex sm:gap-6 text-sm">
+                    </div>
+
+                    <nav className="hidden sm:flex sm:items-center sm:gap-6 text-sm absolute left-1/2 -translate-x-1/2">
+                        <Link
+                            href="/facilities"
+                            className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
+                        >
+                            Fasilitas
+                        </Link>
+                        {user.role === 'pengguna' && (
+                            <>
+                                <Link
+                                    href="/reservations"
+                                    className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
+                                >
+                                    Reservasi Saya
+                                </Link>
+                                <Link
+                                    href="/reports"
+                                    className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
+                                >
+                                    Lapor Fasilitas
+                                </Link>
+                            </>
+                        )}
+                        {user.role === 'petugas' && (
                             <Link
-                                href="/facilities"
+                                href="/petugas/reservations"
                                 className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
                             >
-                                Fasilitas
+                                Panel Petugas
                             </Link>
-                            {user.role === 'pengguna' && (
-                                <>
-                                    <Link
-                                        href="/reservations"
-                                        className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
-                                    >
-                                        Reservasi Saya
-                                    </Link>
-                                    <Link
-                                        href="/reports"
-                                        className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
-                                    >
-                                        Lapor Kerusakan
-                                    </Link>
-                                </>
-                            )}
-                            {user.role === 'petugas' && (
-                                <Link
-                                    href="/petugas/reservations"
-                                    className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
-                                >
-                                    Panel Petugas
-                                </Link>
-                            )}
-                            {user.role === 'admin' && (
-                                <Link
-                                    href="/admin/facilities"
-                                    className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
-                                >
-                                    Kelola Fasilitas
-                                </Link>
-                            )}
-                        </nav>
-                    </div>
+                        )}
+                        {user.role === 'admin' && (
+                            <Link
+                                href="/admin/facilities"
+                                className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
+                            >
+                                Kelola Fasilitas
+                            </Link>
+                        )}
+                    </nav>
+
                     <div className="flex items-center gap-3">
                         <Link
                             href="/profile"
