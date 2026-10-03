@@ -337,22 +337,22 @@ export default function FacilityIndex({
                                     >
                                         <div>
                                             <div className="flex items-center justify-between gap-2">
-                                                <span className="text-xs font-semibold text-[#2D4C79]">
+                                                <span className="text-sm font-semibold text-[#2D4C79]">
                                                     {typeLabels[fac.type] || fac.type}
                                                 </span>
                                                 <span
-                                                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${status.classes}`}
+                                                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${status.classes}`}
                                                 >
                                                     <span>{status.icon}</span>
                                                     <span>{status.label}</span>
                                                 </span>
                                             </div>
 
-                                            <h2 className="mt-3 text-base font-semibold text-[#111827]">
+                                            <h2 className="mt-3 text-lg font-semibold text-[#111827]">
                                                 {fac.name}
                                             </h2>
 
-                                            <dl className="mt-3 space-y-1.5 text-xs text-[#667085]">
+                                            <dl className="mt-3 space-y-1.5 text-sm text-[#667085]">
                                                 <div className="flex justify-between">
                                                     <dt>Lokasi:</dt>
                                                     <dd className="font-medium text-[#111827]">
@@ -376,7 +376,7 @@ export default function FacilityIndex({
                                             </dl>
 
                                             {fac.description && (
-                                                <p className="mt-3 line-clamp-2 text-xs text-[#667085]">
+                                                <p className="mt-3 line-clamp-2 text-sm text-[#667085]">
                                                     {fac.description}
                                                 </p>
                                             )}
@@ -385,7 +385,7 @@ export default function FacilityIndex({
                                         <div className="mt-5 pt-4 border-t border-[#E5E7EB]">
                                             <Link
                                                 href={`/facilities/${fac.id}`}
-                                                className="inline-flex h-9 w-full items-center justify-center rounded-md border border-[#D0D5DD] bg-white text-xs font-semibold text-[#2D4C79] hover:bg-[#E9EEF5] hover:border-[#2D4C79] transition"
+                                                className="inline-flex h-10 w-full items-center justify-center rounded-md border border-[#D0D5DD] bg-white text-sm font-semibold text-[#2D4C79] hover:bg-[#E9EEF5] hover:border-[#2D4C79] transition"
                                             >
                                                 Lihat Detail & Jadwal →
                                             </Link>
