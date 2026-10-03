@@ -160,10 +160,10 @@ export default function FacilityIndex({
                                         aria-label="Buka profil"
                                         className="group hidden rounded-md text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79] sm:block"
                                     >
-                                        <span className="block text-xs font-semibold text-[#111827] group-hover:text-[#2D4C79]">
+                                        <span className="block text-sm font-semibold text-[#111827] group-hover:text-[#2D4C79]">
                                             {user.nama || user.name}
                                         </span>
-                                        <span className="block text-[10px] text-[#667085] capitalize">
+                                        <span className="block text-xs text-[#667085] capitalize">
                                             {user.role}
                                         </span>
                                     </Link>
@@ -171,7 +171,7 @@ export default function FacilityIndex({
                                         href="/logout"
                                         method="post"
                                         as="button"
-                                        className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#5D6673] hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition shadow-sm"
+                                        className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#5D6673] hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition shadow-sm"
                                     >
                                         Keluar
                                     </Link>
