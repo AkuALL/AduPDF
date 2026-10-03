@@ -1,5 +1,14 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ChevronDown, LogOut, User as UserIcon } from 'lucide-react';
 
 type Facility = {
     id: number;
@@ -99,81 +108,112 @@ export default function FacilityIndex({
             <div className="min-h-screen bg-[#F7F8FA] text-[#111827] font-sans antialiased">
                 {/* Navigation Bar */}
                 <header className="sticky top-0 z-30 border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm">
-                    <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
-                        <div className="flex items-center gap-8">
+                    <div className="relative flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
+                        <div className="flex items-center">
                             <Link href="/" className="flex items-center gap-2">
                                 <span className="text-xl font-bold tracking-tight text-[#2D4C79]">
                                     AduPDF
                                 </span>
-                                <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-xs font-semibold text-[#2D4C79]">
-                                    Kampus
+                                <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-base font-semibold text-[#2D4C79]">
+                                    Universitas Diponegoro
                                 </span>
                             </Link>
-                            <nav className="hidden sm:flex sm:gap-6 text-sm">
-                                <Link
-                                    href="/facilities"
-                                    className="font-semibold text-[#2D4C79] border-b-2 border-[#2D4C79] pb-4 pt-4"
-                                >
-                                    Fasilitas
-                                </Link>
-                                {user?.role === 'pengguna' && (
-                                    <>
-                                        <Link
-                                            href="/reservations"
-                                            className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                        >
-                                            Reservasi Saya
-                                        </Link>
-                                        <Link
-                                            href="/reports"
-                                            className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                        >
-                                            Lapor Kerusakan
-                                        </Link>
-                                    </>
-                                )}
-                                {user?.role === 'petugas' && (
-                                    <Link
-                                        href="/petugas/reservations"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                    >
-                                        Panel Petugas
-                                    </Link>
-                                )}
-                                {user?.role === 'admin' && (
-                                    <a
-                                        href="/admin/facilities"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                    >
-                                        Kelola Fasilitas
-                                    </a>
-                                )}
-                            </nav>
                         </div>
-                        <div className="flex items-center gap-3">
-                            {user ? (
+
+                        <nav className="hidden sm:flex sm:items-center sm:gap-6 text-base absolute left-1/2 -translate-x-1/2">
+                            <Link
+                                href="/facilities"
+                                className="relative py-4 font-semibold text-[#2D4C79] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#2D4C79] after:origin-center after:scale-x-100 after:transition-transform after:duration-500"
+                            >
+                                Fasilitas
+                            </Link>
+                            {user?.role === 'pengguna' && (
                                 <>
                                     <Link
-                                        href="/profile"
-                                        aria-label="Buka profil"
-                                        className="group hidden rounded-md text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79] sm:block"
+                                        href="/reservations"
+                                        className="relative py-4 font-medium text-[#667085] hover:text-[#2D4C79] transition-colors after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#2D4C79] after:origin-center after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-500"
                                     >
-                                        <span className="block text-xs font-semibold text-[#111827] group-hover:text-[#2D4C79]">
-                                            {user.nama || user.name}
-                                        </span>
-                                        <span className="block text-[10px] text-[#667085] capitalize">
-                                            {user.role}
-                                        </span>
+                                        Reservasi
                                     </Link>
                                     <Link
-                                        href="/logout"
-                                        method="post"
-                                        as="button"
-                                        className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#5D6673] hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition shadow-sm"
+                                        href="/reports"
+                                        className="relative py-4 font-medium text-[#667085] hover:text-[#2D4C79] transition-colors after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#2D4C79] after:origin-center after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-500"
                                     >
-                                        Keluar
+                                        Laporan
                                     </Link>
                                 </>
+                            )}
+                            {user?.role === 'petugas' && (
+                                <Link
+                                    href="/petugas/reservations"
+                                    className="relative py-4 font-medium text-[#667085] hover:text-[#2D4C79] transition-colors after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#2D4C79] after:origin-center after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200"
+                                >
+                                    Panel Petugas
+                                </Link>
+                            )}
+                            {user?.role === 'admin' && (
+                                <a
+                                    href="/admin/facilities"
+                                    className="relative py-4 font-medium text-[#667085] hover:text-[#2D4C79] transition-colors after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#2D4C79] after:origin-center after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200"
+                                >
+                                    Kelola Fasilitas
+                                </a>
+                            )}
+                        </nav>
+
+                        <div className="flex items-center gap-3">
+                            {user ? (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <button
+                                            type="button"
+                                            className="flex items-center gap-3 rounded-full border border-[#E5E7EB] bg-white py-1.5 pl-2 pr-3.5 text-left transition hover:bg-[#F7F8FA] focus:outline-none focus:ring-2 focus:ring-[#2D4C79]/20 cursor-pointer shadow-xs"
+                                        >
+                                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E9EEF5] text-sm font-bold text-[#2D4C79]">
+                                                {(user.nama || user.name || 'U').charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="hidden text-left sm:block">
+                                                <span className="block text-sm font-semibold text-[#111827] leading-tight">
+                                                    {user.nama || user.name}
+                                                </span>
+                                                <span className="block text-xs text-[#667085] capitalize leading-none">
+                                                    {user.role}
+                                                </span>
+                                            </div>
+                                            <ChevronDown className="h-4 w-4 text-[#667085]" />
+                                        </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-56 rounded-xl border border-[#E5E7EB] bg-white p-1.5 text-[#111827] shadow-lg">
+                                        <DropdownMenuLabel className="px-3 py-2">
+                                            <div className="font-semibold text-sm text-[#111827]">{user.nama || user.name}</div>
+                                            {user.email && (
+                                                <div className="truncate text-xs text-[#667085] font-normal">{user.email}</div>
+                                            )}
+                                        </DropdownMenuLabel>
+                                        <DropdownMenuSeparator className="my-1 bg-[#F3F4F6]" />
+                                        <DropdownMenuItem asChild>
+                                            <Link
+                                                href="/profile"
+                                                className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-[#374151] transition hover:bg-[#F3F4F6]"
+                                            >
+                                                <UserIcon className="h-4 w-4 text-[#667085]" />
+                                                <span>Pengaturan Profil</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator className="my-1 bg-[#F3F4F6]" />
+                                        <DropdownMenuItem asChild>
+                                            <Link
+                                                href="/logout"
+                                                method="post"
+                                                as="button"
+                                                className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-rose-600 transition hover:bg-rose-50"
+                                            >
+                                                <LogOut className="h-4 w-4 text-rose-500" />
+                                                <span>Keluar</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             ) : (
                                 <>
                                     <a
@@ -198,10 +238,10 @@ export default function FacilityIndex({
                 <main className="w-full px-4 py-8 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="mb-6">
-                        <h1 className="text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl">
+                        <h1 className="text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl text-center">
                             Fasilitas Kampus
                         </h1>
-                        <p className="mt-1 text-sm text-[#667085]">
+                        <p className="mt-1 text-lg text-[#667085] text-center">
                             Temukan fasilitas ruangan dan peralatan untuk kegiatan akademik dan organisasi.
                         </p>
                     </div>
@@ -212,8 +252,8 @@ export default function FacilityIndex({
                         className="mb-8 rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)]"
                     >
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            <div className="sm:col-span-2 lg:col-span-1">
-                                <label className="mb-1.5 block text-xs font-semibold text-[#111827]">
+                            <div className="group sm:col-span-2 lg:col-span-1">
+                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Cari Fasilitas
                                 </label>
                                 <input
@@ -221,18 +261,18 @@ export default function FacilityIndex({
                                     value={form.search}
                                     onChange={(e) => setForm({ ...form, search: e.target.value })}
                                     placeholder="Nama atau lokasi..."
-                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition-all hover:border-[#2D4C79] hover:shadow-xs group-hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
                                 />
                             </div>
 
-                            <div>
-                                <label className="mb-1.5 block text-xs font-semibold text-[#111827]">
+                            <div className="group">
+                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Tipe
                                 </label>
                                 <select
                                     value={form.type}
                                     onChange={(e) => setForm({ ...form, type: e.target.value })}
-                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] outline-none transition-all hover:border-[#2D4C79] hover:shadow-xs group-hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
                                 >
                                     <option value="">Semua tipe</option>
                                     {types.map((type) => (
@@ -243,14 +283,14 @@ export default function FacilityIndex({
                                 </select>
                             </div>
 
-                            <div>
-                                <label className="mb-1.5 block text-xs font-semibold text-[#111827]">
+                            <div className="group">
+                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Lokasi
                                 </label>
                                 <select
                                     value={form.location}
                                     onChange={(e) => setForm({ ...form, location: e.target.value })}
-                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] outline-none transition-all hover:border-[#2D4C79] hover:shadow-xs group-hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
                                 >
                                     <option value="">Semua lokasi</option>
                                     {locations.map((loc) => (
@@ -261,8 +301,8 @@ export default function FacilityIndex({
                                 </select>
                             </div>
 
-                            <div>
-                                <label className="mb-1.5 block text-xs font-semibold text-[#111827]">
+                            <div className="group">
+                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Kapasitas Min.
                                 </label>
                                 <input
@@ -277,32 +317,34 @@ export default function FacilityIndex({
                                         })
                                     }
                                     placeholder="0 orang"
-                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition-all hover:border-[#2D4C79] hover:shadow-xs group-hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
                                 />
                             </div>
                         </div>
 
-                        <div className="mt-4 flex items-center justify-between border-t border-[#E5E7EB] pt-4">
-                            <span className="text-xs text-[#667085]">
-                                Menampilkan <strong className="font-semibold text-[#111827]">{facilities.length}</strong> fasilitas
-                            </span>
-                            <div className="flex gap-2">
-                                <button
-                                    type="button"
-                                    onClick={resetFilters}
-                                    className="h-9 rounded-md border border-[#D0D5DD] bg-white px-3.5 text-xs font-semibold text-[#111827] hover:bg-[#F3F5F7] transition"
-                                >
-                                    Reset
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="h-9 rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
-                                >
-                                    Terapkan Filter
-                                </button>
-                            </div>
+                        <div className="mt-4 flex justify-end gap-2 border-t border-[#E5E7EB] pt-4">
+                            <button
+                                type="button"
+                                onClick={resetFilters}
+                                className="h-10 rounded-md border border-[#D0D5DD] bg-white px-4 text-sm font-semibold text-[#111827] hover:bg-[#F3F5F7] transition"
+                            >
+                                Reset
+                            </button>
+                            <button
+                                type="submit"
+                                className="h-10 rounded-md bg-[#2D4C79] px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
+                            >
+                                Terapkan Filter
+                            </button>
                         </div>
                     </form>
+
+                    {/* Facility Count (Above Cards) */}
+                    <div className="mb-4">
+                        <span className="text-base text-[#667085]">
+                            Menampilkan <strong className="font-semibold text-[#111827]">{facilities.length}</strong> fasilitas
+                        </span>
+                    </div>
 
                     {/* Facility List (Design Section 14) */}
                     {facilities.length === 0 ? (
@@ -327,28 +369,29 @@ export default function FacilityIndex({
                                 const status = conditionConfig[fac.condition] || conditionConfig.aktif;
 
                                 return (
-                                    <article
+                                    <Link
                                         key={fac.id}
-                                        className="flex flex-col justify-between rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#D0D5DD] transition"
+                                        href={`/facilities/${fac.id}`}
+                                        className="group flex flex-col justify-between rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#2D4C79] hover:shadow-md transition"
                                     >
                                         <div>
                                             <div className="flex items-center justify-between gap-2">
-                                                <span className="text-xs font-semibold text-[#2D4C79]">
+                                                <span className="text-sm font-semibold text-[#2D4C79]">
                                                     {typeLabels[fac.type] || fac.type}
                                                 </span>
                                                 <span
-                                                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${status.classes}`}
+                                                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${status.classes}`}
                                                 >
                                                     <span>{status.icon}</span>
                                                     <span>{status.label}</span>
                                                 </span>
                                             </div>
 
-                                            <h2 className="mt-3 text-base font-semibold text-[#111827]">
+                                            <h2 className="mt-3 text-lg font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                                 {fac.name}
                                             </h2>
 
-                                            <dl className="mt-3 space-y-1.5 text-xs text-[#667085]">
+                                            <dl className="mt-3 space-y-1.5 text-sm text-[#667085]">
                                                 <div className="flex justify-between">
                                                     <dt>Lokasi:</dt>
                                                     <dd className="font-medium text-[#111827]">
@@ -372,21 +415,18 @@ export default function FacilityIndex({
                                             </dl>
 
                                             {fac.description && (
-                                                <p className="mt-3 line-clamp-2 text-xs text-[#667085]">
+                                                <p className="mt-3 line-clamp-2 text-sm text-[#667085]">
                                                     {fac.description}
                                                 </p>
                                             )}
                                         </div>
 
                                         <div className="mt-5 pt-4 border-t border-[#E5E7EB]">
-                                            <Link
-                                                href={`/facilities/${fac.id}`}
-                                                className="inline-flex h-9 w-full items-center justify-center rounded-md border border-[#D0D5DD] bg-white text-xs font-semibold text-[#2D4C79] hover:bg-[#E9EEF5] hover:border-[#2D4C79] transition"
-                                            >
+                                            <div className="inline-flex h-10 w-full items-center justify-center rounded-md border border-[#D0D5DD] bg-white text-sm font-semibold text-[#2D4C79] group-hover:bg-[#E9EEF5] group-hover:border-[#2D4C79] transition">
                                                 Lihat Detail & Jadwal →
-                                            </Link>
+                                            </div>
                                         </div>
-                                    </article>
+                                    </Link>
                                 );
                             })}
                         </div>
