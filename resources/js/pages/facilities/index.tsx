@@ -1,5 +1,14 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ChevronDown, LogOut, User as UserIcon } from 'lucide-react';
 
 type Facility = {
     id: number;
@@ -154,28 +163,57 @@ export default function FacilityIndex({
 
                         <div className="flex items-center gap-3">
                             {user ? (
-                                <>
-                                    <Link
-                                        href="/profile"
-                                        aria-label="Buka profil"
-                                        className="group hidden rounded-md text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79] sm:block"
-                                    >
-                                        <span className="block text-sm font-semibold text-[#111827] group-hover:text-[#2D4C79]">
-                                            {user.nama || user.name}
-                                        </span>
-                                        <span className="block text-xs text-[#667085] capitalize">
-                                            {user.role}
-                                        </span>
-                                    </Link>
-                                    <Link
-                                        href="/logout"
-                                        method="post"
-                                        as="button"
-                                        className="inline-flex h-10 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-4 text-sm font-medium text-[#5D6673] hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition shadow-sm"
-                                    >
-                                        Keluar
-                                    </Link>
-                                </>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <button
+                                            type="button"
+                                            className="flex items-center gap-3 rounded-full border border-[#E5E7EB] bg-white py-1.5 pl-2 pr-3.5 text-left transition hover:bg-[#F7F8FA] focus:outline-none focus:ring-2 focus:ring-[#2D4C79]/20 cursor-pointer shadow-xs"
+                                        >
+                                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E9EEF5] text-sm font-bold text-[#2D4C79]">
+                                                {(user.nama || user.name || 'U').charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="hidden text-left sm:block">
+                                                <span className="block text-sm font-semibold text-[#111827] leading-tight">
+                                                    {user.nama || user.name}
+                                                </span>
+                                                <span className="block text-xs text-[#667085] capitalize leading-none">
+                                                    {user.role}
+                                                </span>
+                                            </div>
+                                            <ChevronDown className="h-4 w-4 text-[#667085]" />
+                                        </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-56 rounded-xl border border-[#E5E7EB] bg-white p-1.5 text-[#111827] shadow-lg">
+                                        <DropdownMenuLabel className="px-3 py-2">
+                                            <div className="font-semibold text-sm text-[#111827]">{user.nama || user.name}</div>
+                                            {user.email && (
+                                                <div className="truncate text-xs text-[#667085] font-normal">{user.email}</div>
+                                            )}
+                                        </DropdownMenuLabel>
+                                        <DropdownMenuSeparator className="my-1 bg-[#F3F4F6]" />
+                                        <DropdownMenuItem asChild>
+                                            <Link
+                                                href="/profile"
+                                                className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-[#374151] transition hover:bg-[#F3F4F6]"
+                                            >
+                                                <UserIcon className="h-4 w-4 text-[#667085]" />
+                                                <span>Pengaturan Profil</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator className="my-1 bg-[#F3F4F6]" />
+                                        <DropdownMenuItem asChild>
+                                            <Link
+                                                href="/logout"
+                                                method="post"
+                                                as="button"
+                                                className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-rose-600 transition hover:bg-rose-50"
+                                            >
+                                                <LogOut className="h-4 w-4 text-rose-500" />
+                                                <span>Keluar</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             ) : (
                                 <>
                                     <a
