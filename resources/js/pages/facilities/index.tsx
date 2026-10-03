@@ -252,8 +252,8 @@ export default function FacilityIndex({
                         className="mb-8 rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)]"
                     >
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            <div className="sm:col-span-2 lg:col-span-1">
-                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827]">
+                            <div className="group sm:col-span-2 lg:col-span-1">
+                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Cari Fasilitas
                                 </label>
                                 <input
@@ -261,18 +261,18 @@ export default function FacilityIndex({
                                     value={form.search}
                                     onChange={(e) => setForm({ ...form, search: e.target.value })}
                                     placeholder="Nama atau lokasi..."
-                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition-all hover:border-[#2D4C79] hover:shadow-xs group-hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
                                 />
                             </div>
 
-                            <div>
-                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827]">
+                            <div className="group">
+                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Tipe
                                 </label>
                                 <select
                                     value={form.type}
                                     onChange={(e) => setForm({ ...form, type: e.target.value })}
-                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] outline-none transition-all hover:border-[#2D4C79] hover:shadow-xs group-hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
                                 >
                                     <option value="">Semua tipe</option>
                                     {types.map((type) => (
@@ -283,14 +283,14 @@ export default function FacilityIndex({
                                 </select>
                             </div>
 
-                            <div>
-                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827]">
+                            <div className="group">
+                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Lokasi
                                 </label>
                                 <select
                                     value={form.location}
                                     onChange={(e) => setForm({ ...form, location: e.target.value })}
-                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] outline-none transition-all hover:border-[#2D4C79] hover:shadow-xs group-hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
                                 >
                                     <option value="">Semua lokasi</option>
                                     {locations.map((loc) => (
@@ -301,8 +301,8 @@ export default function FacilityIndex({
                                 </select>
                             </div>
 
-                            <div>
-                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827]">
+                            <div className="group">
+                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Kapasitas Min.
                                 </label>
                                 <input
@@ -317,7 +317,7 @@ export default function FacilityIndex({
                                         })
                                     }
                                     placeholder="0 orang"
-                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition-all hover:border-[#2D4C79] hover:shadow-xs group-hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
                                 />
                             </div>
                         </div>
