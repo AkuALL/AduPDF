@@ -284,27 +284,29 @@ export default function FacilityIndex({
                             </div>
                         </div>
 
-                        <div className="mt-4 flex items-center justify-between border-t border-[#E5E7EB] pt-4">
-                            <span className="text-sm text-[#667085]">
-                                Menampilkan <strong className="font-semibold text-[#111827]">{facilities.length}</strong> fasilitas
-                            </span>
-                            <div className="flex gap-2">
-                                <button
-                                    type="button"
-                                    onClick={resetFilters}
-                                    className="h-9 rounded-md border border-[#D0D5DD] bg-white px-3.5 text-xs font-semibold text-[#111827] hover:bg-[#F3F5F7] transition"
-                                >
-                                    Reset
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="h-9 rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
-                                >
-                                    Terapkan Filter
-                                </button>
-                            </div>
+                        <div className="mt-4 flex justify-end gap-2 border-t border-[#E5E7EB] pt-4">
+                            <button
+                                type="button"
+                                onClick={resetFilters}
+                                className="h-9 rounded-md border border-[#D0D5DD] bg-white px-3.5 text-xs font-semibold text-[#111827] hover:bg-[#F3F5F7] transition"
+                            >
+                                Reset
+                            </button>
+                            <button
+                                type="submit"
+                                className="h-9 rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
+                            >
+                                Terapkan Filter
+                            </button>
                         </div>
                     </form>
+
+                    {/* Facility Count (Above Cards) */}
+                    <div className="mb-4">
+                        <span className="text-base text-[#667085]">
+                            Menampilkan <strong className="font-semibold text-[#111827]">{facilities.length}</strong> fasilitas
+                        </span>
+                    </div>
 
                     {/* Facility List (Design Section 14) */}
                     {facilities.length === 0 ? (
