@@ -288,13 +288,13 @@ export default function FacilityIndex({
                             <button
                                 type="button"
                                 onClick={resetFilters}
-                                className="h-9 rounded-md border border-[#D0D5DD] bg-white px-3.5 text-xs font-semibold text-[#111827] hover:bg-[#F3F5F7] transition"
+                                className="h-10 rounded-md border border-[#D0D5DD] bg-white px-4 text-sm font-semibold text-[#111827] hover:bg-[#F3F5F7] transition"
                             >
                                 Reset
                             </button>
                             <button
                                 type="submit"
-                                className="h-9 rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
+                                className="h-10 rounded-md bg-[#2D4C79] px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
                             >
                                 Terapkan Filter
                             </button>
