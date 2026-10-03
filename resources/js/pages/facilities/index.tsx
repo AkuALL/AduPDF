@@ -123,7 +123,7 @@ export default function FacilityIndex({
                         <nav className="hidden sm:flex sm:items-center sm:gap-6 text-base absolute left-1/2 -translate-x-1/2">
                             <Link
                                 href="/facilities"
-                                className="font-semibold text-[#2D4C79] border-b-2 border-[#2D4C79] pb-4 pt-4"
+                                className="relative py-4 font-semibold text-[#2D4C79] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#2D4C79] after:origin-center after:scale-x-100 after:transition-transform after:duration-500"
                             >
                                 Fasilitas
                             </Link>
@@ -131,13 +131,13 @@ export default function FacilityIndex({
                                 <>
                                     <Link
                                         href="/reservations"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                        className="relative py-4 font-medium text-[#667085] hover:text-[#2D4C79] transition-colors after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#2D4C79] after:origin-center after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-500"
                                     >
                                         Reservasi
                                     </Link>
                                     <Link
                                         href="/reports"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                        className="relative py-4 font-medium text-[#667085] hover:text-[#2D4C79] transition-colors after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#2D4C79] after:origin-center after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-500"
                                     >
                                         Laporan
                                     </Link>
@@ -146,7 +146,7 @@ export default function FacilityIndex({
                             {user?.role === 'petugas' && (
                                 <Link
                                     href="/petugas/reservations"
-                                    className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                    className="relative py-4 font-medium text-[#667085] hover:text-[#2D4C79] transition-colors after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#2D4C79] after:origin-center after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200"
                                 >
                                     Panel Petugas
                                 </Link>
@@ -154,7 +154,7 @@ export default function FacilityIndex({
                             {user?.role === 'admin' && (
                                 <a
                                     href="/admin/facilities"
-                                    className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
+                                    className="relative py-4 font-medium text-[#667085] hover:text-[#2D4C79] transition-colors after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#2D4C79] after:origin-center after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200"
                                 >
                                     Kelola Fasilitas
                                 </a>
