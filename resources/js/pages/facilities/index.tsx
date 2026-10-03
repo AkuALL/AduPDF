@@ -102,16 +102,16 @@ export default function FacilityIndex({
                     <div className="relative flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
                         <div className="flex items-center">
                             <Link href="/" className="flex items-center gap-2">
-                                <span className="text-xl font-bold tracking-tight text-[#2D4C79]">
+                                <span className="text-2xl font-bold tracking-tight text-[#2D4C79]">
                                     AduPDF
                                 </span>
-                                <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-xs font-semibold text-[#2D4C79]">
+                                <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-sm font-semibold text-[#2D4C79]">
                                     Universitas Diponegoro
                                 </span>
                             </Link>
                         </div>
 
-                        <nav className="hidden sm:flex sm:items-center sm:gap-6 text-sm absolute left-1/2 -translate-x-1/2">
+                        <nav className="hidden sm:flex sm:items-center sm:gap-6 text-lg absolute left-1/2 -translate-x-1/2">
                             <Link
                                 href="/facilities"
                                 className="font-semibold text-[#2D4C79] border-b-2 border-[#2D4C79] pb-4 pt-4"
@@ -203,7 +203,7 @@ export default function FacilityIndex({
                         <h1 className="text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl">
                             Fasilitas Kampus
                         </h1>
-                        <p className="mt-1 text-sm text-[#667085]">
+                        <p className="mt-1 text-lg text-[#667085]">
                             Temukan fasilitas ruangan dan peralatan untuk kegiatan akademik dan organisasi.
                         </p>
                     </div>
@@ -215,7 +215,7 @@ export default function FacilityIndex({
                     >
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             <div className="sm:col-span-2 lg:col-span-1">
-                                <label className="mb-1.5 block text-xs font-semibold text-[#111827]">
+                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827]">
                                     Cari Fasilitas
                                 </label>
                                 <input
@@ -228,7 +228,7 @@ export default function FacilityIndex({
                             </div>
 
                             <div>
-                                <label className="mb-1.5 block text-xs font-semibold text-[#111827]">
+                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827]">
                                     Tipe
                                 </label>
                                 <select
@@ -246,7 +246,7 @@ export default function FacilityIndex({
                             </div>
 
                             <div>
-                                <label className="mb-1.5 block text-xs font-semibold text-[#111827]">
+                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827]">
                                     Lokasi
                                 </label>
                                 <select
@@ -264,7 +264,7 @@ export default function FacilityIndex({
                             </div>
 
                             <div>
-                                <label className="mb-1.5 block text-xs font-semibold text-[#111827]">
+                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827]">
                                     Kapasitas Min.
                                 </label>
                                 <input
@@ -285,7 +285,7 @@ export default function FacilityIndex({
                         </div>
 
                         <div className="mt-4 flex items-center justify-between border-t border-[#E5E7EB] pt-4">
-                            <span className="text-xs text-[#667085]">
+                            <span className="text-sm text-[#667085]">
                                 Menampilkan <strong className="font-semibold text-[#111827]">{facilities.length}</strong> fasilitas
                             </span>
                             <div className="flex gap-2">
