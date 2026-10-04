@@ -1,4 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { UserNavbar } from '@/components/user-navbar';
 import DateCalendarGrid from '@/components/date-calendar-grid';
 import { useState } from 'react';
 
@@ -129,103 +130,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
             <Head title={`${facility.name} — AduPDF`} />
             <div className="min-h-screen bg-[#F7F8FA] text-[#111827] font-sans antialiased">
                 {/* Navigation Bar */}
-                <header className="sticky top-0 z-30 border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm">
-                    <div className="relative flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
-                        <div className="flex items-center">
-                            <Link href="/" className="flex items-center gap-2">
-                                <span className="text-xl font-bold tracking-tight text-[#2D4C79]">
-                                    AduPDF
-                                </span>
-                                <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-xs font-semibold text-[#2D4C79]">
-                                    Kampus
-                                </span>
-                            </Link>
-                        </div>
-
-                        <nav className="hidden sm:flex sm:items-center sm:gap-6 text-sm absolute left-1/2 -translate-x-1/2">
-                            <Link
-                                href="/facilities"
-                                className="font-semibold text-[#2D4C79] border-b-2 border-[#2D4C79] pb-4 pt-4"
-                            >
-                                Fasilitas
-                            </Link>
-                            {user?.role === 'pengguna' && (
-                                <>
-                                    <Link
-                                        href="/reservations"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                    >
-                                        Reservasi Saya
-                                    </Link>
-                                    <Link
-                                        href="/reports"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                    >
-                                        Lapor Fasilitas
-                                    </Link>
-                                </>
-                            )}
-                            {user?.role === 'petugas' && (
-                                <Link
-                                    href="/petugas/reservations"
-                                    className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                >
-                                    Panel Petugas
-                                </Link>
-                            )}
-                            {user?.role === 'admin' && (
-                                <a
-                                    href="/admin/facilities"
-                                    className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                >
-                                    Kelola Fasilitas
-                                </a>
-                            )}
-                        </nav>
-
-                        <div className="flex items-center gap-3">
-                            {user ? (
-                                <>
-                                    <Link
-                                        href="/profile"
-                                        aria-label="Buka profil"
-                                        className="group hidden rounded-md text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79] sm:block"
-                                    >
-                                        <span className="block text-xs font-semibold text-[#111827] group-hover:text-[#2D4C79]">
-                                            {user.nama || user.name}
-                                        </span>
-                                        <span className="block text-[10px] text-[#667085] capitalize">
-                                            {user.role}
-                                        </span>
-                                    </Link>
-                                    <Link
-                                        href="/logout"
-                                        method="post"
-                                        as="button"
-                                        className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#5D6673] hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition shadow-sm"
-                                    >
-                                        Keluar
-                                    </Link>
-                                </>
-                            ) : (
-                                <>
-                                    <a
-                                        href="/login"
-                                        className="inline-flex h-9 items-center justify-center rounded-md px-3.5 text-sm font-medium text-[#111827] hover:bg-[#F3F5F7] transition"
-                                    >
-                                        Masuk
-                                    </a>
-                                    <a
-                                        href="/register"
-                                        className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
-                                    >
-                                        Daftar
-                                    </a>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </header>
+                <UserNavbar current="facilities" />
 
                 {/* Main Content Area */}
                 <main className="w-full px-4 py-8 sm:px-6 lg:px-8">
