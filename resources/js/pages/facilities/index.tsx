@@ -54,7 +54,7 @@ const conditionConfig: Record<
 > = {
     aktif: {
         label: 'Aktif',
-        icon: '✓',
+        icon: '',
         classes: 'bg-[#EAF7F0] text-[#16794A] border-[#B7E2CB]',
     },
     dalam_perbaikan: {
@@ -242,7 +242,7 @@ export default function FacilityIndex({
                             Fasilitas Kampus
                         </h1>
                         <p className="mt-1 text-lg text-[#667085] text-center">
-                            Temukan fasilitas ruangan dan peralatan untuk kegiatan akademik dan organisasi.
+                            Temukan ruangan dan peralatan untuk kegiatan akademik dan organisasi.
                         </p>
                     </div>
 
@@ -254,7 +254,7 @@ export default function FacilityIndex({
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             <div className="group sm:col-span-2 lg:col-span-1">
                                 <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
-                                    Cari Fasilitas
+                                    Cari
                                 </label>
                                 <input
                                     type="text"
@@ -303,7 +303,7 @@ export default function FacilityIndex({
 
                             <div className="group">
                                 <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
-                                    Kapasitas Min.
+                                    Kapasitas
                                 </label>
                                 <input
                                     type="number"
@@ -382,7 +382,7 @@ export default function FacilityIndex({
                                                 <span
                                                     className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${status.classes}`}
                                                 >
-                                                    <span>{status.icon}</span>
+                                                    {status.icon && <span>{status.icon}</span>}
                                                     <span>{status.label}</span>
                                                 </span>
                                             </div>
