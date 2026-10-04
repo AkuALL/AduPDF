@@ -94,10 +94,10 @@ export default function FacilityIndex({
                 <main className="w-full px-4 py-8 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="mb-6">
-                        <h1 className="text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl text-center">
+                        <h1 className="text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl">
                             Fasilitas Kampus
                         </h1>
-                        <p className="mt-1 text-lg text-[#667085] text-center">
+                        <p className="mt-1 text-lg text-[#667085]">
                             Temukan ruangan dan peralatan untuk kegiatan akademik dan organisasi.
                         </p>
                     </div>
@@ -109,7 +109,7 @@ export default function FacilityIndex({
                     >
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             <div className="group sm:col-span-2 lg:col-span-1">
-                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
+                                <label className="mb-1.5 block text-base font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Cari
                                 </label>
                                 <input
@@ -122,7 +122,7 @@ export default function FacilityIndex({
                             </div>
 
                             <div className="group">
-                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
+                                <label className="mb-1.5 block text-base font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Tipe
                                 </label>
                                 <select
@@ -140,7 +140,7 @@ export default function FacilityIndex({
                             </div>
 
                             <div className="group">
-                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
+                                <label className="mb-1.5 block text-base font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Lokasi
                                 </label>
                                 <select
@@ -158,7 +158,7 @@ export default function FacilityIndex({
                             </div>
 
                             <div className="group">
-                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
+                                <label className="mb-1.5 block text-base font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Kapasitas
                                 </label>
                                 <input

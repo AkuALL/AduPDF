@@ -54,22 +54,22 @@ export default function ReservationIndex({ reservations, success }: Props) {
 
                 <main className="w-full px-4 py-8 sm:px-6 lg:px-8">
                     {/* Header */}
-                    <div className="mb-8 flex flex-col items-center justify-center text-center">
-                        <h1 className="text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl">
-                            Riwayat Reservasi
-                        </h1>
-                        <p className="mt-1 text-lg text-[#667085] max-w-2xl">
-                            Pantau status pengajuan dan jadwal peminjaman fasilitas Anda.
-                        </p>
-                        <div className="mt-4">
-                            <Link
-                                href="/facilities"
-                                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-[#2D4C79] px-5 text-sm font-semibold text-white shadow-xs hover:bg-[#243E63] active:bg-[#1C3150] transition"
-                            >
-                                <span>+</span>
-                                <span>Ajukan Reservasi</span>
-                            </Link>
+                    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h1 className="text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl">
+                                Riwayat Reservasi
+                            </h1>
+                            <p className="mt-1 text-lg text-[#667085]">
+                                Pantau status pengajuan dan jadwal peminjaman fasilitas Anda.
+                            </p>
                         </div>
+                        <Link
+                            href="/facilities"
+                            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-[#2D4C79] px-5 text-sm font-semibold text-white shadow-xs hover:bg-[#243E63] active:bg-[#1C3150] transition shrink-0"
+                        >
+                            <span>+</span>
+                            <span>Ajukan Reservasi</span>
+                        </Link>
                     </div>
 
                     {success && (
