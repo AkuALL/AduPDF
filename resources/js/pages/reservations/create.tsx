@@ -45,6 +45,16 @@ function nextWibSlot(time: string): string {
     return `${String(Math.floor(nextMinutes / 60)).padStart(2, '0')}:${String(nextMinutes % 60).padStart(2, '0')}`;
 }
 
+function formatDuration(start: string, end: string): string {
+    const [sh, sm] = start.split(':').map(Number);
+    const [eh, em] = end.split(':').map(Number);
+    const minutes = (eh * 60 + em) - (sh * 60 + sm);
+    if (isNaN(minutes) || minutes <= 0) return '';
+    if (minutes < 60) return `${minutes} Menit`;
+    const hours = minutes / 60;
+    return `${hours.toString().replace('.', ',')} Jam`;
+}
+
 type Props = {
     facility: { id: number; name: string; location: string };
     reservable: boolean;
@@ -132,9 +142,14 @@ export default function CreateReservation({ facility, reservable, success, serve
 
                 <main className="w-full px-4 py-8 sm:px-6 lg:px-8">
                     <div className="mx-auto max-w-4xl">
-                        <Link href={`/facilities/${facility.id}`} className="text-sm font-medium text-[#2D4C79] hover:underline">
-                            <span aria-hidden="true">←</span> Kembali ke detail fasilitas
-                        </Link>
+                        <div className="mb-6">
+                            <Link
+                                href={`/facilities/${facility.id}`}
+                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
+                            >
+                                <span aria-hidden="true">←</span> Kembali ke detail fasilitas
+                            </Link>
+                        </div>
                         <h1 className="mt-6 text-2xl font-bold">Ajukan reservasi</h1>
                         <p className="mt-2 text-sm text-[#667085]">{facility.name} · {facility.location}</p>
                         {success && <p role="status" className="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
@@ -170,22 +185,27 @@ export default function CreateReservation({ facility, reservable, success, serve
                                             <div>
                                                 <label htmlFor="start_time_input" className="block text-sm font-medium">Waktu mulai (WIB)</label>
                                                 <input
-                                                    type="time"
+                                                    type="text"
                                                     id="start_time_input"
+                                                    list="start_time_list"
                                                     value={startTime}
+                                                    placeholder="07:00"
+                                                    maxLength={5}
                                                     required
                                                     disabled={!selectedDate || noCurrentDaySlots}
-                                                    min={selectedDate === currentWib.date && !noCurrentDaySlots ? minimumStartTime : '07:00'}
-                                                    max={selectedDate === latestDate && latestStartTime < '19:30' ? latestStartTime : '19:30'}
-                                                    step={1800}
                                                     onChange={(event) => {
                                                         setStartTime(event.currentTarget.value);
                                                         setEndTime('');
                                                     }}
                                                     aria-invalid={!!errors.start_time || !!startTimeError}
                                                     aria-describedby={startTimeError ? 'start_time_client_error' : undefined}
-                                                    className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 focus-visible:border-[#2D4C79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 disabled:cursor-not-allowed disabled:bg-[#F3F5F7] disabled:text-[#98A2B3]"
+                                                    className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm focus-visible:border-[#2D4C79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 disabled:cursor-not-allowed disabled:bg-[#F3F5F7] disabled:text-[#98A2B3]"
                                                 />
+                                                <datalist id="start_time_list">
+                                                    {startTimeOptions.map((opt) => (
+                                                        <option key={opt} value={opt} />
+                                                    ))}
+                                                </datalist>
                                                 {startTimeError && <p id="start_time_client_error" role="alert" className="mt-1 text-sm text-red-700">{startTimeError}</p>}
                                                 {errors.start_time && <p role="alert" className="mt-1 text-sm text-red-700">{errors.start_time}</p>}
                                             </div>
@@ -193,19 +213,26 @@ export default function CreateReservation({ facility, reservable, success, serve
                                             <div>
                                                 <label htmlFor="end_time_input" className="block text-sm font-medium">Waktu selesai (WIB)</label>
                                                 <input
-                                                    type="time"
+                                                    type="text"
                                                     id="end_time_input"
+                                                    list="end_time_list"
                                                     value={endTime}
+                                                    placeholder="07:30"
+                                                    maxLength={5}
                                                     required
                                                     disabled={!selectedDate || !startTime}
-                                                    min={startTime ? nextWibSlot(startTime) : '07:30'}
-                                                    max="20:00"
-                                                    step={1800}
                                                     onChange={(event) => setEndTime(event.currentTarget.value)}
                                                     aria-invalid={!!errors.end_time || !!endTimeError}
                                                     aria-describedby={endTimeError ? 'end_time_client_error' : undefined}
-                                                    className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 focus-visible:border-[#2D4C79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 disabled:cursor-not-allowed disabled:bg-[#F3F5F7] disabled:text-[#98A2B3]"
+                                                    className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm focus-visible:border-[#2D4C79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 disabled:cursor-not-allowed disabled:bg-[#F3F5F7] disabled:text-[#98A2B3]"
                                                 />
+                                                <datalist id="end_time_list">
+                                                    {timeOptions
+                                                        .filter((opt) => !startTime || opt > startTime)
+                                                        .map((opt) => (
+                                                            <option key={opt} value={opt} />
+                                                        ))}
+                                                </datalist>
                                                 {endTimeError && <p id="end_time_client_error" role="alert" className="mt-1 text-sm text-red-700">{endTimeError}</p>}
                                                 {errors.end_time && <p role="alert" className="mt-1 text-sm text-red-700">{errors.end_time}</p>}
                                             </div>
@@ -214,7 +241,7 @@ export default function CreateReservation({ facility, reservable, success, serve
 
                                     {selectedDate && startTime && endTime && (
                                         <p role="status" className="rounded-md bg-[#F3F5F7] px-3 py-2 text-sm text-[#344054]">
-                                            Jadwal dipilih: {reservationDateFormatter.format(new Date(`${selectedDate}T00:00:00Z`))}, {startTime}–{endTime} WIB
+                                            Jadwal dipilih: {reservationDateFormatter.format(new Date(`${selectedDate}T00:00:00Z`))}, {startTime} - {endTime} (WIB){formatDuration(startTime, endTime) ? ` (${formatDuration(startTime, endTime)})` : ''}
                                         </p>
                                     )}
 

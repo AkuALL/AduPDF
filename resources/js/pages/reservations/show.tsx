@@ -1,4 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
+import { UserNavbar } from '@/components/user-navbar';
 
 type Reservation = {
     id: number;
@@ -18,10 +19,20 @@ export default function ReservationShow({ reservation, can_cancel, success }: Pr
     return (
         <>
             <Head title="Detail Reservasi" />
-            <main className="min-h-screen bg-[#F7F8FA] px-4 py-10 text-[#111827]">
-                <div className="w-full">
-                    <Link href="/reservations" className="text-sm font-medium text-[#2D4C79] hover:underline">Kembali ke riwayat</Link>
-                    {success && <p role="status" className="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
+            <div className="min-h-screen bg-[#F7F8FA] text-[#111827] font-sans antialiased">
+                <UserNavbar current="reservations" />
+
+                <main className="w-full px-4 py-8 sm:px-6 lg:px-8">
+                    <div className="w-full">
+                        <div className="mb-6">
+                            <Link
+                                href="/reservations"
+                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
+                            >
+                                <span aria-hidden="true">←</span> Kembali ke riwayat
+                            </Link>
+                        </div>
+                        {success && <p role="status" className="mb-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
                     <article className="mt-6 rounded-lg border border-[#E5E7EB] bg-white p-6">
                         <div className="flex items-start justify-between gap-4">
                             <div>
@@ -49,6 +60,7 @@ export default function ReservationShow({ reservation, can_cancel, success }: Pr
                     </article>
                 </div>
             </main>
-        </>
+        </div>
+    </>
     );
 }
