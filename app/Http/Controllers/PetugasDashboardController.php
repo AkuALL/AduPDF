@@ -9,8 +9,6 @@ use App\Models\Report;
 use App\Models\Reservation;
 use App\Queries\ReportQueueQuery;
 use App\Queries\ReservationQueueQuery;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -23,10 +21,9 @@ class PetugasDashboardController extends Controller
      * Segments reservation queue by time slot: nearest slot first, and FIFO (created_at ASC) inside each segment.
      */
     public function index(
-        Request $request,
         ReservationQueueQuery $reservationQueue,
         ReportQueueQuery $reportQueue,
-    ): View|Response {
+    ): Response {
         $pendingReservations = $reservationQueue->pending()->get();
         $newReports = $reportQueue->newReports()->get();
 
@@ -140,10 +137,6 @@ class PetugasDashboardController extends Controller
             'under_repair_facilities' => $formattedUnderRepairFacilities,
         ];
 
-        if ($request->header('X-Inertia') || $request->wantsJson()) {
-            return Inertia::render('petugas/dashboard', $data);
-        }
-
-        return view('petugas.dashboard', $data);
+        return Inertia::render('petugas/dashboard', $data);
     }
 }

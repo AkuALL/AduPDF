@@ -134,10 +134,10 @@ test('shared status badge component renders label and explicit symbol icon', fun
         ->and($ditolak)->toContain('×')
         ->and($ditolak)->toContain('#B42318');
 
-    $kedaluwarsa = Blade::render('<x-status-badge status="kedaluwarsa" />');
-    expect($kedaluwarsa)->toContain('Kedaluwarsa')
-        ->and($kedaluwarsa)->toContain('—')
-        ->and($kedaluwarsa)->toContain('#5D6673');
+    $unknownStatus = Blade::render('<x-status-badge status="custom" />');
+    expect($unknownStatus)->toContain('Custom')
+        ->and($unknownStatus)->toContain('•')
+        ->and($unknownStatus)->toContain('#5D6673');
 });
 
 test('shared empty state component renders informative copy and CTA link', function () {

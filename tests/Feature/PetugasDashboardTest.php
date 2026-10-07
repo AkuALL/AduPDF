@@ -9,6 +9,7 @@ use App\Models\Report;
 use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
@@ -39,10 +40,13 @@ test('petugas can visit operational dashboard with empty state (DA-02, FR-09)', 
 
     $response = $this->actingAs($petugas)->get(route('petugas.dashboard'));
 
-    $response->assertOk();
-    $response->assertSee('Dashboard Antrean Petugas');
-    $response->assertSee('Tidak Ada Antrean Reservasi');
-    $response->assertSee('Tidak Ada Laporan Baru');
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('petugas/dashboard')
+        ->where('pending_reservations_count', 0)
+        ->where('new_reports_count', 0)
+        ->where('reservation_segments', [])
+        ->where('reports', [])
+    );
 });
 
 test('petugas dashboard segments reservation queue by time slot and orders FIFO within segments (DA-02, FR-09, BR-25)', function () {
@@ -95,24 +99,15 @@ test('petugas dashboard segments reservation queue by time slot and orders FIFO 
 
     $response = $this->actingAs($petugas)->get(route('petugas.dashboard'));
 
-    $response->assertOk();
-    $content = $response->getContent();
-
-    // Verify both facilities and purposes appear
-    $response->assertSee('Lab Software Engineering');
-    $response->assertSee('Aula Nusantara');
-    $response->assertSee('Praktikum Pemrograman Web Lanjut');
-    $response->assertSee('Rapat Koordinasi Himpunan Mahasiswa');
-    $response->assertSee('Workshop UI/UX Design');
-
-    // Verify ordering:
-    // Slot 1 (08:00) should appear before Slot 2 (13:00)
-    $posSlot1Res1 = strpos($content, 'Praktikum Pemrograman Web Lanjut');
-    $posSlot1Res2 = strpos($content, 'Rapat Koordinasi Himpunan Mahasiswa');
-    $posSlot2Res3 = strpos($content, 'Workshop UI/UX Design');
-
-    expect($posSlot1Res1)->toBeLessThan($posSlot1Res2)
-        ->and($posSlot1Res2)->toBeLessThan($posSlot2Res3);
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('petugas/dashboard')
+        ->has('reservation_segments', 2)
+        ->where('reservation_segments.0.reservations.0.facility_name', 'Lab Software Engineering')
+        ->where('reservation_segments.0.reservations.0.tujuan', 'Praktikum Pemrograman Web Lanjut')
+        ->where('reservation_segments.0.reservations.1.facility_name', 'Aula Nusantara')
+        ->where('reservation_segments.0.reservations.1.tujuan', 'Rapat Koordinasi Himpunan Mahasiswa')
+        ->where('reservation_segments.1.reservations.0.tujuan', 'Workshop UI/UX Design')
+    );
 });
 
 test('petugas dashboard only displays new reports and ignores non-new ones (DA-02, FR-09, BR-13)', function () {
@@ -146,14 +141,14 @@ test('petugas dashboard only displays new reports and ignores non-new ones (DA-0
 
     $response = $this->actingAs($petugas)->get(route('petugas.dashboard'));
 
-    $response->assertOk();
-    $response->assertSee('Stop kontak meja 5 mengeluarkan percikan api');
-    $response->assertSee('Pelapor Kerusakan');
-    $response->assertSee('Kelistrikan');
-
-    // Should NOT see processing or completed reports in the new reports queue
-    $response->assertDontSee('AC bocor menetes ke lantai');
-    $response->assertDontSee('Lampu ruangan padam');
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('petugas/dashboard')
+        ->has('reports', 1)
+        ->where('reports.0.deskripsi', 'Stop kontak meja 5 mengeluarkan percikan api')
+        ->where('reports.0.reporter_name', 'Pelapor Kerusakan')
+        ->where('reports.0.kategori', 'Kelistrikan')
+        ->where('new_reports_count', 1)
+    );
 });
 
 test('petugas can approve a pending reservation directly from the dashboard (DA-02, FR-10)', function () {
@@ -259,11 +254,18 @@ test('petugas dashboard displays 4 operational metrics, today agenda, and under 
 
     $response = $this->actingAs($petugas)->get(route('petugas.dashboard'));
 
-    $response->assertOk();
-    $response->assertSee('Sidang Skripsi Terbuka Hari Ini');
-    $response->assertSee('Ruang Seminar Utama');
-    $response->assertSee('Lab Multimedia Rusak');
-    $response->assertDontSee('Kuliah Tamu Besok Pagi');
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('petugas/dashboard')
+        ->where('today_reservations_count', 1)
+        ->where('today_reservations.0.tujuan', 'Sidang Skripsi Terbuka Hari Ini')
+        ->where('today_reservations.0.facility_name', 'Ruang Seminar Utama')
+        ->where('under_repair_facilities_count', 1)
+        ->where('under_repair_facilities.0.name', 'Lab Multimedia Rusak')
+        ->where('pending_reservations_count', 1)
+        ->where('reservation_segments.0.reservations.0.tujuan', 'Rapat Senat Akademik')
+        ->where('new_reports_count', 1)
+        ->where('reports.0.deskripsi', 'Konsleting panel listrik')
+    );
 });
 
 test('petugas dashboard inertia response returns complete operational props (DA-02, FR-09)', function () {

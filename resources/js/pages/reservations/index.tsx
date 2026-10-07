@@ -6,7 +6,7 @@ type Reservation = {
     tujuan: string;
     start_time: string;
     end_time: string;
-    status: 'menunggu' | 'disetujui' | 'ditolak' | 'dibatalkan' | 'kedaluwarsa';
+    status: 'menunggu' | 'disetujui' | 'ditolak' | 'dibatalkan';
     alasan_penolakan: string | null;
     ditolak_pada: string | null;
     facility: { id: number; name: string; location: string };
@@ -35,11 +35,6 @@ const statusConfig: Record<
     },
     dibatalkan: {
         label: 'Dibatalkan',
-        classes: 'bg-[#F0F2F4] text-[#5D6673] border-[#D7DBE0]',
-        icon: '—',
-    },
-    kedaluwarsa: {
-        label: 'Kedaluwarsa',
         classes: 'bg-[#F0F2F4] text-[#5D6673] border-[#D7DBE0]',
         icon: '—',
     },
