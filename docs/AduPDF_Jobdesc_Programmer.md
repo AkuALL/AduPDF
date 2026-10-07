@@ -1,17 +1,17 @@
 # AduPDF — Pembagian Tugas 5 Programmer & Dependency-Chain Implementation Plan
 
 **Project:** AduPDF — Sistem Reservasi & Pelaporan Fasilitas Kampus  
-**Tech Stack:** Laravel + Blade  
+**Tech Stack:** Laravel 13 + Inertia.js 3 + React 19 + TypeScript + Tailwind CSS v4\
 **Programmer:** AL, Galang, Daniel, Abhi, Agil  
-**Source of Truth:** `AduPDF_SRS_Final_Konsolidasi`  
+**Source of Truth:** `AduPDF_SRS.md`\
 **Strategi:** Domain ownership with dependency-chain grouping  
-**Tujuan:** mengelompokkan fitur yang saling dependen pada owner yang sama agar kondisi saling tunggu berkurang, sambil tetap menjaga batas ownership antar-domain.
+**Tujuan:** mempertahankan pembagian FR dan ownership V1; setiap perubahan Iterasi 2 dikerjakan oleh owner FR/domain yang sama seperti V1.
 
 ---
 
 # 1. Prinsip Pembagian Tugas
 
-Pembagian tugas menggunakan **dependency-chain grouping**. Satu programmer memegang satu domain secara end-to-end: model/migration, service, controller, route module, Blade view, validation, dan test yang menjadi bagian dari domain tersebut.
+Pembagian tugas menggunakan **dependency-chain grouping**. Satu programmer memegang satu domain secara end-to-end: model/migration, service, controller, route module, Inertia page/React component, validation, dan test yang menjadi bagian dari domain tersebut.
 
 Prinsip utama:
 
@@ -25,6 +25,7 @@ Prinsip utama:
 8. Perubahan lintas-domain harus diminta kepada owner domain terkait.
 9. Defect hasil integration test dikembalikan ke owner domain; owner integrasi tidak mengambil alih business logic domain lain.
 10. Satu fitur dianggap selesai setelah acceptance criteria dan test domain lulus.
+11. Perubahan pada suatu FR dikerjakan oleh owner FR tersebut pada V1; ownership tidak berpindah hanya karena requirement direvisi.
 
 ---
 
@@ -32,9 +33,9 @@ Prinsip utama:
 
 | Programmer | Domain Utama | Beban | Ownership Utama |
 |---|---|---|---|
-| **AL** | **Reservation End-to-End** | Sangat Tinggi | Pengajuan, validasi waktu, conflict engine, room-tool rules, history/detail, H-2 cancellation, approval/reject, emergency cancellation, reservation contracts |
+| **AL** | **Reservation End-to-End** | Sangat Tinggi | Pengajuan, validasi identitas, horizon 90 hari, auto-reject pending saat kedaluwarsa, conflict engine, room-tool rules, history/detail, H-2 cancellation, approval/reject, emergency cancellation, reservation contracts |
 | **Agil** | **Facility + Availability + Room–Tool Relation** | Tinggi | Facility master, parent room-child tool, public catalog, search/filter, status kondisi, availability, admin facility management, deactivate integration |
-| **Galang** | **Authentication + Registration + Verification + RBAC** | Sedang–Tinggi | User foundation, self-registration, verification US-15, login/logout, role middleware/policy, account management, single Admin provisioning |
+| **Galang** | **Authentication + Registration + Profile + RBAC** | Sedang–Tinggi | User foundation, self-registration aktif, login/logout, profil NIM/NIP/No. Pegawai/WhatsApp, soft-delete account, role middleware/policy, account management, single Admin provisioning |
 | **Abhi** | **Damage Report + Repair Flow** | Tinggi | Report, multi-attachment upload, tracking, Petugas processing, maintenance flow, report statistics contract |
 | **Daniel** | **Dashboard + Recap/Export + Integration/QA** | Sedang–Tinggi | Shared UI shell, Petugas dashboard, occupancy/damage recap, CSV/Excel/PDF export, E2E/integration test dan merge coordination |
 
@@ -91,12 +92,16 @@ AL menjadi owner tunggal seluruh lifecycle reservasi dan conflict engine.
 - Migration/table `reservations`.
 - Model `Reservation`.
 - Status: `menunggu`, `disetujui`, `ditolak`, `dibatalkan`.
+- Reservasi `menunggu` yang kedaluwarsa diubah menjadi `ditolak`; isi `alasan_penolakan` dengan keterangan bahwa pengajuan kedaluwarsa.
 - Field: user, facility, tujuan, start/end time, alasan pembatalan jika diperlukan.
 
 **AL-02 — User Reservation Submission (FR-04)**
 - Pengajuan reservasi.
 - Jam operasional 07:00–20:00.
 - Slot 30 menit.
+- Validasi salah satu NIM/NIP/No. Pegawai dari profil sebelum submit.
+- Tidak ada minimum lead time.
+- Batas maksimal `now + 90 hari`.
 - Facility reservability check.
 - Reservation baru berstatus `menunggu`.
 
@@ -133,17 +138,23 @@ AL menjadi owner tunggal seluruh lifecycle reservasi dan conflict engine.
 - `ReservationImpactService` untuk Admin facility deactivation milik Agil.
 - `ReservationStatisticsQuery` untuk recap Daniel.
 
+**AL-08 — Pending Auto-Reject & Queue Contract**
+- Job/command/service yang mengubah reservation `menunggu` menjadi `ditolak` ketika `start_time` tiba dan mengisi `alasan_penolakan` dengan keterangan bahwa pengajuan kedaluwarsa.
+- Bersifat idempotent dan tidak memasukkan reservation yang ditolak karena kedaluwarsa ke occupancy.
+- `ReservationQueueQuery` mengelompokkan antrian berdasarkan slot waktu; segmen slot terdekat dari now lebih dahulu, kemudian `created_at ASC` di dalam setiap segmen.
+
 ### Dependency
 
 | Task | Hard Dependency |
 |---|---|
 | AL-01 | GAL-01 User Foundation + AG-01 Facility Foundation |
-| AL-02 | AL-01 + AG-03 Facility Condition Contract |
+| AL-02 | AL-01 + AG-03 + GAL-05 Institutional Identity Contract |
 | AL-03 | AL-01 + AG-01 + AG-03 |
 | AL-04 | AL-02 |
 | AL-05 | AL-03 + GAL-04 |
 | AL-06 | AL-05 |
 | AL-07 | AL-03 + AL-05 |
+| AL-08 | AL-01 + scheduler/queue Laravel |
 
 ### Larangan Scope
 AL tidak boleh membuat/mengubah Auth infrastructure, Facility schema/service internal, Report workflow, Admin facility CRUD, atau dashboard/recap milik Daniel.
@@ -215,7 +226,7 @@ Agil tidak boleh membuat Reservation conflict/approval logic, mass reservation s
 
 ---
 
-## 4.3 Galang — Authentication, Registration, Verification & RBAC
+## 4.3 Galang — Authentication, Registration, Profile & RBAC
 
 ### Scope
 
@@ -227,20 +238,19 @@ Galang memegang seluruh lifecycle identitas dan authorization.
 - Migration/table `users`.
 - Model `User`.
 - Role: `pengguna`, `petugas`, `admin`.
-- Status verifikasi Pengguna.
+- `institutional_id`, `identity_type`, `whatsapp`, dan `deleted_at` untuk profil/soft-delete.
 - Provision tepat satu Admin pertama oleh developer.
 
 **GAL-02 — Self Registration Pengguna**
 - Registrasi mahasiswa/dosen/staf.
 - Email unik dan validasi password.
-- Akun baru berstatus pending.
-- User pending belum boleh login.
+- Registrasi hanya meminta email, nama lengkap, dan password.
+- Akun baru langsung aktif dan dapat login.
 
 **GAL-03 — Login & Logout**
 - Login Pengguna/Petugas/Admin.
-- Pengguna hanya dapat login setelah approved.
+- Pengguna dapat login segera setelah registrasi berhasil.
 - Logout.
-- Pesan yang sesuai untuk pending/rejected.
 
 **GAL-04 — RBAC & Ownership Infrastructure**
 - Middleware role.
@@ -248,14 +258,19 @@ Galang memegang seluruh lifecycle identitas dan authorization.
 - Current authenticated user helper.
 - Foundation authorization/ownership yang dipakai domain lain.
 
-**GAL-05 — Admin Account Management (FR-15, FR-16, FR-17)**
+**GAL-05 — Profile & Institutional Identity (FR-17)**
+- Edit nama, email, WhatsApp, password, serta NIM/NIP/No. Pegawai.
+- Menetapkan `identity_type` + `institutional_id` secara konsisten.
+- Menyediakan guard/helper `hasInstitutionalIdentity()` untuk Reservation.
+
+**GAL-06 — Admin Account Management (FR-15, FR-16)**
 - Admin membuat Petugas.
 - Admin membuat Pengguna langsung.
-- Verification queue hasil registrasi mandiri.
-- Approve/reject sesuai User Story 15.
 - Admin tidak dapat membuat Admin lain.
+- Admin dapat soft-delete akun role apa pun.
+- Admin terakhir tidak dapat dihapus.
 
-**GAL-06 — Admin Change Password**
+**GAL-07 — Admin Change Password**
 - Admin tunggal dapat mengubah password sendiri.
 
 ### Dependency
@@ -266,11 +281,12 @@ Galang memegang seluruh lifecycle identitas dan authorization.
 | GAL-02 | GAL-01 |
 | GAL-03 | GAL-01 + GAL-02 |
 | GAL-04 | GAL-03 |
-| GAL-05 | GAL-04 |
-| GAL-06 | GAL-03 |
+| GAL-05 | GAL-03 + GAL-04 |
+| GAL-06 | GAL-04 + GAL-05 |
+| GAL-07 | GAL-03 |
 
 ### Output Contract
-Setelah GAL-04 tersedia, domain lain boleh mengandalkan Laravel auth session, role middleware/policy, verified-user access, dan ownership pattern.
+Setelah GAL-04 tersedia, domain lain boleh mengandalkan Laravel auth session, role middleware/policy, active-user access, dan ownership pattern. Setelah GAL-05 tersedia, Reservation dapat memakai guard identitas institusional.
 
 ### Larangan Scope
 Galang tidak mengimplementasikan Facility, Reservation, Report, Dashboard, atau Recap/Export.
@@ -341,7 +357,7 @@ Daniel menjadi owner integrasi tampilan lintas-domain, reporting administratif, 
 ### Task
 
 **DA-01 — Shared App Shell & Navigation**
-- Base Blade layout.
+- Inertia/React app shell dan shared React layout.
 - Navigation berdasarkan role memakai contract Galang.
 - Shared alert/status/empty/error components.
 - Modular route aggregator.
@@ -349,6 +365,7 @@ Daniel menjadi owner integrasi tampilan lintas-domain, reporting administratif, 
 **DA-02 — Petugas Dashboard (FR-09)**
 - Reservation queue dari contract AL.
 - Report queue dari contract Abhi.
+- Tampilkan queue reservasi sebagai segmen slot waktu: slot terdekat dari now lebih dahulu, lalu `created_at ASC` di dalam segmen.
 - Tidak membuat query domain sendiri jika contract belum tersedia.
 
 **DA-03 — Admin Recap (FR-19)**
@@ -362,7 +379,12 @@ Daniel menjadi owner integrasi tampilan lintas-domain, reporting administratif, 
 - Tangani empty data dan generation error.
 
 **DA-05 — Integration / E2E Test**
-- Register → Admin approve → login.
+- Register → login langsung → lengkapi identitas → reservasi.
+- Pengguna tanpa identitas → diarahkan ke Profil.
+- Batas `now + 90 hari` dan pengajuan sesaat sebelum slot.
+- Pending auto-reject saat `start_time` dengan `alasan_penolakan` bahwa pengajuan kedaluwarsa.
+- Queue Petugas bersegmen slot dan `created_at ASC` di dalam segmen.
+- Soft-delete akun tanpa menghapus histori.
 - Facility discovery.
 - Tool vs room availability.
 - Reservation submit → approve → conflicting pending auto-reject.
@@ -411,7 +433,7 @@ Daniel tidak boleh membuat ulang Reservation/Report/Facility/Auth business logic
 | FR-14 | Perubahan kondisi fasilitas | Abhi melalui Facility contract Agil |
 | FR-15 | Admin membuat Petugas | Galang |
 | FR-16 | Admin membuat Pengguna | Galang |
-| FR-17 | Verifikasi akun Pengguna | Galang |
+| FR-17 | Pengelolaan profil dan identitas Pengguna | Galang |
 | FR-18 | Admin kelola fasilitas | Agil |
 | FR-19 | Rekap & export | Daniel |
 
@@ -424,7 +446,7 @@ Authentication register/login/logout tetap dimiliki Galang meskipun berada sebag
 ## Phase 1 — Foundation Paralel
 
 **Galang**
-- GAL-01 → GAL-04.
+- GAL-01 → GAL-05 untuk foundation, RBAC, dan profile identity contract.
 
 **Agil**
 - AG-01 → AG-03.
@@ -442,7 +464,7 @@ Authentication register/login/logout tetap dimiliki Galang meskipun berada sebag
 Setelah GAL-04 dan AG-03 tersedia untuk task yang membutuhkan authorization/condition contract:
 
 **AL**
-- AL-01 → AL-06.
+- AL-01 → AL-06, lalu AL-08 untuk auto-reject dan queue contract.
 
 **Abhi**
 - AB-01 → AB-05.
@@ -450,7 +472,7 @@ Setelah GAL-04 dan AG-03 tersedia untuk task yang membutuhkan authorization/cond
 Sementara:
 
 **Galang**
-- GAL-05 → GAL-06.
+- GAL-05 → GAL-07.
 
 **Agil**
 - AG-02 → AG-05.
@@ -458,7 +480,7 @@ Sementara:
 ## Phase 3 — Cross-Domain Contracts
 
 **AL**
-- AL-07.
+- AL-07 dan AL-08.
 
 **Abhi**
 - AB-06.
@@ -551,11 +573,11 @@ Continue only with AL task whose dependencies are satisfied.
 
 | Area | Owner |
 |---|---|
-| `users`, auth, verification, role middleware/policy base | Galang |
+| `users`, auth, profile identity, role middleware/policy base | Galang |
 | `facilities`, hierarchy, condition, public facility | Agil |
 | `reservations`, conflict, approval/cancel | AL |
 | `reports`, `report_attachments`, maintenance flow | Abhi |
-| Shared Blade shell, dashboards, recap/export, E2E integration | Daniel |
+| Shared React app shell, dashboards, recap/export, E2E integration | Daniel |
 
 Programmer lain boleh **memanggil contract**, tetapi tidak mengubah implementasi internal tanpa koordinasi owner.
 
@@ -605,23 +627,23 @@ Semua owner domain wajib menerapkan NFR-01 sampai NFR-04 pada fitur miliknya; ta
 
 Global checklist setiap fitur:
 
-- Laravel separation of concerns: Model/data access, Controller/request handling, service/business logic, dan Blade View dipisahkan secara logis.
+- Laravel separation of concerns: Model/data access, Controller/request handling, dan service/business logic dipisahkan secara logis; Inertia pages/React components menangani UI.
 - Validasi penting tersedia di client-side **dan** server-side; server tetap menjadi sumber validasi final.
 - RBAC dan ownership diterapkan pada resource terproteksi.
-- Blade UI responsif, user-friendly, konsisten dengan primary color `#2D4C79`, dan tidak membedakan status hanya dengan warna.
+- React UI responsif, user-friendly, konsisten dengan primary color `#2D4C79`, dan tidak membedakan status hanya dengan warna.
 - Fitur memiliki loading/empty/error/success state yang relevan.
 - Aksi destruktif atau berdampak besar memakai confirmation sesuai SRS.
 - Commit/version-control mengikuti NFR-03 dan tidak mencampur scope domain lain tanpa koordinasi.
 
-## 9.2 UX & Blade Page Ownership
+## 9.2 UX & Inertia/React Page Ownership
 
 | Owner | Halaman/UX utama |
 |---|---|
-| **Galang** | Login, Register, status pending/rejected, Verification Queue, Create Petugas, Create Pengguna, account management |
+| **Galang** | Login, Register, Profile, NIM/NIP/No. Pegawai, WhatsApp, Create Petugas, Create Pengguna, soft-delete account, account management |
 | **Agil** | Facility List, Facility Detail, Availability, search/filter, Facility Management, warning tool `dalam_perbaikan`, confirmation deactivate |
 | **AL** | Create Reservation, My Reservations, Reservation Detail, conflict/error feedback, H-2 cancellation confirmation, Petugas reservation action/detail |
 | **Abhi** | Create Report, My Reports, Report Detail, upload 1–8 foto, Petugas report processing/detail |
-| **Daniel** | Shared Blade layout/navigation/components, Petugas Dashboard, Admin Dashboard, Recap, Export, integration states |
+| **Daniel** | Shared React layout/navigation/components, Petugas Dashboard, Admin Dashboard, Recap, Export, integration states |
 
 Shared component milik Daniel boleh digunakan semua domain. Business behavior dan acceptance criteria halaman tetap milik owner domain masing-masing.
 
