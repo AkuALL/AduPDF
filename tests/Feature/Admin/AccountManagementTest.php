@@ -3,6 +3,7 @@
 use App\Models\User;
 use Database\Seeders\AdminUserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
@@ -22,7 +23,10 @@ test('admin can view Petugas and Pengguna account list', function () {
 
     $response = $this->actingAs($admin)->get(route('admin.users.index'));
 
-    $response->assertOk();
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('admin/accounts/index')
+        ->has('users.data', 2)
+    );
     $response->assertSee($petugas->nama);
     $response->assertSee($pengguna->nama);
     $response->assertDontSee($otherAdmin->nama);

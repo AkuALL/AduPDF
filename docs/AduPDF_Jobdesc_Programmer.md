@@ -11,7 +11,7 @@
 
 # 1. Prinsip Pembagian Tugas
 
-Pembagian tugas menggunakan **dependency-chain grouping**. Satu programmer memegang satu domain secara end-to-end: model/migration, service, controller, route module, Blade view, validation, dan test yang menjadi bagian dari domain tersebut.
+Pembagian tugas menggunakan **dependency-chain grouping**. Satu programmer memegang satu domain secara end-to-end: model/migration, service, controller, route module, Inertia page/React component, validation, dan test yang menjadi bagian dari domain tersebut.
 
 Prinsip utama:
 
@@ -357,7 +357,7 @@ Daniel menjadi owner integrasi tampilan lintas-domain, reporting administratif, 
 ### Task
 
 **DA-01 — Shared App Shell & Navigation**
-- Base Blade layout.
+- Inertia/React app shell dan shared React layout.
 - Navigation berdasarkan role memakai contract Galang.
 - Shared alert/status/empty/error components.
 - Modular route aggregator.
@@ -577,7 +577,7 @@ Continue only with AL task whose dependencies are satisfied.
 | `facilities`, hierarchy, condition, public facility | Agil |
 | `reservations`, conflict, approval/cancel | AL |
 | `reports`, `report_attachments`, maintenance flow | Abhi |
-| Shared Blade shell, dashboards, recap/export, E2E integration | Daniel |
+| Shared React app shell, dashboards, recap/export, E2E integration | Daniel |
 
 Programmer lain boleh **memanggil contract**, tetapi tidak mengubah implementasi internal tanpa koordinasi owner.
 
@@ -627,15 +627,15 @@ Semua owner domain wajib menerapkan NFR-01 sampai NFR-04 pada fitur miliknya; ta
 
 Global checklist setiap fitur:
 
-- Laravel separation of concerns: Model/data access, Controller/request handling, service/business logic, dan Blade View dipisahkan secara logis.
+- Laravel separation of concerns: Model/data access, Controller/request handling, dan service/business logic dipisahkan secara logis; Inertia pages/React components menangani UI.
 - Validasi penting tersedia di client-side **dan** server-side; server tetap menjadi sumber validasi final.
 - RBAC dan ownership diterapkan pada resource terproteksi.
-- Blade UI responsif, user-friendly, konsisten dengan primary color `#2D4C79`, dan tidak membedakan status hanya dengan warna.
+- React UI responsif, user-friendly, konsisten dengan primary color `#2D4C79`, dan tidak membedakan status hanya dengan warna.
 - Fitur memiliki loading/empty/error/success state yang relevan.
 - Aksi destruktif atau berdampak besar memakai confirmation sesuai SRS.
 - Commit/version-control mengikuti NFR-03 dan tidak mencampur scope domain lain tanpa koordinasi.
 
-## 9.2 UX & Blade Page Ownership
+## 9.2 UX & Inertia/React Page Ownership
 
 | Owner | Halaman/UX utama |
 |---|---|
@@ -643,7 +643,7 @@ Global checklist setiap fitur:
 | **Agil** | Facility List, Facility Detail, Availability, search/filter, Facility Management, warning tool `dalam_perbaikan`, confirmation deactivate |
 | **AL** | Create Reservation, My Reservations, Reservation Detail, conflict/error feedback, H-2 cancellation confirmation, Petugas reservation action/detail |
 | **Abhi** | Create Report, My Reports, Report Detail, upload 1–8 foto, Petugas report processing/detail |
-| **Daniel** | Shared Blade layout/navigation/components, Petugas Dashboard, Admin Dashboard, Recap, Export, integration states |
+| **Daniel** | Shared React layout/navigation/components, Petugas Dashboard, Admin Dashboard, Recap, Export, integration states |
 
 Shared component milik Daniel boleh digunakan semua domain. Business behavior dan acceptance criteria halaman tetap milik owner domain masing-masing.
 

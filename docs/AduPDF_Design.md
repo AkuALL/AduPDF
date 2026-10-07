@@ -1386,14 +1386,14 @@ Do not:
 
 ---
 
-# 39. Implementation Guidance for Laravel + Blade
+# 39. Implementation Guidance for Inertia.js + React
 
-The design system should map cleanly into reusable Blade components.
+The design system should map cleanly into reusable React components used by Inertia pages. Shared styling should follow the SRS stack: Tailwind CSS 4 with Vite.
 
 Recommended reusable component groups:
 
 ```text
-components/
+resources/js/components/
   button/
   badge/
   alert/
@@ -1414,25 +1414,25 @@ components/
 Recommended semantic components include:
 
 ```text
-<x-status.reservation />
-<x-status.report />
-<x-status.facility />
+<ReservationStatusBadge />
+<ReportStatusBadge />
+<FacilityStatusBadge />
 
-<x-facility.card />
-<x-facility.relationship />
+<FacilityCard />
+<FacilityRelationship />
 
-<x-availability.slot-grid />
-<x-availability.legend />
+<AvailabilitySlotGrid />
+<AvailabilityLegend />
 
-<x-reservation.summary />
-<x-reservation.conflict-warning />
+<ReservationSummary />
+<ReservationConflictWarning />
 
-<x-report.attachment-upload />
+<ReportAttachmentUpload />
 ```
 
 Component names are recommendations, not mandatory architecture.
 
-The important rule is that semantic behavior should not be reconstructed independently on every Blade page.
+The important rule is that semantic behavior should not be reconstructed independently on every Inertia page.
 
 ---
 
