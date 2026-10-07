@@ -1,4 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
+import { UserNavbar } from '@/components/user-navbar';
 
 type Facility = {
     id: number;
@@ -15,14 +16,22 @@ export default function CreateReport({ facilities, success }: Props) {
     return (
         <>
             <Head title="Laporkan Kerusakan" />
-            <main className="min-h-screen bg-[#F7F8FA] px-4 py-10 text-[#111827]">
-                <div className="w-full">
-                    <Link href="/facilities" className="text-sm font-medium text-[#2D4C79] hover:underline">
-                        Kembali ke fasilitas
-                    </Link>
-                    <h1 className="mt-6 text-2xl font-bold">Laporkan kerusakan</h1>
-                    <p className="mt-2 text-sm text-[#667085]">Sertakan foto pendukung agar Petugas dapat menindaklanjuti laporan Anda.</p>
-                    {success && <p role="status" className="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
+            <div className="min-h-screen bg-[#F7F8FA] text-[#111827] font-sans antialiased">
+                <UserNavbar current="reports" />
+
+                <main className="w-full px-4 py-8 sm:px-6 lg:px-8">
+                    <div className="w-full">
+                        <div className="mb-6">
+                            <Link
+                                href="/facilities"
+                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
+                            >
+                                <span aria-hidden="true">←</span> Kembali ke fasilitas
+                            </Link>
+                        </div>
+                        <h1 className="mt-6 text-2xl font-bold">Laporkan kerusakan</h1>
+                        <p className="mt-2 text-sm text-[#667085]">Sertakan foto pendukung agar Petugas dapat menindaklanjuti laporan Anda.</p>
+                        {success && <p role="status" className="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
 
                     <Form action="/reports" method="post" encType="multipart/form-data" resetOnSuccess className="mt-6 space-y-5 rounded-lg border border-[#E5E7EB] bg-white p-6">
                         {({ errors, processing, progress }) => (
@@ -63,6 +72,7 @@ export default function CreateReport({ facilities, success }: Props) {
                     </Form>
                 </div>
             </main>
-        </>
+        </div>
+    </>
     );
 }

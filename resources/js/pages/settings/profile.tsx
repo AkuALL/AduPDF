@@ -1,4 +1,5 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { UserNavbar } from '@/components/user-navbar';
 import DeleteUser from '@/components/delete-user';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -38,82 +39,7 @@ export default function Profile({
 
             <h1 className="sr-only">Pengaturan Profil</h1>
 
-            <header className="sticky top-0 z-30 border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm">
-                <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center gap-8">
-                        <Link href="/" className="flex items-center gap-2">
-                            <span className="text-xl font-bold tracking-tight text-[#2D4C79]">
-                                AduPDF
-                            </span>
-                            <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-xs font-semibold text-[#2D4C79]">
-                                Kampus
-                            </span>
-                        </Link>
-                        <nav className="hidden sm:flex sm:gap-6 text-sm">
-                            <Link
-                                href="/facilities"
-                                className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
-                            >
-                                Fasilitas
-                            </Link>
-                            {user.role === 'pengguna' && (
-                                <>
-                                    <Link
-                                        href="/reservations"
-                                        className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
-                                    >
-                                        Reservasi Saya
-                                    </Link>
-                                    <Link
-                                        href="/reports"
-                                        className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
-                                    >
-                                        Lapor Kerusakan
-                                    </Link>
-                                </>
-                            )}
-                            {user.role === 'petugas' && (
-                                <Link
-                                    href="/petugas/reservations"
-                                    className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
-                                >
-                                    Panel Petugas
-                                </Link>
-                            )}
-                            {user.role === 'admin' && (
-                                <Link
-                                    href="/admin/facilities"
-                                    className="pb-4 pt-4 font-medium text-[#667085] transition hover:text-[#2D4C79]"
-                                >
-                                    Kelola Fasilitas
-                                </Link>
-                            )}
-                        </nav>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <Link
-                            href="/profile"
-                            aria-label="Buka profil"
-                            className="group hidden rounded-md text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79] sm:block"
-                        >
-                            <span className="block text-xs font-semibold text-[#111827] group-hover:text-[#2D4C79]">
-                                {user.nama || user.name}
-                            </span>
-                            <span className="block text-[10px] text-[#667085] capitalize">
-                                {user.role}
-                            </span>
-                        </Link>
-                        <Link
-                            href="/logout"
-                            method="post"
-                            as="button"
-                            className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#5D6673] shadow-sm transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
-                        >
-                            Keluar
-                        </Link>
-                    </div>
-                </div>
-            </header>
+            <UserNavbar />
 
             <main className="mx-auto w-full max-w-3xl space-y-6 px-4 py-8 sm:px-6">
               <section className="space-y-6 rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)] sm:p-8">

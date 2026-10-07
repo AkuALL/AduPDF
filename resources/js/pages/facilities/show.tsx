@@ -1,4 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { UserNavbar } from '@/components/user-navbar';
 import DateCalendarGrid from '@/components/date-calendar-grid';
 import { useState } from 'react';
 
@@ -20,6 +21,15 @@ function todayWibDate(): string {
     const parts = Object.fromEntries(wibDateFormatter.formatToParts(new Date()).map(({ type, value }) => [type, value])) as Record<string, string>;
 
     return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
+function currentWibTime(): string {
+    return new Date().toLocaleTimeString('en-GB', {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    });
 }
 
 type AuthUser = {
@@ -105,18 +115,31 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
     const { auth } = usePage<{ auth?: { user?: AuthUser | null } }>().props;
     const user = auth?.user;
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [selectedRange, setSelectedRange] = useState<{ start: number; end: number } | null>(null);
 
     const status = conditionConfig[facility.condition] || conditionConfig.aktif;
     const isRoom = ['ruang_kelas', 'aula', 'laboratorium'].includes(facility.type);
 
     const today = todayWibDate();
+    const currentTime = currentWibTime();
     const latestDateValue = new Date(`${today}T00:00:00Z`);
     latestDateValue.setUTCDate(latestDateValue.getUTCDate() + 90);
     const latestDate = latestDateValue.toISOString().slice(0, 10);
     const currentDate = selectedDate || availability?.date || today;
 
+    const isSlotPast = (slotStartTime: string) => {
+        if (currentDate < today) return true;
+        if (currentDate > today) return false;
+        return slotStartTime <= currentTime;
+    };
+
+    const isSlotSelectable = (slot: AvailabilitySlot) => {
+        return slot.is_available && (availability?.is_reservable ?? false) && !isSlotPast(slot.start_time);
+    };
+
     const handleDateChange = (newDate: string) => {
         setIsCalendarOpen(false);
+        setSelectedRange(null);
         router.get(
             `/facilities/${facility.id}`,
             { date: newDate },
@@ -124,116 +147,62 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
         );
     };
 
+    const handleSlotClick = (idx: number) => {
+        if (!availability?.slots) return;
+
+        if (!selectedRange) {
+            setSelectedRange({ start: idx, end: idx });
+            return;
+        }
+
+        const { start, end } = selectedRange;
+
+        // Clicking start slot: deselect if single, collapse to start if range
+        if (idx === start) {
+            setSelectedRange(start === end ? null : { start, end: start });
+            return;
+        }
+
+        // Clicking end slot when range is active: undo time window, revert to start slot only
+        if (idx === end && start !== end) {
+            setSelectedRange({ start, end: start });
+            return;
+        }
+
+        // Clicking backwards (idx < start): move forward only, so change selection
+        if (idx < start) {
+            setSelectedRange({ start: idx, end: idx });
+            return;
+        }
+
+        // Clicking forward (idx > start): adjust end to idx if contiguous range is available
+        const allAvailable = availability.slots
+            .slice(start, idx + 1)
+            .every((s) => isSlotSelectable(s));
+
+        if (allAvailable) {
+            setSelectedRange({ start, end: idx });
+        } else {
+            setSelectedRange({ start: idx, end: idx });
+        }
+    };
+
     return (
         <>
             <Head title={`${facility.name} — AduPDF`} />
             <div className="min-h-screen bg-[#F7F8FA] text-[#111827] font-sans antialiased">
                 {/* Navigation Bar */}
-                <header className="sticky top-0 z-30 border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm">
-                    <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
-                        <div className="flex items-center gap-8">
-                            <Link href="/" className="flex items-center gap-2">
-                                <span className="text-xl font-bold tracking-tight text-[#2D4C79]">
-                                    AduPDF
-                                </span>
-                                <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-xs font-semibold text-[#2D4C79]">
-                                    Kampus
-                                </span>
-                            </Link>
-                            <nav className="hidden sm:flex sm:gap-6 text-sm">
-                                <Link
-                                    href="/facilities"
-                                    className="font-semibold text-[#2D4C79] border-b-2 border-[#2D4C79] pb-4 pt-4"
-                                >
-                                    Fasilitas
-                                </Link>
-                                {user?.role === 'pengguna' && (
-                                    <>
-                                        <Link
-                                            href="/reservations"
-                                            className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                        >
-                                            Reservasi Saya
-                                        </Link>
-                                        <Link
-                                            href="/reports"
-                                            className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                        >
-                                            Lapor Kerusakan
-                                        </Link>
-                                    </>
-                                )}
-                                {user?.role === 'petugas' && (
-                                    <Link
-                                        href="/petugas/reservations"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                    >
-                                        Panel Petugas
-                                    </Link>
-                                )}
-                                {user?.role === 'admin' && (
-                                    <a
-                                        href="/admin/facilities"
-                                        className="font-medium text-[#667085] hover:text-[#2D4C79] pb-4 pt-4 transition"
-                                    >
-                                        Kelola Fasilitas
-                                    </a>
-                                )}
-                            </nav>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            {user ? (
-                                <>
-                                    <Link
-                                        href="/profile"
-                                        aria-label="Buka profil"
-                                        className="group hidden rounded-md text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79] sm:block"
-                                    >
-                                        <span className="block text-xs font-semibold text-[#111827] group-hover:text-[#2D4C79]">
-                                            {user.nama || user.name}
-                                        </span>
-                                        <span className="block text-[10px] text-[#667085] capitalize">
-                                            {user.role}
-                                        </span>
-                                    </Link>
-                                    <Link
-                                        href="/logout"
-                                        method="post"
-                                        as="button"
-                                        className="inline-flex h-9 items-center justify-center rounded-md border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#5D6673] hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition shadow-sm"
-                                    >
-                                        Keluar
-                                    </Link>
-                                </>
-                            ) : (
-                                <>
-                                    <a
-                                        href="/login"
-                                        className="inline-flex h-9 items-center justify-center rounded-md px-3.5 text-sm font-medium text-[#111827] hover:bg-[#F3F5F7] transition"
-                                    >
-                                        Masuk
-                                    </a>
-                                    <a
-                                        href="/register"
-                                        className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
-                                    >
-                                        Daftar
-                                    </a>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </header>
+                <UserNavbar current="facilities" />
 
                 {/* Main Content Area */}
                 <main className="w-full px-4 py-8 sm:px-6 lg:px-8">
-                    {/* Back Breadcrumb */}
+                    {/* Back Button */}
                     <div className="mb-6">
                         <Link
                             href="/facilities"
-                            className="inline-flex items-center text-xs font-semibold text-[#2D4C79] hover:underline"
+                            className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
                         >
-                            ← Kembali
+                            <span aria-hidden="true">←</span> Kembali
                         </Link>
                     </div>
 
@@ -432,11 +401,21 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                         <div className="mt-6">
                             {availability && availability.slots.length > 0 ? (
                                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7">
-                                    {availability.slots.map((slot) => {
+                                    {availability.slots.map((slot, index) => {
+                                        const isPast = isSlotPast(slot.start_time);
+                                        const isSelectable = isSlotSelectable(slot);
+                                        const isSelected = selectedRange !== null && index >= selectedRange.start && index <= selectedRange.end;
+
                                         let slotStyle = 'bg-[#EAF7F0] border-[#B7E2CB] text-[#16794A]';
                                         let statusBadge = 'Tersedia';
 
-                                        if (slot.status === 'terisi') {
+                                        if (isSelected) {
+                                            slotStyle = 'bg-[#2D4C79] border-[#1C3150] text-white shadow-sm ring-2 ring-[#2D4C79]/30';
+                                            statusBadge = 'Dipilih';
+                                        } else if (isPast) {
+                                            slotStyle = 'bg-[#F3F5F7] border-[#E5E7EB] text-[#98A2B3] opacity-60';
+                                            statusBadge = 'Lewat';
+                                        } else if (slot.status === 'terisi') {
                                             slotStyle = 'bg-[#F3F5F7] border-[#E5E7EB] text-[#667085] opacity-80';
                                             statusBadge = 'Dipesan';
                                         } else if (slot.status === 'dalam_perbaikan') {
@@ -447,32 +426,40 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                             statusBadge = 'Nonaktif';
                                         }
 
-                                        const isClickable = slot.is_available && availability.is_reservable;
-                                        const reservationUrl = `/reservations/create?facility_id=${facility.id}&start_time=${currentDate}T${slot.start_time}&end_time=${currentDate}T${slot.end_time}`;
-
-                                        if (isClickable) {
+                                        if (isSelectable) {
                                             return (
-                                                <Link
+                                                <button
                                                     key={slot.start_time}
-                                                    href={reservationUrl}
-                                                    title={`Klik untuk ajukan reservasi slot ${slot.start_time} - ${slot.end_time}`}
-                                                    className={`group flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all cursor-pointer hover:bg-[#D4EFE0] hover:border-[#16794A] hover:shadow-sm hover:scale-[1.02] ${slotStyle}`}
+                                                    type="button"
+                                                    onClick={() => handleSlotClick(index)}
+                                                    aria-pressed={isSelected}
+                                                    title={
+                                                        isSelected
+                                                            ? `Slot ${slot.start_time} - ${slot.end_time} dipilih (klik untuk ubah/batalkan)`
+                                                            : `Klik untuk memilih slot ${slot.start_time} - ${slot.end_time}`
+                                                    }
+                                                    className={`group flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all cursor-pointer ${
+                                                        isSelected
+                                                            ? slotStyle
+                                                            : `${slotStyle} hover:bg-[#D4EFE0] hover:border-[#16794A] hover:shadow-sm hover:scale-[1.02]`
+                                                    }`}
                                                 >
-                                                    <span className="text-xs font-bold tracking-tight group-hover:underline">
+                                                    <span className="text-xs font-bold tracking-tight">
                                                         {slot.start_time} - {slot.end_time}
                                                     </span>
-                                                    <span className="mt-1 inline-flex items-center text-[10px] font-semibold uppercase tracking-wider">
+                                                    <span className={`mt-1 inline-flex items-center text-[10px] font-semibold uppercase tracking-wider ${isSelected ? 'text-white/90' : ''}`}>
                                                         {statusBadge}
                                                     </span>
-                                                </Link>
+                                                </button>
                                             );
                                         }
 
                                         return (
                                             <div
                                                 key={slot.start_time}
+                                                aria-disabled="true"
                                                 title={`Slot ${slot.start_time} - ${slot.end_time} (${statusBadge})`}
-                                                className={`flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all cursor-default ${slotStyle}`}
+                                                className={`flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all cursor-not-allowed select-none ${slotStyle}`}
                                             >
                                                 <span className="text-xs font-bold tracking-tight">
                                                     {slot.start_time} - {slot.end_time}
@@ -493,25 +480,50 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
 
                         {/* CTA / Quick Link to Reservation */}
                         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-[#E5E7EB] pt-5">
-                            <span className="text-xs text-[#667085]">
-                                {availability?.is_reservable
-                                    ? 'Slot waktu di atas dapat diajukan oleh pengguna terverifikasi.'
-                                    : 'Fasilitas ini sedang tidak menerima pengajuan reservasi baru.'}
-                            </span>
+                            <div>
+                                {selectedRange !== null && availability ? (
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <span className="text-xs font-semibold text-[#111827]">
+                                            Slot dipilih: {availability.slots[selectedRange.start].start_time} - {availability.slots[selectedRange.end].end_time} (WIB)
+                                        </span>
+                                        <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-[10px] font-semibold text-[#2D4C79]">
+                                            {selectedRange.end - selectedRange.start + 1} slot
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedRange(null)}
+                                            className="text-xs text-[#B54708] hover:underline"
+                                        >
+                                            Reset pilihan
+                                        </button>
+                                    </div>
+                                ) : (
+                                    !availability?.is_reservable && (
+                                        <span className="text-xs text-[#B54708]">
+                                            Fasilitas ini sedang tidak menerima pengajuan reservasi baru.
+                                        </span>
+                                    )
+                                )}
+                            </div>
                             <div className="flex gap-2">
-                                {availability?.is_reservable ? (
+                                {availability?.is_reservable && selectedRange !== null ? (
                                     <Link
-                                        href={user ? `/reservations/create?facility_id=${facility.id}` : '/login'}
+                                        href={
+                                            user
+                                                ? `/reservations/create?facility_id=${facility.id}&start_time=${currentDate}T${availability.slots[selectedRange.start].start_time}&end_time=${currentDate}T${availability.slots[selectedRange.end].end_time}`
+                                                : '/login'
+                                        }
                                         className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
                                     >
-                                        Ajukan Reservasi Fasilitas Ini
+                                        Ajukan Reservasi ({availability.slots[selectedRange.start].start_time} - {availability.slots[selectedRange.end].end_time})
                                     </Link>
                                 ) : (
                                     <button
+                                        type="button"
                                         disabled
                                         className="inline-flex h-9 cursor-not-allowed items-center justify-center rounded-md bg-[#E5E7EB] px-4 text-xs font-semibold text-[#98A2B3]"
                                     >
-                                        Tidak Tersedia untuk Reservasi
+                                        {!availability?.is_reservable ? 'Tidak Tersedia untuk Reservasi' : 'Pilih Slot Waktu'}
                                     </button>
                                 )}
                             </div>
