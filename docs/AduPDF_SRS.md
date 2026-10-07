@@ -685,13 +685,13 @@ Empat tabel inti berasal dari hint rancangan database proyek. Atribut tambahan d
 | Field | Tipe/Constraint | Keterangan |
 | --- | --- | --- |
 | id | BIGINT PK AI | ID |
-| nama_fasilitas | VARCHAR(100) | Nama fasilitas |
-| tipe | VARCHAR(50) | Kelas/Aula/Lab/Alat/Lapangan |
-| lokasi | VARCHAR(100) | Gedung/Lantai/Lokasi |
-| kapasitas | INT | >= 0 |
-| deskripsi | TEXT | Deskripsi |
-| status_kondisi | ENUM | aktif/dalam_perbaikan/nonaktif. Status parent room memengaruhi reservability child tools; status tool tidak otomatis mengubah status parent room. |
-| parent_facility_id | BIGINT FK, wajib untuk tipe Alat | Ruangan induk alat. Lapangan tidak dapat menjadi parent; tool harus terkait ke satu ruang kelas/aula/lab. |
+| name | VARCHAR(100) | Nama fasilitas |
+| type | ENUM | ruang_kelas/aula/laboratorium/alat/lapangan |
+| location | VARCHAR(100) | Gedung/Lantai/Lokasi |
+| capacity | INT UNSIGNED DEFAULT 0 | Kapasitas, >= 0 |
+| description | TEXT NULL | Deskripsi |
+| condition | ENUM | aktif/dalam_perbaikan/nonaktif. Status parent room memengaruhi reservability child tools; status tool tidak otomatis mengubah status parent room. |
+| parent_facility_id | BIGINT FK NULL | Nullable di database; aplikasi mewajibkan ruangan induk untuk tipe Alat. Lapangan tidak dapat menjadi parent; alat harus terkait ke satu ruang kelas/aula/lab. |
 
 ### reservations
 
@@ -705,6 +705,7 @@ Empat tabel inti berasal dari hint rancangan database proyek. Atribut tambahan d
 | end_time | DATETIME | Selesai |
 | status | ENUM | menunggu/disetujui/ditolak/dibatalkan |
 | alasan_penolakan | TEXT NULL | Alasan penolakan, termasuk penolakan otomatis karena pengajuan kedaluwarsa |
+| ditolak_pada | TIMESTAMP NULL | Waktu reservasi ditolak; dipakai untuk riwayat penolakan |
 | alasan_pembatalan | TEXT NULL | Alasan cancel darurat Petugas |
 
 ### reports
@@ -728,7 +729,7 @@ Empat tabel inti berasal dari hint rancangan database proyek. Atribut tambahan d
 | file_path | VARCHAR(255) | Path file pada storage |
 | original_name | VARCHAR(255) | Nama file asli untuk display/audit |
 | mime_type | VARCHAR(100) | Harus image/jpeg atau image/png sesuai validasi |
-| file_size | INT | Ukuran byte; maksimum 2 MB per file |
+| file_size | INT UNSIGNED | Ukuran byte; maksimum 2 MB per file |
 
 > Perubahan desain akun Iterasi 2: status verifikasi/persetujuan akun dihapus. Gunakan `deleted_at` untuk soft-delete dan `institutional_id` + `identity_type` untuk identitas institusional.
 
@@ -747,15 +748,15 @@ Facilities (Ruangan) 1 ─── N Facilities (Alat) melalui parent_facility_id
 CHECK TARGET + USER CONTEXT
 
 IF target = RUANGAN:
-    IF room.status_kondisi != aktif → tidak tersedia
+    IF room.condition != aktif → tidak tersedia
     ELSE IF ada approved reservation langsung pada room yang overlap → tidak tersedia
     ELSE IF ada approved reservation pada salah satu child tool yang overlap → tidak tersedia untuk full-room reservation
     ELSE IF Pengguna punya approved reservation overlap pada ruangan lain → tidak tersedia bagi Pengguna tersebut
     ELSE → tersedia
 
 IF target = ALAT:
-    IF tool.status_kondisi != aktif → tidak tersedia
-    ELSE IF parent room.status_kondisi != aktif → tidak tersedia
+    IF tool.condition != aktif → tidak tersedia
+    ELSE IF parent room.condition != aktif → tidak tersedia
     ELSE IF ada approved reservation langsung pada tool yang overlap → tidak tersedia
     ELSE IF ada approved full-room reservation pada parent yang overlap → tidak tersedia
     ELSE IF Pengguna punya approved reservation overlap pada ruangan lain → tidak tersedia bagi Pengguna tersebut

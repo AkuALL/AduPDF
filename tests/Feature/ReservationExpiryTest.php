@@ -4,6 +4,7 @@ use App\Enums\ReservationStatus;
 use App\Models\Facility;
 use App\Models\Reservation;
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
 test('pending reservations that reach their start time are rejected with an expiry reason', function () {
@@ -58,7 +59,7 @@ test('pending reservations that reach their start time are rejected with an expi
         ->and($approvedReservation->ditolak_pada)->toBeNull();
 });
 
-test('legacy expired reservations are migrated to rejected with an expiry reason', function () {
+test('expired is not a persisted reservation status', function () {
     $reservation = Reservation::create([
         'user_id' => User::factory()->pengguna()->create()->id,
         'facility_id' => Facility::factory()->create()->id,
@@ -68,15 +69,9 @@ test('legacy expired reservations are migrated to rejected with an expiry reason
         'status' => ReservationStatus::Rejected,
     ]);
 
-    DB::table('reservations')->where('id', $reservation->id)->update([
+    expect(fn () => DB::table('reservations')->where('id', $reservation->id)->update([
         'status' => 'kedaluwarsa',
-        'alasan_penolakan' => null,
-    ]);
+    ]))->toThrow(QueryException::class);
 
-    $migration = require database_path('migrations/2026_10_07_100657_convert_expired_reservations_to_rejected_status.php');
-    $migration->up();
-
-    $reservation->refresh();
-    expect($reservation->status)->toBe(ReservationStatus::Rejected)
-        ->and($reservation->alasan_penolakan)->toBe('Pengajuan ditolak otomatis karena belum disetujui hingga waktu reservasi dimulai (kedaluwarsa).');
+    expect($reservation->fresh()->status)->toBe(ReservationStatus::Rejected);
 });
