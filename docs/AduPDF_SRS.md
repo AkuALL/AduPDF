@@ -5,7 +5,7 @@ Sistem Reservasi & Pelaporan Fasilitas Kampus
 SOFTWARE REQUIREMENTS SPECIFICATION (SRS)
 
 Versi revisi hasil pembahasan — business rules fasilitas & reservasi dikunci
-Tech Stack: Laravel + Blade
+Tech Stack: Laravel + React
 Primary UI Color: #2D4C79
 
 > Status dokumen: Konsolidasi final hasil analisis draft, 17 User Story proyek, dan keputusan business rule yang telah dikunci sampai 15 September 2026. Tidak ada Open Decision aktif untuk domain reservasi ruangan–alat, approval konflik, pembatalan, provisioning Admin, penonaktifan fasilitas, upload laporan, dan rekap penggunaan.

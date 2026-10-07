@@ -1,7 +1,7 @@
 # AduPDF — Pembagian Tugas 5 Programmer & Dependency-Chain Implementation Plan
 
 **Project:** AduPDF — Sistem Reservasi & Pelaporan Fasilitas Kampus  
-**Tech Stack:** Laravel + Blade  
+**Tech Stack:** Laravel + React  
 **Programmer:** AL, Galang, Daniel, Abhi, Agil  
 **Source of Truth:** `AduPDF_SRS_Final_Konsolidasi`  
 **Strategi:** Domain ownership with dependency-chain grouping  

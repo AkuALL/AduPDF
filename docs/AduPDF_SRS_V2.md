@@ -5,7 +5,7 @@ Sistem Reservasi & Pelaporan Fasilitas Kampus
 SOFTWARE REQUIREMENTS SPECIFICATION (SRS) — V2
 
 Versi 2 — baseline lengkap setelah revisi business rule
-Tech Stack: Laravel Monolith Modern berbasis SPA (Inertia.js React + TypeScript + Tailwind CSS v4)
+Tech Stack: Laravel 13 + Inertia.js 3 + React 19 + TypeScript + Tailwind CSS v4
 
 Primary UI Color: #2D4C79
 
@@ -17,7 +17,7 @@ Dokumen ini disusun berdasarkan spesifikasi proyek PPK 2026, draft SRS AduPDF se
 
 - DetailProyekPPK2026.pdf — ketentuan umum, 17 User Story, aturan waktu reservasi, aktor, dan hint rancangan database.
 - DRAFT_AduPDF.pdf — draft kebutuhan fungsional, non-fungsional, business rules, dan rancangan database awal.
-- Keputusan Iterasi 2 — Laravel + Blade, warna utama #2D4C79, terminologi Pengunjung, registrasi langsung aktif, profil dengan NIM/NIP/No. Pegawai dan WhatsApp, identitas wajib sebelum reservasi, horizon reservasi 90 hari, auto-expire pending, antrian Petugas bersegmen slot, serta soft-delete akun.
+- Keputusan Iterasi 2 — Laravel + Inertia.js React + TypeScript, warna utama #2D4C79, terminologi Pengunjung, registrasi langsung aktif, profil dengan NIM/NIP/No. Pegawai dan WhatsApp, identitas wajib sebelum reservasi, horizon reservasi 90 hari, auto-reject pending dengan alasan kedaluwarsa, antrian Petugas bersegmen slot, serta soft-delete akun.
 # 1. Pendahuluan dan Ruang Lingkup
 
 ## 1.1 Tujuan Dokumen
@@ -65,7 +65,7 @@ AduPDF adalah aplikasi web terpusat untuk membantu pengelolaan penggunaan fasili
 | Reservasi | Pengajuan penggunaan satu fasilitas pada rentang waktu tertentu. |
 | Slot Waktu | Unit waktu reservasi berdurasi 30 menit. |
 | Bentrok Reservasi | Kondisi dua reservasi pada fasilitas sama memiliki interval waktu yang overlap. |
-| Status Reservasi | menunggu, disetujui, ditolak, dibatalkan, kedaluwarsa. |
+| Status Reservasi | menunggu, disetujui, ditolak, dibatalkan. Pengajuan yang belum diproses hingga waktu reservasi dimulai otomatis berstatus ditolak dengan alasan kedaluwarsa. |
 | Laporan Kerusakan | Laporan Pengguna mengenai masalah/kerusakan suatu fasilitas. |
 | Status Laporan | baru, diproses, selesai, ditolak. |
 | Status Kondisi Fasilitas | aktif, dalam_perbaikan, nonaktif. |
@@ -148,7 +148,7 @@ Keterangan: Akun hasil registrasi mandiri dapat langsung digunakan setelah regis
 | BR-21 | Rekap Penggunaan Ruangan–Alat | Reservasi penuh ruangan dihitung sebagai penggunaan ruangan. Alat di dalam ruangan menjadi unavailable selama reservasi penuh, tetapi tidak menambah frekuensi penggunaan individual alat. Frekuensi penggunaan individual alat hanya dihitung dari reservasi alat yang dilakukan secara eksplisit. |
 | BR-22 | Identitas Sebelum Reservasi | Pengguna wajib memiliki salah satu identitas institusional (NIM, NIP, atau No. Pegawai) pada profil sebelum dapat mengajukan reservasi. Identitas tidak diinput ulang pada form reservasi. |
 | BR-23 | Horizon Reservasi | Pengguna boleh mengajukan reservasi hingga `now + 90 hari`, tanpa minimum lead time; pengajuan sampai sesaat sebelum slot dimulai tetap diperbolehkan. |
-| BR-24 | Auto-Expire Pengajuan | Reservasi berstatus menunggu yang belum diproses ketika `start_time` tiba otomatis berubah menjadi `kedaluwarsa` dan tidak menjadi occupancy. |
+| BR-24 | Penolakan Otomatis Pengajuan Kedaluwarsa | Reservasi berstatus menunggu yang belum diproses ketika `start_time` tiba otomatis berubah menjadi `ditolak`; `alasan_penolakan` diisi bahwa pengajuan kedaluwarsa. Reservasi tersebut tidak menjadi occupancy. |
 | BR-25 | Segmen Antrian Petugas | Queue reservasi Petugas dikelompokkan berdasarkan slot waktu. Segmen slot diurutkan dari yang paling dekat dengan waktu sekarang ke yang lebih jauh; di dalam setiap segmen, pengajuan diurutkan `created_at ASC`. |
 | BR-26 | Penghapusan Akun | Admin dapat melakukan soft-delete akun dengan role apa pun. Histori reservasi/laporan tetap dipertahankan; akun yang dihapus tidak dapat login atau membuat transaksi baru. Sistem harus mencegah penghapusan Admin terakhir. |
 
@@ -498,7 +498,7 @@ Acceptance Criteria
 - Pengguna tidak boleh memiliki reservasi overlap lintas ruangan. Jika sudah memiliki reservasi alat/ruangan di Ruang A, reservasi pada Ruang B untuk waktu overlap harus ditolak.
 - Pengguna yang sudah memiliki reservasi alat pada Ruang A boleh menambah alat lain yang tersedia di Ruang A pada waktu overlap, tetapi tidak boleh mengajukan full-room Ruang A maupun fasilitas pada ruangan lain untuk waktu overlap.
 - Pembatalan Pengguna dilakukan kurang dari 48 jam sebelum start_time → tolak.
-- Reservasi menunggu yang mencapai start_time tanpa diproses → ubah menjadi kedaluwarsa.
+- Reservasi menunggu yang mencapai `start_time` tanpa diproses → ubah menjadi `ditolak` dan isi `alasan_penolakan` bahwa pengajuan kedaluwarsa; reservasi tidak menjadi occupancy.
 
 ## 7.3 Laporan Kerusakan
 
@@ -601,7 +601,7 @@ Admin Dashboard
 
 | ID | Kategori | Requirement |
 | --- | --- | --- |
-| NFR-01 | Arsitektur Kode | Aplikasi menggunakan Laravel dengan Blade dan memisahkan koneksi/akses data (Model), request handling (Controller), logika proses, konfigurasi, serta View secara logis sesuai struktur framework. |
+| NFR-01 | Arsitektur Kode | Aplikasi menggunakan Laravel sebagai backend dan Inertia.js + React + TypeScript sebagai frontend. Laravel menangani routing, request, akses data, validasi, dan otorisasi; React pages/components menangani UI. Tanggung jawab dipisahkan secara logis mengikuti struktur proyek. |
 | NFR-02 | Keamanan & Validasi | Form penting wajib divalidasi client-side dan server-side. Password disimpan dalam bentuk hash yang aman. Otorisasi role dan ownership diterapkan untuk resource terproteksi. |
 | NFR-03 | Version Control & Kolaborasi | Source code dikelola pada repository bersama GitHub/GitLab; seluruh anggota wajib berkontribusi dan menggunakan pesan commit yang representatif. |
 | NFR-04 | Usability & UI/UX | UI harus user-friendly, intuitif, responsif, konsisten, menggunakan #2D4C79 sebagai primary color, serta menjaga keterbacaan dan kontras. |
@@ -657,8 +657,9 @@ Bagian ini ditempatkan setelah requirement inti agar desain teknis tidak mengunc
 
 ## 12.1 Technology Stack
 
-- Backend / application framework: Laravel.
-- Frontend / server-rendered UI: Blade.
+- Backend / application framework: Laravel 13.
+- Frontend bridge and UI: Inertia.js 3, React 19, and TypeScript.
+- Styling and asset build: Tailwind CSS 4 and Vite.
 - Database: relasional (mengikuti implementasi tim; rancangan awal menggunakan tabel Users, Facilities, Reservations, Reports).
 - Version control: GitHub atau GitLab repository bersama.
 ## 12.2 Rancangan Database Rekomendasi
@@ -702,7 +703,8 @@ Empat tabel inti berasal dari hint rancangan database proyek. Atribut tambahan d
 | tujuan | TEXT | Tujuan penggunaan |
 | start_time | DATETIME | Mulai |
 | end_time | DATETIME | Selesai |
-| status | ENUM | menunggu/disetujui/ditolak/dibatalkan/kedaluwarsa |
+| status | ENUM | menunggu/disetujui/ditolak/dibatalkan |
+| alasan_penolakan | TEXT NULL | Alasan penolakan, termasuk penolakan otomatis karena pengajuan kedaluwarsa |
 | alasan_pembatalan | TEXT NULL | Alasan cancel darurat Petugas |
 
 ### reports
@@ -767,9 +769,9 @@ CATATAN:
 
 Ketersediaan dihitung dari status kondisi, reservasi approved, relasi parent-child ruangan–alat, dan overlap personal Pengguna. Konflik room–tool bersifat asimetris. Reservasi penuh ruangan memblokir seluruh child tools; reservasi tool memblokir tool tersebut dan full-room reservation tetapi tidak sibling tools. Reservasi penuh ruangan dihitung sebagai usage ruangan saja, sedangkan usage individual tool berasal dari reservasi tool eksplisit.
 
-## 12.5 Route & Interaction Specification (Laravel + Blade)
+## 12.5 Route & Inertia Interaction Specification (Laravel + React)
 
-Karena stack menggunakan Laravel full-stack + Blade, dokumen menggunakan spesifikasi route/interaksi, bukan memaksakan arsitektur REST API terpisah yang tidak diwajibkan proyek.
+Laravel menyediakan route dan mengirimkan data halaman melalui Inertia; React merender halaman dan komponen UI. Interaksi form dan navigasi menggunakan Inertia pada route Laravel. Karena itu, bagian ini menetapkan route dan perilaku interaksi tanpa mengasumsikan REST API terpisah.
 
 | Method | Route | Aktor | Fungsi |
 | --- | --- | --- | --- |
@@ -816,7 +818,7 @@ Karena stack menggunakan Laravel full-stack + Blade, dokumen menggunakan spesifi
 | Registrasi mandiri langsung aktif | BR-06/US-15 keluar dari scope karena approval akun menambah beban operasional Admin. |
 | Profil identitas institusional | NIM/NIP/No. Pegawai dilengkapi setelah login dan salah satunya wajib sebelum reservasi. |
 | Horizon reservasi 90 hari | Pengajuan boleh sampai `now + 90 hari` tanpa minimum lead time. |
-| Pending auto-expire | Pengajuan menunggu menjadi kedaluwarsa saat start_time tiba. |
+| Pending auto-reject | Pengajuan menunggu menjadi ditolak dengan alasan kedaluwarsa saat `start_time` tiba. |
 | Queue Petugas bersegmen slot | Slot paling dekat ditampilkan lebih dahulu; dalam setiap segmen pengajuan diurutkan created_at paling lama ke paling baru. |
 | Soft-delete akun | Admin dapat menghapus akun tanpa menghapus histori; Admin terakhir dilindungi. |
 | Petugas tidak self-register | User Story 13 menyatakan akun Petugas dibuat Admin. |
@@ -824,7 +826,7 @@ Karena stack menggunakan Laravel full-stack + Blade, dokumen menggunakan spesifi
 | Dashboard Petugas memakai reservasi menunggu + laporan baru | Menyelaraskan state awal masing-masing domain. |
 | CRUD fasilitas diganti tambah/lihat/ubah/nonaktifkan | User Story meminta nonaktifkan, bukan hard delete; histori perlu tetap utuh. |
 | Availability dihitung, tidak disimpan statis | Mencegah data ketersediaan tidak sinkron dengan status fasilitas/reservasi approved. |
-| API Specification diganti Route & Interaction Specification | Laravel + Blade tidak memerlukan frontend-backend terpisah melalui REST API kecuali ada kebutuhan khusus. |
+| API Specification diganti Route & Interaction Specification | Laravel + Inertia.js + React menggunakan route Laravel dan interaksi halaman Inertia; REST API terpisah hanya diperlukan jika ada kebutuhan integrasi khusus. |
 | Edge cases dan Risiko ditambahkan | Mencegah requirement hanya menjelaskan happy path, terutama concurrency, otorisasi, dan state transition. |
 | Technical Design ditempatkan setelah SRS inti | Requirement dikunci lebih dulu sebelum solusi teknis agar desain tidak mendikte kebutuhan. |
 | Relasi ruangan–alat ditambahkan | Keputusan final: alat berada pada satu ruangan; reservasi alat dan ruangan saling memengaruhi availability. Lapangan tidak memiliki alat. |
@@ -841,7 +843,7 @@ Karena stack menggunakan Laravel full-stack + Blade, dokumen menggunakan spesifi
 
 # 14. Status Keputusan / Open Decisions
 
-Tidak ada Open Decision aktif pada versi ini. Keputusan utama yang dikunci: registrasi langsung aktif tanpa approval akun, identitas institusional wajib sebelum reservasi, horizon 90 hari, pending auto-expire, queue Petugas bersegmen slot, soft-delete akun, H-2 cancellation, provisioning Admin tunggal, relasi ruangan–alat, konflik pending/approval, propagasi kondisi fasilitas, penonaktifan absolut oleh Admin, upload 8 × 2 MB JPG/JPEG/PNG, serta definisi rekap penggunaan room–tool. Perubahan berikutnya diperlakukan sebagai change request terhadap baseline ini.
+Tidak ada Open Decision aktif pada versi ini. Keputusan utama yang dikunci: registrasi langsung aktif tanpa approval akun, identitas institusional wajib sebelum reservasi, horizon 90 hari, pending auto-reject dengan alasan kedaluwarsa, queue Petugas bersegmen slot, soft-delete akun, H-2 cancellation, provisioning Admin tunggal, relasi ruangan–alat, konflik pending/approval, propagasi kondisi fasilitas, penonaktifan absolut oleh Admin, upload 8 × 2 MB JPG/JPEG/PNG, serta definisi rekap penggunaan room–tool. Perubahan berikutnya diperlakukan sebagai change request terhadap baseline ini.
 
 | ID | Keputusan | Catatan |
 | --- | --- | --- |
