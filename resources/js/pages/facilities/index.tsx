@@ -231,9 +231,9 @@ export default function FacilityIndex({
                                         href={`/facilities/${fac.id}`}
                                         className="group flex flex-col justify-between overflow-hidden rounded-lg border border-[#E5E7EB] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#2D4C79] hover:shadow-md transition"
                                     >
-                                        {facilityImages[fac.type] && (
+                                        {facilityImages[fac.type]?.[0] && (
                                             <img
-                                                src={facilityImages[fac.type]}
+                                                src={facilityImages[fac.type][0]}
                                                 alt={fac.name}
                                                 loading="lazy"
                                                 className="h-40 w-full object-cover"

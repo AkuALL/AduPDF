@@ -1,5 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { UserNavbar } from '@/components/user-navbar';
+import FacilityPhotoCarousel from '@/components/facility-photo-carousel';
 import { facilityImages } from '@/lib/facility-images';
 import DateCalendarGrid from '@/components/date-calendar-grid';
 import { useState } from 'react';
@@ -211,11 +212,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                     <article className="rounded-lg border border-[#E5E7EB] bg-white p-6 shadow-[0_1px_2px_rgba(16,24,40,0.03)] sm:p-8">
                         <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-8">
                         {facilityImages[facility.type] && (
-                            <img
-                                src={facilityImages[facility.type]}
-                                alt={facility.name}
-                                className="h-auto w-full self-start rounded-lg border border-[#E5E7EB]"
-                            />
+                            <FacilityPhotoCarousel images={facilityImages[facility.type]} alt={facility.name} />
                         )}
                         <div className="min-w-0">
                         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
