@@ -19,6 +19,16 @@ test('role helper methods identify roles accurately', function () {
         ->and($admin->isPetugas())->toBeFalse();
 });
 
+test('account active helper reflects its deactivation timestamp', function () {
+    $user = new User;
+
+    expect($user->isActive())->toBeTrue();
+
+    $user->deleted_at = now();
+
+    expect($user->isActive())->toBeFalse();
+});
+
 test('institutional identity helper identifies completed identity accurately (GAL-05)', function () {
     $userWithoutIdentity = new User;
     expect($userWithoutIdentity->hasInstitutionalIdentity())->toBeFalse();
@@ -67,5 +77,6 @@ test('nama and name attributes stay in sync', function () {
 
     $user2 = new User(['name' => 'Dewi Sartika']);
     expect($user2->nama)->toBe('Dewi Sartika')
-        ->and($user2->name)->toBe('Dewi Sartika');
+        ->and($user2->name)->toBe('Dewi Sartika')
+        ->and($user2->toArray()['name'])->toBe('Dewi Sartika');
 });

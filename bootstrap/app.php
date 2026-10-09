@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureHasInstitutionalIdentity;
-use App\Http\Middleware\EnsureUserApproved;
+use App\Http\Middleware\EnsureUserActive;
 use App\Http\Middleware\EnsureUserRole;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -28,12 +28,12 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
-            EnsureUserApproved::class,
+            EnsureUserActive::class,
         ]);
 
         $middleware->alias([
             'role' => EnsureUserRole::class,
-            'approved' => EnsureUserApproved::class,
+            'active' => EnsureUserActive::class,
             'institutional.identity' => EnsureHasInstitutionalIdentity::class,
         ]);
 

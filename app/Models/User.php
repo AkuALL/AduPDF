@@ -40,16 +40,7 @@ class User extends Authenticatable implements PasskeyUser
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, SoftDeletes, TwoFactorAuthenticatable;
 
-    protected static function booted(): void
-    {
-        static::saving(function (User $user) {
-            if (empty($user->name) && ! empty($user->nama)) {
-                $user->name = $user->nama;
-            } elseif (empty($user->nama) && ! empty($user->name)) {
-                $user->nama = $user->name;
-            }
-        });
-    }
+    protected $appends = ['name'];
 
     /**
      * Get the attributes that should be cast.
@@ -68,15 +59,12 @@ class User extends Authenticatable implements PasskeyUser
 
     public function getNameAttribute(): ?string
     {
-        return $this->attributes['nama'] ?? $this->attributes['name'] ?? null;
+        return $this->attributes['nama'] ?? null;
     }
 
     public function setNameAttribute(?string $value): void
     {
-        $this->attributes['name'] = $value;
-        if (! isset($this->attributes['nama']) || empty($this->attributes['nama'])) {
-            $this->attributes['nama'] = $value;
-        }
+        $this->attributes['nama'] = $value;
     }
 
     public function isPengguna(): bool
@@ -99,19 +87,9 @@ class User extends Authenticatable implements PasskeyUser
         return ! empty($this->institutional_id) && ! empty($this->identity_type);
     }
 
-    public function isApproved(): bool
+    public function isActive(): bool
     {
         return ! $this->trashed();
-    }
-
-    public function isPending(): bool
-    {
-        return false;
-    }
-
-    public function isRejected(): bool
-    {
-        return false;
     }
 
     /**

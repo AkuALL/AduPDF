@@ -4,7 +4,7 @@ use App\Http\Controllers\PetugasReservationController;
 use App\Http\Controllers\ReservationController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'approved', 'role:pengguna'])->group(function () {
+Route::middleware(['auth', 'active', 'role:pengguna'])->group(function () {
     Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
     Route::get('/reservations/create', [ReservationController::class, 'create'])->middleware('institutional.identity')->name('reservations.create');
     Route::post('/reservations', [ReservationController::class, 'store'])->middleware('institutional.identity')->name('reservations.store');

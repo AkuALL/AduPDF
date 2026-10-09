@@ -7,10 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureUserApproved
+class EnsureUserActive
 {
     /**
-     * Handle an incoming request to verify that Pengguna accounts are approved.
+     * Handle an incoming request to ensure the authenticated account is active.
      *
      * @param  Closure(Request): (Response)  $next
      */

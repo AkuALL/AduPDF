@@ -2,9 +2,20 @@
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
+
+test('user name is stored once and the framework name alias stays available', function () {
+    expect(Schema::hasColumn('users', 'nama'))->toBeTrue()
+        ->and(Schema::hasColumn('users', 'name'))->toBeFalse();
+
+    $user = User::factory()->create(['nama' => 'Dewi Sartika']);
+
+    expect($user->name)->toBe('Dewi Sartika')
+        ->and($user->fresh()->toArray()['name'])->toBe('Dewi Sartika');
+});
 
 test('registration screen can be rendered', function () {
     $response = $this->get(route('register'));
