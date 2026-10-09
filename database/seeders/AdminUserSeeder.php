@@ -15,13 +15,15 @@ class AdminUserSeeder extends Seeder
     {
         // Ensure only one Admin exists
         if (! User::where('role', 'admin')->exists()) {
-            User::create([
+            $admin = new User([
                 'nama' => 'Administrator AduPDF',
                 'email' => 'admin@adupdf.ac.id',
                 'password' => Hash::make('Admin123!'),
                 'role' => 'admin',
-                'email_verified_at' => now(),
             ]);
+            $admin->forceFill([
+                'approved_at' => now(),
+            ])->save();
         }
     }
 }

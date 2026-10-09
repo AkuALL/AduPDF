@@ -5,15 +5,10 @@ import {
     Building2,
     CalendarCheck,
     CheckCircle2,
-    Clock,
-    FileSpreadsheet,
     KeyRound,
     PlusCircle,
-    Shield,
     UserCheck,
-    UserPlus,
     Users,
-    Wrench,
 } from 'lucide-react';
 import AdminLayout from '@/layouts/admin-layout';
 
@@ -108,7 +103,7 @@ export default function AdminDashboard({
                             Dashboard Administrasi
                         </h1>
                         <p className="text-sm text-[#667085] mt-1">
-                            Ringkasan eksekutif tata kelola fasilitas, rekapitulasi okupansi pemakaian (BR-21), dan pengawasan akun civitas.
+                            Ringkasan tata kelola fasilitas, penggunaan, dan pengawasan akun civitas.
                         </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2.5">
@@ -173,7 +168,7 @@ export default function AdminDashboard({
                         </div>
                         <div className="mt-3 pt-3 border-t border-[#F3F4F6] flex items-center justify-between text-xs text-[#667085]">
                             <span>Total: <strong className="text-[#111827]">{usage_stats.total_hours} Jam</strong></span>
-                            <span className="text-[11px] text-[#2D4C79] font-medium" title="BR-21: Reservasi penuh ruangan dihitung untuk ruangan; alat hanya dihitung jika dipesan eksplisit">Aturan BR-21 ✓</span>
+                            <span className="text-[11px] text-[#2D4C79] font-medium" title="Reservasi penuh dihitung sebagai penggunaan ruangan; alat dihitung jika dipesan secara individual">Penghitungan penggunaan ✓</span>
                         </div>
                     </div>
 
@@ -308,7 +303,7 @@ export default function AdminDashboard({
                                         Fasilitas Terpopuler (Bulan Ini)
                                     </h2>
                                     <p className="text-xs text-[#667085] mt-0.5">
-                                        Dihitung berdasarkan reservasi disetujui sesuai aturan BR-21
+                                        Penggunaan dihitung dari reservasi yang disetujui
                                     </p>
                                 </div>
                                 <Link href="/admin/recap" className="text-xs text-[#2D4C79] hover:underline font-semibold">
@@ -357,7 +352,7 @@ export default function AdminDashboard({
                         </div>
 
                         <div className="px-6 py-3 bg-[#F9FAFB] border-t border-[#E5E7EB] text-xs text-[#667085] flex items-center justify-between">
-                            <span>Aturan BR-21: Penggunaan alat hanya dihitung jika dipesan individual</span>
+                            <span>Penggunaan alat hanya dihitung jika dipesan individual</span>
                             <Link href="/admin/recap" className="font-medium text-[#2D4C79] hover:underline">
                                 Buka Rekapitulasi Lengkap
                             </Link>
@@ -517,7 +512,7 @@ export default function AdminDashboard({
                                 Keamanan & Sandi
                             </div>
                             <p className="text-xs text-[#667085] mt-1">
-                                Kelola kredensial akun Administrator tunggal (BR-18).
+                                Kelola kata sandi akun Administrator.
                             </p>
                         </Link>
                     </div>

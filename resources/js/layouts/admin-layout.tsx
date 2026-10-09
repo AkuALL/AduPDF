@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BarChart3, Building2, ChevronDown, KeyRound, LayoutDashboard, LogOut, Menu, Shield, UserCheck, UserPlus, Users } from 'lucide-react';
+import { BarChart3, Building2, ChevronDown, KeyRound, LayoutDashboard, LogOut, Menu, UserCheck, UserPlus, Users } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { FlashAlert } from '@/components/flash-alert';
 import {

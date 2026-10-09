@@ -1,17 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import {
-    AlertTriangle,
-    BarChart3,
-    Calendar,
-    Download,
-    FileSpreadsheet,
-    FileText,
-    Filter,
-    HelpCircle,
-    Info,
-    RotateCcw,
-    Search,
-} from 'lucide-react';
+import { Download, FileSpreadsheet, FileText, Info } from 'lucide-react';
 import { useState } from 'react';
 import AdminLayout from '@/layouts/admin-layout';
 
@@ -138,9 +126,9 @@ export default function RecapIndex({
                                 Analitik & Pelaporan
                             </span>
                             <span className="text-xs text-[#667085]">·</span>
-                            <span className="text-xs text-[#667085]">Modul DA-03 & DA-04 (FR-19)</span>
+                            <span className="text-xs text-[#667085]">Rekap dan ekspor data</span>
                             <span className="text-xs text-[#667085]">·</span>
-                            <span className="text-xs text-[#667085]">Aturan BR-21 Terverifikasi</span>
+                            <span className="text-xs text-[#667085]">Aturan rekap diterapkan</span>
                         </div>
                         <h1 className="text-2xl sm:text-3xl font-bold text-[#111827] tracking-tight">
                             Rekapitulasi Okupansi & Kerusakan
@@ -348,11 +336,11 @@ export default function RecapIndex({
                     </div>
                 </div>
 
-                {/* Callout Box Aturan BR-21 */}
+                {/* Penjelasan dasar penghitungan rekapitulasi */}
                 <div className="rounded-lg bg-blue-50/70 border border-blue-200 p-4 text-xs text-[#2D4C79] flex items-start gap-3">
                     <Info className="w-5 h-5 text-[#2D4C79] shrink-0 mt-0.5" />
                     <div>
-                        <strong className="font-semibold block text-sm mb-0.5">Penetapan Aturan Rekapitulasi (BR-21):</strong>
+                        <strong className="font-semibold block text-sm mb-0.5">Dasar penghitungan rekapitulasi:</strong>
                         Reservasi penuh ruangan dihitung secara tepat sebagai penggunaan ruangan tersebut. Alat di dalam ruangan dinonaktifkan dari pemesanan selama reservasi berlangsung, namun <em>tidak menambah frekuensi penggunaan individual alat</em>. Frekuensi penggunaan alat hanya dihitung dari reservasi alat yang diajukan dan disetujui secara eksplisit.
                     </div>
                 </div>

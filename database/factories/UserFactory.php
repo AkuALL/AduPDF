@@ -29,7 +29,8 @@ class UserFactory extends Factory
         return [
             'nama' => $name,
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
+            'approved_at' => now(),
+            'approved_by' => null,
             'password' => static::$password ??= Hash::make('password'),
             'role' => 'pengguna',
             'institutional_id' => null,
@@ -63,21 +64,19 @@ class UserFactory extends Factory
         ]);
     }
 
+    public function pendingApproval(): static
+    {
+        return $this->state(fn () => [
+            'approved_at' => null,
+            'approved_by' => null,
+        ]);
+    }
+
     public function withInstitutionalIdentity(string $type = 'nim', string $id = '1234567890'): static
     {
         return $this->state(fn () => [
             'identity_type' => $type,
             'institutional_id' => $id,
-        ]);
-    }
-
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
         ]);
     }
 

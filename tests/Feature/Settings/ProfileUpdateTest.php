@@ -2,6 +2,8 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
+use Inertia\Testing\AssertableInertia as Assert;
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -66,7 +68,7 @@ test('profile update validates identity_type and institutional_id consistency', 
     $response2->assertSessionHasErrors(['institutional_id']);
 });
 
-test('email verification status is unchanged when the email address is unchanged', function () {
+test('profile update with unchanged email keeps the account approved', function () {
     $user = User::factory()->create();
 
     $response = $this
@@ -80,7 +82,41 @@ test('email verification status is unchanged when the email address is unchanged
         ->assertSessionHasNoErrors()
         ->assertRedirect(route('profile.edit'));
 
-    expect($user->refresh()->email_verified_at)->not->toBeNull();
+    expect($user->refresh()->isApproved())->toBeTrue();
+});
+
+test('changing email does not require verification or revoke account approval', function () {
+    Notification::fake();
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->patch(route('profile.update'), [
+        'name' => $user->name,
+        'email' => 'alamat.baru@kampus.ac.id',
+    ]);
+
+    $response->assertSessionHasNoErrors()->assertRedirect(route('profile.edit'));
+    expect($user->refresh()->email)->toBe('alamat.baru@kampus.ac.id')
+        ->and($user->isApproved())->toBeTrue();
+    Notification::assertNothingSent();
+});
+
+test('admin and petugas can update email without verification notifications', function () {
+    Notification::fake();
+
+    foreach (['admin', 'petugas'] as $role) {
+        $user = User::factory()->state(['role' => $role])->create();
+
+        $this->actingAs($user)
+            ->patch(route('profile.update'), [
+                'name' => $user->name,
+                'email' => $role.'.updated@kampus.ac.id',
+            ])
+            ->assertSessionHasNoErrors();
+
+        expect($user->fresh()->email)->toBe($role.'.updated@kampus.ac.id');
+    }
+
+    Notification::assertNothingSent();
 });
 
 test('user cannot deactivate their own account from the profile page', function () {

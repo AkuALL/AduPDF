@@ -75,3 +75,9 @@ test('expired is not a persisted reservation status', function () {
 
     expect($reservation->fresh()->status)->toBe(ReservationStatus::Rejected);
 });
+
+test('local development runs the scheduler process', function () {
+    $this->artisan('dev:list', ['--json' => true])
+        ->expectsOutputToContain('"name":"scheduler"')
+        ->expectsOutputToContain('"command":"php artisan schedule:work"');
+});

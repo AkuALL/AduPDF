@@ -20,6 +20,39 @@ function pendingReservationFor(User $user): Reservation
     ]);
 }
 
+test('approved Pengguna can submit a reservation without email verification', function () {
+    $user = User::factory()->pengguna()->withInstitutionalIdentity()->create();
+    $facility = Facility::factory()->create();
+    $startTime = now('Asia/Jakarta')->addDays(3)->startOfDay()->addHours(9);
+    $endTime = $startTime->copy()->addHour();
+
+    $response = $this->actingAs($user)->post(route('reservations.store'), [
+        'facility_id' => $facility->id,
+        'tujuan' => 'Rapat organisasi mahasiswa',
+        'start_time' => $startTime->format('Y-m-d\\TH:i'),
+        'end_time' => $endTime->format('Y-m-d\\TH:i'),
+    ]);
+
+    $response->assertRedirect(route('reservations.create', ['facility_id' => $facility->id]));
+    $this->assertDatabaseHas('reservations', [
+        'user_id' => $user->id,
+        'facility_id' => $facility->id,
+        'status' => ReservationStatus::Pending->value,
+    ]);
+});
+
+test('unapproved Pengguna cannot submit a reservation even with an authenticated session', function () {
+    $user = User::factory()->pengguna()->withInstitutionalIdentity()->create([
+        'approved_at' => null,
+        'approved_by' => null,
+    ]);
+
+    $response = $this->actingAs($user)->post(route('reservations.store'));
+
+    $response->assertForbidden();
+    $this->assertDatabaseCount('reservations', 0);
+});
+
 test('petugas must provide a reason when rejecting a reservation', function () {
     $petugas = User::factory()->petugas()->create();
     $reservation = pendingReservationFor(User::factory()->pengguna()->create());

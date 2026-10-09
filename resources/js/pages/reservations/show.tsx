@@ -48,7 +48,16 @@ export default function ReservationShow({ reservation, can_cancel, success }: Pr
                             {reservation.alasan_pembatalan && <div><dt className="text-[#667085]">Alasan pembatalan</dt><dd className="mt-1">{reservation.alasan_pembatalan}</dd></div>}
                         </dl>
                         {can_cancel && (
-                            <Form action={`/reservations/${reservation.id}/cancel`} method="patch" className="mt-6">
+                            <Form
+                                action={`/reservations/${reservation.id}/cancel`}
+                                method="patch"
+                                onSubmit={(event) => {
+                                    if (!window.confirm('Batalkan reservasi ini? Status reservasi akan berubah menjadi Dibatalkan.')) {
+                                        event.preventDefault();
+                                    }
+                                }}
+                                className="mt-6"
+                            >
                                 {({ processing, errors }) => (
                                     <>
                                         {errors.reservation && <p role="alert" className="mb-3 text-sm text-red-700">{errors.reservation}</p>}

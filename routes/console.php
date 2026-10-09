@@ -2,8 +2,11 @@
 
 use App\Enums\ReservationStatus;
 use App\Models\Reservation;
+use Illuminate\Foundation\DevCommands;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+
+DevCommands::artisan('schedule:work', 'scheduler');
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());

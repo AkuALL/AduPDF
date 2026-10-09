@@ -22,6 +22,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/users/pengguna/create', [AccountManagementController::class, 'createPengguna'])->name('users.pengguna.create');
     Route::post('/users/pengguna', [AccountManagementController::class, 'storePengguna'])->name('users.pengguna.store');
 
+    Route::patch('/users/{user}/approve', [AccountManagementController::class, 'approve'])->name('users.approve');
+
     // GAL-06: Account lifecycle (FR-16, BR-26, SRS 12.5)
     Route::patch('/users/{user}/deactivate', [AccountManagementController::class, 'deactivate'])->name('users.deactivate');
     Route::patch('/users/{user}/activate', [AccountManagementController::class, 'activate'])->name('users.activate');

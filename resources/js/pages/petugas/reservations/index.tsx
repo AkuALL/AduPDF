@@ -38,10 +38,27 @@ export default function PetugasReservationIndex({ reservations, approved_reserva
                                     <p className="mt-3 text-sm"><span className="font-medium">Pengaju:</span> {reservation.user}</p>
                                     <p className="mt-2 whitespace-pre-wrap text-sm text-[#667085]">{reservation.tujuan}</p>
                                     <div className="mt-5 flex flex-wrap items-start gap-3">
-                                        <Form action={`/petugas/reservations/${reservation.id}/approve`} method="patch">
+                                        <Form
+                                            action={`/petugas/reservations/${reservation.id}/approve`}
+                                            method="patch"
+                                            onSubmit={(event) => {
+                                                if (!window.confirm('Setujui reservasi ini? Pengajuan menunggu lain yang berbenturan dapat otomatis ditolak.')) {
+                                                    event.preventDefault();
+                                                }
+                                            }}
+                                        >
                                             {({ processing }) => <button type="submit" disabled={processing} className="rounded-md bg-[#2D4C79] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Setujui</button>}
                                         </Form>
-                                        <Form action={`/petugas/reservations/${reservation.id}/reject`} method="patch" className="w-full max-w-xl">
+                                        <Form
+                                            action={`/petugas/reservations/${reservation.id}/reject`}
+                                            method="patch"
+                                            onSubmit={(event) => {
+                                                if (!window.confirm('Tolak reservasi ini? Statusnya akan menjadi Ditolak dan tidak dapat disetujui lagi.')) {
+                                                    event.preventDefault();
+                                                }
+                                            }}
+                                            className="w-full max-w-xl"
+                                        >
                                             {({ errors, processing }) => (
                                                 <>
                                                     <label htmlFor={`rejection-reason-${reservation.id}`} className="block text-sm font-medium">Alasan penolakan</label>
@@ -71,7 +88,7 @@ export default function PetugasReservationIndex({ reservations, approved_reserva
                                             action={`/petugas/reservations/${reservation.id}/cancel`}
                                             method="patch"
                                             onSubmit={(event) => {
-                                                if (! window.confirm(`Batalkan darurat reservasi ${reservation.facility}?`)) {
+                                                if (!window.confirm(`Batalkan darurat reservasi ${reservation.facility}? Statusnya akan berubah menjadi Dibatalkan.`)) {
                                                     event.preventDefault();
                                                 }
                                             }}
