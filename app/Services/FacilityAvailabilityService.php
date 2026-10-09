@@ -59,6 +59,9 @@ class FacilityAvailabilityService
         $availableCount = 0;
         $occupiedCount = 0;
 
+        $nowWib = CarbonImmutable::now('Asia/Jakarta');
+        $isToday = $dateString === $nowWib->format('Y-m-d');
+
         $currentTime = CarbonImmutable::parse("{$dateString} 07:00:00", 'Asia/Jakarta');
         $endTime = CarbonImmutable::parse("{$dateString} 20:00:00", 'Asia/Jakarta');
 
@@ -88,9 +91,16 @@ class FacilityAvailabilityService
                     return $reservation->start_time->lt($slotEndUtc) && $reservation->end_time->gt($slotStartUtc);
                 });
 
+                $isPast = $isToday && $currentTime->lessThanOrEqualTo($nowWib);
+
                 if ($isOccupied) {
                     $status = 'terisi';
                     $label = 'Sudah Direservasi';
+                    $isAvailable = false;
+                    $occupiedCount++;
+                } elseif ($isPast) {
+                    $status = 'tidak_tersedia';
+                    $label = 'Tidak Tersedia';
                     $isAvailable = false;
                     $occupiedCount++;
                 } else {
