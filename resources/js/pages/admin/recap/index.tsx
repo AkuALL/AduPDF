@@ -345,6 +345,96 @@ export default function RecapIndex({
                     </div>
                 </div>
 
+                {/* Bagian 2 & 3: Frekuensi Kerusakan per Fasilitas & Lokasi */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Tabel Kerusakan per Fasilitas */}
+                    <div className="lg:col-span-2 bg-white border border-[#E5E7EB] rounded-lg shadow-xs overflow-hidden">
+                        <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#FBFBFC]">
+                            <h2 className="text-base font-bold text-[#111827]">
+                                Frekuensi Kerusakan per Fasilitas
+                            </h2>
+                            <p className="text-xs text-[#667085] mt-0.5">
+                                Jumlah insiden gangguan atau kerusakan yang dilaporkan civitas
+                            </p>
+                        </div>
+
+                        {damage_by_facility.length > 0 ? (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm">
+                                    <thead className="bg-[#F9FAFB] text-xs font-semibold text-[#4B5563] uppercase border-b border-[#E5E7EB]">
+                                        <tr>
+                                            <th className="px-6 py-3">Fasilitas</th>
+                                            <th className="px-6 py-3">Lokasi</th>
+                                            <th className="px-6 py-3">Kondisi</th>
+                                            <th className="px-6 py-3 text-right">Laporan Masuk</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-[#E5E7EB]">
+                                        {damage_by_facility.map((df) => (
+                                            <tr key={df.id} className="hover:bg-[#F9FAFB] transition">
+                                                <td className="px-6 py-3.5 font-semibold text-[#111827]">
+                                                    {df.name}
+                                                </td>
+                                                <td className="px-6 py-3.5 text-xs text-[#4B5563]">
+                                                    {df.location}
+                                                </td>
+                                                <td className="px-6 py-3.5">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-800">
+                                                        {df.condition_label}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-3.5 text-right font-bold text-rose-700">
+                                                    {df.report_count} kali
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="px-6 py-10 text-center text-xs text-[#667085]">
+                                Tidak ada laporan kerusakan pada periode filter terpilih.
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Tabel Kerusakan per Lokasi */}
+                    <div className="bg-white border border-[#E5E7EB] rounded-lg shadow-xs overflow-hidden">
+                        <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#FBFBFC]">
+                            <h2 className="text-base font-bold text-[#111827]">
+                                Frekuensi per Lokasi
+                            </h2>
+                            <p className="text-xs text-[#667085] mt-0.5">
+                                Titik konsentrasi insiden per gedung
+                            </p>
+                        </div>
+
+                        {damage_by_location.length > 0 ? (
+                            <div className="divide-y divide-[#E5E7EB]">
+                                {damage_by_location.map((locStat) => (
+                                    <div key={locStat.location} className="px-6 py-3.5 flex items-center justify-between hover:bg-[#F9FAFB] transition">
+                                        <div>
+                                            <div className="text-sm font-semibold text-[#111827]">
+                                                {locStat.location}
+                                            </div>
+                                            <div className="text-xs text-[#667085] mt-0.5">
+                                                {locStat.facilities_count} fasilitas terdata
+                                            </div>
+                                        </div>
+                                        <span className="font-bold text-xs text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded">
+                                            {locStat.total_reports} insiden
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="px-6 py-10 text-center text-xs text-[#667085]">
+                                Belum ada laporan kerusakan di lokasi mana pun pada periode ini.
+                            </div>
+                        )}
+                    </div>
+                </div>
+
                 {/* Bagian 1: Tabel Okupansi & Penggunaan Fasilitas */}
                 <div className="bg-white border border-[#E5E7EB] rounded-lg shadow-xs overflow-hidden">
                     <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#FBFBFC] flex items-center justify-between">
@@ -452,96 +542,6 @@ export default function RecapIndex({
                             <p className="text-xs text-[#667085] mt-1">Coba sesuaikan filter tipe atau kata kunci pencarian Anda.</p>
                         </div>
                     )}
-                </div>
-
-                {/* Bagian 2 & 3: Frekuensi Kerusakan per Fasilitas & Lokasi */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Tabel Kerusakan per Fasilitas */}
-                    <div className="lg:col-span-2 bg-white border border-[#E5E7EB] rounded-lg shadow-xs overflow-hidden">
-                        <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#FBFBFC]">
-                            <h2 className="text-base font-bold text-[#111827]">
-                                Frekuensi Kerusakan per Fasilitas
-                            </h2>
-                            <p className="text-xs text-[#667085] mt-0.5">
-                                Jumlah insiden gangguan atau kerusakan yang dilaporkan civitas
-                            </p>
-                        </div>
-
-                        {damage_by_facility.length > 0 ? (
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left text-sm">
-                                    <thead className="bg-[#F9FAFB] text-xs font-semibold text-[#4B5563] uppercase border-b border-[#E5E7EB]">
-                                        <tr>
-                                            <th className="px-6 py-3">Fasilitas</th>
-                                            <th className="px-6 py-3">Lokasi</th>
-                                            <th className="px-6 py-3">Kondisi</th>
-                                            <th className="px-6 py-3 text-right">Laporan Masuk</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-[#E5E7EB]">
-                                        {damage_by_facility.map((df) => (
-                                            <tr key={df.id} className="hover:bg-[#F9FAFB] transition">
-                                                <td className="px-6 py-3.5 font-semibold text-[#111827]">
-                                                    {df.name}
-                                                </td>
-                                                <td className="px-6 py-3.5 text-xs text-[#4B5563]">
-                                                    {df.location}
-                                                </td>
-                                                <td className="px-6 py-3.5">
-                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-800">
-                                                        {df.condition_label}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-3.5 text-right font-bold text-rose-700">
-                                                    {df.report_count} kali
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        ) : (
-                            <div className="px-6 py-10 text-center text-xs text-[#667085]">
-                                Tidak ada laporan kerusakan pada periode filter terpilih.
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Tabel Kerusakan per Lokasi */}
-                    <div className="bg-white border border-[#E5E7EB] rounded-lg shadow-xs overflow-hidden">
-                        <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#FBFBFC]">
-                            <h2 className="text-base font-bold text-[#111827]">
-                                Frekuensi per Lokasi
-                            </h2>
-                            <p className="text-xs text-[#667085] mt-0.5">
-                                Titik konsentrasi insiden per gedung
-                            </p>
-                        </div>
-
-                        {damage_by_location.length > 0 ? (
-                            <div className="divide-y divide-[#E5E7EB]">
-                                {damage_by_location.map((locStat) => (
-                                    <div key={locStat.location} className="px-6 py-3.5 flex items-center justify-between hover:bg-[#F9FAFB] transition">
-                                        <div>
-                                            <div className="text-sm font-semibold text-[#111827]">
-                                                {locStat.location}
-                                            </div>
-                                            <div className="text-xs text-[#667085] mt-0.5">
-                                                {locStat.facilities_count} fasilitas terdata
-                                            </div>
-                                        </div>
-                                        <span className="font-bold text-xs text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded">
-                                            {locStat.total_reports} insiden
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="px-6 py-10 text-center text-xs text-[#667085]">
-                                Belum ada laporan kerusakan di lokasi mana pun pada periode ini.
-                            </div>
-                        )}
-                    </div>
                 </div>
             </div>
         </AdminLayout>
