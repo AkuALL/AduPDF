@@ -13,7 +13,12 @@ class StoreReservationRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isPengguna() && $this->user()->isActive();
+        $user = $this->user();
+
+        return $user?->isPengguna() === true
+            && $user->isActive()
+            && $user->isApproved()
+            && $user->hasVerifiedEmail();
     }
 
     /**

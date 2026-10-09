@@ -20,6 +20,27 @@ function pendingReservationFor(User $user): Reservation
     ]);
 }
 
+test('unverified Pengguna are sent to email verification before submitting a reservation', function () {
+    $user = User::factory()->pengguna()->unverified()->withInstitutionalIdentity()->create();
+
+    $response = $this->actingAs($user)->post(route('reservations.store'));
+
+    $response->assertRedirect(route('verification.notice'));
+    $this->assertDatabaseCount('reservations', 0);
+});
+
+test('unapproved Pengguna cannot submit a reservation even with an authenticated session', function () {
+    $user = User::factory()->pengguna()->withInstitutionalIdentity()->create([
+        'approved_at' => null,
+        'approved_by' => null,
+    ]);
+
+    $response = $this->actingAs($user)->post(route('reservations.store'));
+
+    $response->assertForbidden();
+    $this->assertDatabaseCount('reservations', 0);
+});
+
 test('petugas must provide a reason when rejecting a reservation', function () {
     $petugas = User::factory()->petugas()->create();
     $reservation = pendingReservationFor(User::factory()->pengguna()->create());

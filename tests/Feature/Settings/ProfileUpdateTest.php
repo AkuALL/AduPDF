@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -81,6 +83,20 @@ test('email verification status is unchanged when the email address is unchanged
         ->assertRedirect(route('profile.edit'));
 
     expect($user->refresh()->email_verified_at)->not->toBeNull();
+});
+
+test('changing email clears verification and sends a new verification link', function () {
+    Notification::fake();
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->patch(route('profile.update'), [
+        'name' => $user->name,
+        'email' => 'alamat.baru@kampus.ac.id',
+    ]);
+
+    $response->assertSessionHasNoErrors()->assertRedirect(route('profile.edit'));
+    expect($user->refresh()->email_verified_at)->toBeNull();
+    Notification::assertSentTo($user, VerifyEmail::class);
 });
 
 test('user cannot deactivate their own account from the profile page', function () {

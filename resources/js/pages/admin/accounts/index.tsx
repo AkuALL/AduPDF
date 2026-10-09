@@ -2,6 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Loader2, UserCheck, UserX } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { approve as approveAccount } from '@/actions/App/Http/Controllers/Admin/AccountManagementController';
 import {
     Dialog,
     DialogContent,
@@ -23,6 +24,8 @@ type User = {
     whatsapp?: string | null;
     created_at: string | null;
     deleted_at: string | null;
+    approved_at: string | null;
+    email_verified_at: string | null;
 };
 
 type Props = {
@@ -69,6 +72,13 @@ export default function Index({ users }: Props) {
             {},
             { preserveScroll: true },
         );
+    }
+
+    function approve(user: User) {
+        if (!window.confirm(`Setujui akun Pengguna ${user.nama ?? user.name}?`))
+            return;
+
+        router.patch(approveAccount(user.id).url, {}, { preserveScroll: true });
     }
 
     return (
@@ -184,13 +194,25 @@ export default function Index({ users }: Props) {
                                                 : '-'}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span
-                                                className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${user.deleted_at ? 'bg-slate-100 text-slate-600' : 'bg-emerald-100 text-emerald-800'}`}
-                                            >
-                                                {user.deleted_at
-                                                    ? 'Nonaktif'
-                                                    : 'Aktif'}
-                                            </span>
+                                            <div className="space-y-1">
+                                                <span
+                                                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${user.deleted_at ? 'bg-slate-100 text-slate-600' : user.approved_at ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}
+                                                >
+                                                    {user.deleted_at
+                                                        ? 'Nonaktif'
+                                                        : user.approved_at
+                                                          ? 'Aktif'
+                                                          : 'Menunggu Persetujuan'}
+                                                </span>
+                                                {!user.deleted_at &&
+                                                    user.role === 'pengguna' &&
+                                                    !user.email_verified_at && (
+                                                        <div className="text-[11px] text-amber-700">
+                                                            Email belum
+                                                            diverifikasi
+                                                        </div>
+                                                    )}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             {user.deleted_at ? (
@@ -205,18 +227,35 @@ export default function Index({ users }: Props) {
                                                     Aktifkan Kembali
                                                 </button>
                                             ) : (
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        setUserToDeactivate(
-                                                            user,
-                                                        )
-                                                    }
-                                                    className="inline-flex cursor-pointer items-center gap-1.5 rounded border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700 transition hover:border-rose-300 hover:bg-rose-100"
-                                                >
-                                                    <UserX className="h-3.5 w-3.5" />
-                                                    Nonaktifkan
-                                                </button>
+                                                <div className="flex flex-wrap justify-end gap-2">
+                                                    {user.role === 'pengguna' &&
+                                                        !user.approved_at && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    approve(
+                                                                        user,
+                                                                    )
+                                                                }
+                                                                className="inline-flex cursor-pointer items-center gap-1.5 rounded border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100"
+                                                            >
+                                                                <UserCheck className="h-3.5 w-3.5" />
+                                                                Setujui
+                                                            </button>
+                                                        )}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setUserToDeactivate(
+                                                                user,
+                                                            )
+                                                        }
+                                                        className="inline-flex cursor-pointer items-center gap-1.5 rounded border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700 transition hover:border-rose-300 hover:bg-rose-100"
+                                                    >
+                                                        <UserX className="h-3.5 w-3.5" />
+                                                        Nonaktifkan
+                                                    </button>
+                                                </div>
                                             )}
                                         </td>
                                     </tr>

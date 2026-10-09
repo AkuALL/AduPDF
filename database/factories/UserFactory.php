@@ -30,6 +30,8 @@ class UserFactory extends Factory
             'nama' => $name,
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
+            'approved_at' => now(),
+            'approved_by' => null,
             'password' => static::$password ??= Hash::make('password'),
             'role' => 'pengguna',
             'institutional_id' => null,
@@ -60,6 +62,15 @@ class UserFactory extends Factory
     {
         return $this->state(fn () => [
             'role' => 'pengguna',
+        ]);
+    }
+
+    public function pendingApproval(): static
+    {
+        return $this->state(fn () => [
+            'email_verified_at' => null,
+            'approved_at' => null,
+            'approved_by' => null,
         ]);
     }
 

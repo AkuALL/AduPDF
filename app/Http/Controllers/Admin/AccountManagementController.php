@@ -63,13 +63,17 @@ class AccountManagementController extends Controller
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
         ]);
 
-        User::create([
+        $petugas = new User([
             'nama' => $validated['nama'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'petugas',
-            'email_verified_at' => now(),
         ]);
+        $petugas->forceFill([
+            'email_verified_at' => now(),
+            'approved_at' => now(),
+            'approved_by' => $request->user()->id,
+        ])->save();
 
         return redirect()->route('admin.users.index')->with('success', 'Akun Petugas ('.$validated['nama'].') berhasil dibuat.');
     }
@@ -101,17 +105,54 @@ class AccountManagementController extends Controller
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
         ]);
 
-        User::create([
+        $pengguna = new User([
             'nama' => $validated['nama'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'pengguna',
-            'email_verified_at' => now(),
         ]);
+        $pengguna->forceFill([
+            'approved_at' => now(),
+            'approved_by' => $request->user()->id,
+        ])->save();
+
+        $pengguna->sendEmailVerificationNotification();
 
         return redirect()->route('admin.users.index')->with(
             'success',
             'Akun Pengguna ('.$validated['nama'].') berhasil dibuat langsung oleh Admin.'
+        );
+    }
+
+    /** Approve a self-registered Pengguna and start email verification. */
+    public function approve(Request $request, User $user): RedirectResponse
+    {
+        $approvedUser = DB::transaction(function () use ($request, $user): ?User {
+            $target = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+            if (! $target->isPengguna() || $target->isApproved()) {
+                return null;
+            }
+
+            $target->forceFill([
+                'approved_at' => now(),
+                'approved_by' => $request->user()->id,
+            ])->save();
+
+            return $target;
+        });
+
+        if (! $approvedUser) {
+            return back()->with('error', 'Akun ini bukan akun Pengguna yang menunggu persetujuan.');
+        }
+
+        if (! $approvedUser->hasVerifiedEmail()) {
+            $approvedUser->sendEmailVerificationNotification();
+        }
+
+        return redirect()->route('admin.users.index')->with(
+            'success',
+            'Akun Pengguna '.$approvedUser->nama.' berhasil disetujui. Email verifikasi telah dikirim.'
         );
     }
 

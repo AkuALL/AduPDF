@@ -7,6 +7,8 @@ use App\Models\Reservation;
 use App\Models\User;
 use Database\Seeders\AdminUserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
@@ -25,17 +27,19 @@ test('admin can view all other accounts in the account list', function () {
     $pengguna = User::factory()->pengguna()->create(['nama' => 'Pengguna Kampus']);
     $otherAdmin = User::factory()->admin()->create(['nama' => 'Admin Lain']);
     User::factory()->pengguna()->create(['nama' => 'Pengguna Nonaktif'])->delete();
+    User::factory()->pengguna()->pendingApproval()->create(['nama' => 'Pengguna Menunggu']);
 
     $response = $this->actingAs($admin)->get(route('admin.users.index'));
 
     $response->assertOk()->assertInertia(fn (Assert $page) => $page
         ->component('admin/accounts/index')
-        ->has('users.data', 4)
+        ->has('users.data', 5)
     );
     $response->assertSee($petugas->nama);
     $response->assertSee($pengguna->nama);
     $response->assertSee($otherAdmin->nama);
     $response->assertSee('Pengguna Nonaktif');
+    $response->assertSee('Pengguna Menunggu');
     $response->assertDontSee($admin->nama);
 });
 
@@ -56,10 +60,14 @@ test('admin can create Petugas account directly (FR-15 / US-13, GAL-06)', functi
         'nama' => 'Petugas Fasilitas Baru',
         'email' => 'petugas.baru@kampus.ac.id',
         'role' => 'petugas',
+        'approved_by' => $admin->id,
     ]);
+
+    expect(User::query()->where('email', 'petugas.baru@kampus.ac.id')->sole()->approved_at)->not->toBeNull();
 });
 
 test('admin can create Pengguna account directly (FR-16 / US-14, GAL-06)', function () {
+    Notification::fake();
     $admin = User::factory()->admin()->create();
 
     $response = $this->actingAs($admin)->post(route('admin.users.pengguna.store'), [
@@ -76,7 +84,51 @@ test('admin can create Pengguna account directly (FR-16 / US-14, GAL-06)', funct
         'nama' => 'Dosen Khusus',
         'email' => 'dosen.khusus@kampus.ac.id',
         'role' => 'pengguna',
+        'approved_by' => $admin->id,
+        'email_verified_at' => null,
     ]);
+
+    $pengguna = User::query()->where('email', 'dosen.khusus@kampus.ac.id')->sole();
+    expect($pengguna->approved_at)->not->toBeNull();
+    Notification::assertSentTo($pengguna, VerifyEmail::class);
+});
+
+test('admin can approve a self-registered Pengguna and sends email verification (FR-20)', function () {
+    Notification::fake();
+    $admin = User::factory()->admin()->create();
+    $pengguna = User::factory()->pengguna()->create([
+        'approved_at' => null,
+        'approved_by' => null,
+        'email_verified_at' => null,
+    ]);
+
+    $response = $this->actingAs($admin)->patch(route('admin.users.approve', $pengguna));
+
+    $response->assertRedirect(route('admin.users.index'));
+    $response->assertSessionHas('success');
+    expect($pengguna->fresh()->approved_at)->not->toBeNull()
+        ->and($pengguna->fresh()->approved_by)->toBe($admin->id);
+    Notification::assertSentTo($pengguna, VerifyEmail::class);
+
+    $this->post(route('logout'));
+    $this->post(route('login'), [
+        'email' => $pengguna->email,
+        'password' => 'password',
+    ])->assertRedirect(url('/facilities'));
+    $this->assertAuthenticatedAs($pengguna);
+});
+
+test('non-admin cannot approve a self-registered Pengguna (FR-20)', function () {
+    $pengguna = User::factory()->pengguna()->create([
+        'approved_at' => null,
+        'approved_by' => null,
+    ]);
+
+    $this->actingAs(User::factory()->pengguna()->create())
+        ->patch(route('admin.users.approve', $pengguna))
+        ->assertForbidden();
+
+    expect($pengguna->fresh()->approved_at)->toBeNull();
 });
 
 test('admin deactivation rejects pending and cancels approved unfinished reservations while preserving history (FR-16, BR-26, GAL-06)', function () {

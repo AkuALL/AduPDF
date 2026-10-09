@@ -4,6 +4,10 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Settings\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Features;
+use Laravel\Fortify\Http\Controllers\EmailVerificationNotificationController;
+use Laravel\Fortify\Http\Controllers\EmailVerificationPromptController;
+use Laravel\Fortify\Http\Controllers\VerifyEmailController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +27,16 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    if (Features::enabled(Features::emailVerification())) {
+        Route::get('/email/verify', EmailVerificationPromptController::class)->name('verification.notice');
+        Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)
+            ->middleware(['signed', 'throttle:'.config('fortify.limiters.verification', '6,1')])
+            ->name('verification.verify');
+        Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+            ->middleware('throttle:'.config('fortify.limiters.verification', '6,1'))
+            ->name('verification.send');
+    }
+
     // GAL-03: Logout
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 

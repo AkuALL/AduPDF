@@ -45,15 +45,24 @@ class ProfileController extends Controller
 
         $user = $request->user();
         $user->fill($validated);
+        $emailChanged = $user->isDirty('email');
 
-        if ($user->isDirty('email')) {
+        if ($emailChanged) {
             $user->email_verified_at = null;
         }
 
         $user->save();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Profil berhasil diperbarui.']);
+        if ($emailChanged) {
+            $user->sendEmailVerificationNotification();
+        }
 
-        return to_route('profile.edit')->with('status', 'profile-updated')->with('success', 'Profil berhasil diperbarui.');
+        $message = $emailChanged
+            ? 'Profil diperbarui. Verifikasi email baru sebelum membuat reservasi atau laporan.'
+            : 'Profil berhasil diperbarui.';
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => $message]);
+
+        return to_route('profile.edit')->with('status', 'profile-updated')->with('success', $message);
     }
 }

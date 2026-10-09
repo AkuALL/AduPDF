@@ -9,7 +9,12 @@ class StoreReportRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isPengguna() ?? false;
+        $user = $this->user();
+
+        return $user?->isPengguna() === true
+            && $user->isActive()
+            && $user->isApproved()
+            && $user->hasVerifiedEmail();
     }
 
     /**

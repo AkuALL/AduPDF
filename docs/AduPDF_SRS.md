@@ -459,7 +459,7 @@ Pengguna dapat melihat dan mengubah profil setelah login, termasuk nama, email, 
 Acceptance Criteria
 
 - Registrasi mandiri hanya membutuhkan email, nama lengkap, dan password; akun menunggu persetujuan Admin sebelum dapat login.
-- Pengguna dapat memperbarui alamat email; perubahan alamat menghapus status verifikasi email sampai alamat baru diverifikasi.
+- Pengguna dapat memperbarui alamat email; perubahan alamat menghapus status verifikasi dan mengirim tautan verifikasi ke alamat baru.
 - Pengguna tanpa identitas institusional diarahkan melengkapi profil sebelum reservasi.
 - Form reservasi tidak meminta identitas ulang.
 ### FR-18 — Pengelolaan Fasilitas
@@ -491,9 +491,10 @@ Admin dapat melihat akun Pengguna hasil registrasi mandiri yang menunggu persetu
 Acceptance Criteria
 
 - Akun hasil registrasi mandiri tidak dapat login sebelum disetujui Admin.
-- Setelah disetujui, akun dapat login; reservasi dan laporan tetap mensyaratkan email terverifikasi.
+- Setelah disetujui, akun dapat login dan menerima tautan verifikasi email; reservasi dan laporan tetap mensyaratkan email terverifikasi.
 - Persetujuan mencatat waktu dan Admin yang menyetujui.
 - Akun Pengguna atau Petugas yang dibuat langsung oleh Admin berstatus disetujui saat dibuat.
+- Akun Pengguna yang dibuat Admin menerima tautan verifikasi email dan belum dapat membuat reservasi atau laporan sampai email diverifikasi.
 # 7. Validasi dan Penanganan Kasus Tepi
 
 ## 7.1 Authentication, Registration & Profile
@@ -503,8 +504,9 @@ Acceptance Criteria
 - Registrasi mandiri berhasil → akun berstatus menunggu persetujuan Admin dan belum dapat login.
 - Login dengan akun yang masih menunggu persetujuan → tolak dan jelaskan bahwa akun belum disetujui.
 - Akun hasil registrasi mandiri yang disetujui Admin → dapat login.
-- Email belum diverifikasi → tolak pembuatan reservasi dan laporan.
-- Email profil diubah → kosongkan verifikasi email dan blokir transaksi sampai alamat baru diverifikasi.
+- Persetujuan Admin → catat waktu dan Admin penyetuju, lalu kirim tautan verifikasi email.
+- Email belum diverifikasi → arahkan ke halaman verifikasi; jangan simpan reservasi atau laporan.
+- Email profil diubah → kosongkan verifikasi email, kirim tautan ke alamat baru, dan blokir transaksi sampai alamat baru diverifikasi.
 - Pengguna tanpa NIM/NIP/No. Pegawai lalu mencoba reservasi → arahkan ke halaman profil.
 - Akun nonaktif tidak dapat login atau membuat transaksi baru; histori tetap dapat direferensikan.
 - Admin dapat mengaktifkan kembali akun nonaktif; Admin terakhir tidak dapat dinonaktifkan.
@@ -715,7 +717,7 @@ Tabel domain di bawah mengikuti migration aplikasi. Tabel pendukung Laravel dan 
 | two_factor_confirmed_at | TIMESTAMP NULL | Waktu autentikasi dua faktor dikonfirmasi |
 | role | ENUM | pengguna/petugas/admin |
 | approved_at | TIMESTAMP NULL | Waktu akun disetujui; NULL berarti registrasi mandiri masih menunggu persetujuan Admin. Akun yang dibuat Admin disetujui saat dibuat. |
-| approved_by | BIGINT FK NULL | ID Admin yang menyetujui akun registrasi mandiri; NULL selama menunggu persetujuan. |
+| approved_by | BIGINT FK NULL | ID Admin yang menyetujui akun registrasi mandiri atau membuat akun langsung; NULL selama menunggu dan untuk Admin awal yang diprovision developer. |
 | institutional_id | VARCHAR(100) NULL | NIM/NIP/No. Pegawai; salah satu wajib sebelum reservasi |
 | identity_type | ENUM NULL | nim/nip/no_pegawai |
 | whatsapp | VARCHAR(30) NULL | Nomor WhatsApp pada profil |
@@ -856,6 +858,9 @@ Laravel menyediakan route dan mengirimkan data halaman melalui Inertia; React me
 | POST | /register | Pengunjung | Submit registrasi → akun menunggu persetujuan Admin dan belum dapat login |
 | GET | /login | Pengunjung | Form login |
 | POST | /login | Pengunjung | Login hanya untuk akun yang disetujui dan tidak dinonaktifkan |
+| GET | /email/verify | Pengguna | Status verifikasi dan opsi kirim ulang email |
+| GET | /email/verify/{id}/{hash} | Pengguna | Verifikasi email melalui tautan bertanda tangan |
+| POST | /email/verification-notification | Pengguna | Kirim ulang tautan verifikasi email |
 | GET | /admin/users | Admin | Daftar/pengelolaan akun, termasuk akun registrasi mandiri yang menunggu persetujuan |
 | PATCH | /admin/users/{user}/approve | Admin | Setujui akun hasil registrasi mandiri dan catat Admin/waktu persetujuan |
 | POST | /logout | Authenticated | Logout |
@@ -924,7 +929,7 @@ Laravel menyediakan route dan mengirimkan data halaman melalui Inertia; React me
 
 # 14. Status Keputusan / Open Decisions
 
-Tidak ada Open Decision aktif pada versi ini. Keputusan utama yang dikunci: registrasi langsung aktif tanpa approval akun, identitas institusional wajib sebelum reservasi, horizon 90 hari, pending auto-reject dengan alasan kedaluwarsa, queue Petugas bersegmen slot, penonaktifan akun yang dapat dipulihkan Admin dengan transisi reservasi menunggu→ditolak dan disetujui→dibatalkan beserta alasan, H-2 cancellation, provisioning Admin tunggal, relasi ruangan–alat, konflik pending/approval, propagasi kondisi fasilitas, penonaktifan absolut oleh Admin, upload 8 × 2 MB JPG/JPEG/PNG, serta definisi rekap penggunaan room–tool. Perubahan berikutnya diperlakukan sebagai change request terhadap baseline ini.
+Tidak ada Open Decision aktif pada versi ini. Keputusan utama yang dikunci: registrasi mandiri menunggu persetujuan Admin sebelum login, akun yang dibuat Admin langsung disetujui, dan verifikasi email wajib sebelum reservasi/laporan, identitas institusional wajib sebelum reservasi, horizon 90 hari, pending auto-reject dengan alasan kedaluwarsa, queue Petugas bersegmen slot, penonaktifan akun yang dapat dipulihkan Admin dengan transisi reservasi menunggu→ditolak dan disetujui→dibatalkan beserta alasan, H-2 cancellation, provisioning Admin tunggal, relasi ruangan–alat, konflik pending/approval, propagasi kondisi fasilitas, penonaktifan absolut oleh Admin, upload 8 × 2 MB JPG/JPEG/PNG, serta definisi rekap penggunaan room–tool. Perubahan berikutnya diperlakukan sebagai change request terhadap baseline ini.
 
 | ID | Keputusan | Catatan |
 | --- | --- | --- |
