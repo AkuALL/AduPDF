@@ -119,77 +119,72 @@ class PdfRecapExporter
             $this->drawRunningHeader('Statistik Kerusakan Fasilitas & Lokasi Kampus');
         }
 
-        $this->drawSectionTitle('2. Frekuensi Kerusakan per Fasilitas & Lokasi');
+        $this->drawSectionTitle('2. Frekuensi Kerusakan per Fasilitas');
 
-        // Draw side-by-side or stacked damage tables
         $damageFacCols = [
-            ['title' => 'ID', 'width' => 30, 'align' => 'C'],
-            ['title' => 'Nama Fasilitas', 'width' => 150, 'align' => 'L'],
-            ['title' => 'Lokasi', 'width' => 100, 'align' => 'L'],
-            ['title' => 'Kondisi', 'width' => 60, 'align' => 'C'],
-            ['title' => 'Laporan', 'width' => 50, 'align' => 'R'],
+            ['title' => 'ID', 'width' => 45, 'align' => 'C'],
+            ['title' => 'Nama Fasilitas', 'width' => 240, 'align' => 'L'],
+            ['title' => 'Lokasi', 'width' => 200, 'align' => 'L'],
+            ['title' => 'Kondisi', 'width' => 130, 'align' => 'C'],
+            ['title' => 'Total Laporan', 'width' => 154, 'align' => 'R'],
         ];
 
-        $damageLocCols = [
-            ['title' => 'Lokasi / Gedung', 'width' => 200, 'align' => 'L'],
-            ['title' => 'Jml Fasilitas', 'width' => 85, 'align' => 'C'],
-            ['title' => 'Total Laporan', 'width' => 84, 'align' => 'R'],
-        ];
-
-        // Draw Subheading for facilities
-        $this->drawText($this->marginLeft, $this->currentY, 'Kerusakan per Fasilitas', 10, true, [0.176, 0.298, 0.475]);
-        $this->drawText($this->marginLeft + 400, $this->currentY, 'Kerusakan per Lokasi', 10, true, [0.176, 0.298, 0.475]);
-        $this->currentY -= 14;
-
-        $startYBeforeTables = $this->currentY;
-
-        // Render damage by facility
-        $this->drawTableHeaderAt($this->marginLeft, $startYBeforeTables, $damageFacCols);
-        $yLeft = $this->currentY;
+        $this->drawTableHeader($damageFacCols);
 
         if (empty($damageByFacility)) {
-            $this->drawEmptyRowAt($this->marginLeft, $yLeft, 'Tidak ada laporan kerusakan.', $damageFacCols);
-            $yLeft -= 18;
+            $this->drawEmptyRow('Tidak ada data laporan kerusakan untuk periode ini.', $damageFacCols);
         } else {
-            $limitFac = array_slice($damageByFacility, 0, 15);
-            foreach ($limitFac as $item) {
-                if ($yLeft < $this->marginBottom + 20) {
-                    break;
+            foreach ($damageByFacility as $item) {
+                if ($this->currentY < $this->marginBottom + 30) {
+                    $this->startNewPage();
+                    $this->drawRunningHeader('Statistik Kerusakan per Fasilitas (Lanjutan)');
+                    $this->drawTableHeader($damageFacCols);
                 }
-                $this->drawTableRowAt($this->marginLeft, $yLeft, [
+
+                $this->drawTableRow([
                     (string) ($item['id'] ?? '—'),
                     (string) ($item['name'] ?? '—'),
                     (string) ($item['location'] ?? '—'),
                     (string) ($item['condition_label'] ?? '—'),
                     (string) ($item['report_count'] ?? '0'),
                 ], $damageFacCols);
-                $yLeft -= 16;
             }
         }
 
-        // Render damage by location
-        $this->drawTableHeaderAt($this->marginLeft + 400, $startYBeforeTables, $damageLocCols);
-        $yRight = $startYBeforeTables - 18;
+        $this->currentY -= 14;
+
+        if ($this->currentY < $this->marginBottom + 80) {
+            $this->startNewPage();
+            $this->drawRunningHeader('Statistik Kerusakan per Lokasi Kampus');
+        }
+
+        $this->drawSectionTitle('3. Frekuensi Kerusakan per Lokasi / Gedung');
+
+        $damageLocCols = [
+            ['title' => 'Lokasi / Gedung', 'width' => 380, 'align' => 'L'],
+            ['title' => 'Jumlah Fasilitas', 'width' => 190, 'align' => 'C'],
+            ['title' => 'Total Laporan Kerusakan', 'width' => 199, 'align' => 'R'],
+        ];
+
+        $this->drawTableHeader($damageLocCols);
 
         if (empty($damageByLocation)) {
-            $this->drawEmptyRowAt($this->marginLeft + 400, $yRight, 'Tidak ada data kerusakan lokasi.', $damageLocCols);
-            $yRight -= 18;
+            $this->drawEmptyRow('Tidak ada data kerusakan lokasi untuk periode ini.', $damageLocCols);
         } else {
-            $limitLoc = array_slice($damageByLocation, 0, 15);
-            foreach ($limitLoc as $locItem) {
-                if ($yRight < $this->marginBottom + 20) {
-                    break;
+            foreach ($damageByLocation as $locItem) {
+                if ($this->currentY < $this->marginBottom + 30) {
+                    $this->startNewPage();
+                    $this->drawRunningHeader('Statistik Kerusakan per Lokasi (Lanjutan)');
+                    $this->drawTableHeader($damageLocCols);
                 }
-                $this->drawTableRowAt($this->marginLeft + 400, $yRight, [
+
+                $this->drawTableRow([
                     (string) ($locItem['location'] ?? '—'),
                     (string) ($locItem['facilities_count'] ?? '0'),
                     (string) ($locItem['total_reports'] ?? '0'),
                 ], $damageLocCols);
-                $yRight -= 16;
             }
         }
-
-        $this->currentY = min($yLeft, $yRight) - 10;
 
         // Finish last page
         $this->finishCurrentPage();
