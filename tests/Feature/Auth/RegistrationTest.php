@@ -23,12 +23,8 @@ test('registration screen can be rendered', function () {
     $response->assertOk()->assertInertia(fn (Assert $page) => $page->component('auth/register'));
 });
 
-test('unverified account can open the email verification prompt', function () {
-    $user = User::factory()->pengguna()->unverified()->create();
-
-    $response = $this->actingAs($user)->get(route('verification.notice'));
-
-    $response->assertOk()->assertInertia(fn (Assert $page) => $page->component('auth/verify-email'));
+test('email verification endpoint is not registered', function () {
+    $this->get('/email/verify')->assertNotFound();
 });
 
 test('new Pengguna must wait for Admin approval before login (GAL-02, BR-05, BR-06, FR-20)', function () {
@@ -37,6 +33,7 @@ test('new Pengguna must wait for Admin approval before login (GAL-02, BR-05, BR-
         'email' => 'ahmad@kampus.ac.id',
         'password' => 'Password123!',
         'password_confirmation' => 'Password123!',
+        'role' => 'petugas',
         'approved_at' => now()->toDateTimeString(),
         'approved_by' => 1,
     ]);
@@ -52,7 +49,6 @@ test('new Pengguna must wait for Admin approval before login (GAL-02, BR-05, BR-
         'role' => 'pengguna',
         'approved_at' => null,
         'approved_by' => null,
-        'email_verified_at' => null,
     ]);
 
     $loginResponse = $this->post(route('login'), [

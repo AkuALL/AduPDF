@@ -37,7 +37,7 @@ test('Petugas cannot create a report', function () {
     $response->assertForbidden();
 });
 
-test('verified Pengguna can create a damage report with supporting photos', function () {
+test('approved Pengguna can create a damage report with supporting photos', function () {
     Storage::fake('local');
     $user = User::factory()->pengguna()->create();
     $facility = Facility::factory()->create();
@@ -66,15 +66,6 @@ test('verified Pengguna can create a damage report with supporting photos', func
     expect($report->attachments)->toHaveCount(2);
 
     $report->attachments->each(fn ($attachment) => Storage::disk('local')->assertExists($attachment->file_path));
-});
-
-test('unverified Pengguna are sent to email verification before submitting a report', function () {
-    $user = User::factory()->pengguna()->unverified()->create();
-
-    $response = $this->actingAs($user)->post(route('reports.store'));
-
-    $response->assertRedirect(route('verification.notice'));
-    $this->assertDatabaseCount('reports', 0);
 });
 
 test('unapproved Pengguna cannot submit a report even with an authenticated session', function () {

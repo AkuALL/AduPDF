@@ -192,7 +192,7 @@ export default function PetugasDashboard({
                     </div>
                 </div>
 
-                {/* 4 Operational Metric Cards (DA-02, FR-09) */}
+                {/* Kartu metrik operasional */}
                 <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {/* Metric 1: Antrean Reservasi */}
                     <button
@@ -417,7 +417,15 @@ export default function PetugasDashboard({
                                                             </td>
                                                             <td className="whitespace-nowrap px-4 py-3 text-right">
                                                                 <div className="inline-flex items-start gap-2">
-                                                                    <Form action={`/petugas/reservations/${res.id}/approve`} method="patch">
+                                                                    <Form
+                                                                        action={`/petugas/reservations/${res.id}/approve`}
+                                                                        method="patch"
+                                                                        onSubmit={(event) => {
+                                                                            if (!window.confirm('Setujui reservasi ini? Pengajuan menunggu lain yang berbenturan dapat otomatis ditolak.')) {
+                                                                                event.preventDefault();
+                                                                            }
+                                                                        }}
+                                                                    >
                                                                         {({ processing }) => (
                                                                             <button
                                                                                 type="submit"
@@ -428,7 +436,16 @@ export default function PetugasDashboard({
                                                                             </button>
                                                                         )}
                                                                     </Form>
-                                                                    <Form action={`/petugas/reservations/${res.id}/reject`} method="patch" className="w-48 text-left">
+                                                                    <Form
+                                                                        action={`/petugas/reservations/${res.id}/reject`}
+                                                                        method="patch"
+                                                                        onSubmit={(event) => {
+                                                                            if (!window.confirm('Tolak reservasi ini? Statusnya akan menjadi Ditolak dan tidak dapat disetujui lagi.')) {
+                                                                                event.preventDefault();
+                                                                            }
+                                                                        }}
+                                                                        className="w-48 text-left"
+                                                                    >
                                                                         {({ errors, processing }) => (
                                                                             <>
                                                                                 <label htmlFor={`dashboard-rejection-reason-${res.id}`} className="sr-only">Alasan penolakan</label>

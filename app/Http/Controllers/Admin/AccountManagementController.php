@@ -70,7 +70,6 @@ class AccountManagementController extends Controller
             'role' => 'petugas',
         ]);
         $petugas->forceFill([
-            'email_verified_at' => now(),
             'approved_at' => now(),
             'approved_by' => $request->user()->id,
         ])->save();
@@ -116,15 +115,13 @@ class AccountManagementController extends Controller
             'approved_by' => $request->user()->id,
         ])->save();
 
-        $pengguna->sendEmailVerificationNotification();
-
         return redirect()->route('admin.users.index')->with(
             'success',
             'Akun Pengguna ('.$validated['nama'].') berhasil dibuat langsung oleh Admin.'
         );
     }
 
-    /** Approve a self-registered Pengguna and start email verification. */
+    /** Approve a self-registered Pengguna. */
     public function approve(Request $request, User $user): RedirectResponse
     {
         $approvedUser = DB::transaction(function () use ($request, $user): ?User {
@@ -146,13 +143,9 @@ class AccountManagementController extends Controller
             return back()->with('error', 'Akun ini bukan akun Pengguna yang menunggu persetujuan.');
         }
 
-        if (! $approvedUser->hasVerifiedEmail()) {
-            $approvedUser->sendEmailVerificationNotification();
-        }
-
         return redirect()->route('admin.users.index')->with(
             'success',
-            'Akun Pengguna '.$approvedUser->nama.' berhasil disetujui. Email verifikasi telah dikirim.'
+            'Akun Pengguna '.$approvedUser->nama.' berhasil disetujui.'
         );
     }
 

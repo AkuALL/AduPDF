@@ -13,8 +13,7 @@ class StoreReportRequest extends FormRequest
 
         return $user?->isPengguna() === true
             && $user->isActive()
-            && $user->isApproved()
-            && $user->hasVerifiedEmail();
+            && $user->isApproved();
     }
 
     /**

@@ -25,7 +25,7 @@ export default function AccountForm({
                     <p className="mt-1 text-xs text-slate-500">
                         {role === 'Petugas'
                             ? 'Akun Petugas disetujui Admin saat dibuat dan dapat langsung masuk.'
-                            : 'Akun Pengguna disetujui Admin saat dibuat; verifikasi email diperlukan sebelum reservasi atau laporan.'}
+                            : 'Akun Pengguna disetujui Admin saat dibuat dan dapat langsung digunakan.'}
                     </p>
                 </div>
                 <div className="p-6">
@@ -42,6 +42,10 @@ export default function AccountForm({
                     <form
                         onSubmit={(event) => {
                             event.preventDefault();
+                            if (!window.confirm(`Buat akun ${role} untuk ${form.data.nama}? Akun akan disetujui Admin saat dibuat dan dapat langsung digunakan.`)) {
+                                return;
+                            }
+
                             form.post(endpoint);
                         }}
                         className="space-y-4"

@@ -1,4 +1,4 @@
-import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import { UserNavbar } from '@/components/user-navbar';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -21,7 +21,6 @@ type PageProps = {
 export default function Profile({
     status,
 }: {
-    mustVerifyEmail?: boolean;
     status?: string;
 }) {
     const { auth, flash } = usePage<PageProps>().props;
@@ -54,23 +53,6 @@ export default function Profile({
                             <div className="mt-1">{flash.warning}</div>
                         </div>
                     )}
-
-                    {user.role === 'pengguna' &&
-                        user.email_verified_at === null && (
-                            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                                <p>
-                                    Email Anda belum diverifikasi. Verifikasi
-                                    email sebelum mengajukan reservasi atau
-                                    laporan.
-                                </p>
-                                <Link
-                                    href="/email/verify"
-                                    className="mt-2 inline-block font-medium underline"
-                                >
-                                    Verifikasi email
-                                </Link>
-                            </div>
-                        )}
 
                     {/* Identity Completeness Indicator */}
                     <div

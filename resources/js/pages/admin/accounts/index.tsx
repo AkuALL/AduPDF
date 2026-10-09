@@ -25,7 +25,6 @@ type User = {
     created_at: string | null;
     deleted_at: string | null;
     approved_at: string | null;
-    email_verified_at: string | null;
 };
 
 type Props = {
@@ -67,6 +66,9 @@ export default function Index({ users }: Props) {
     }
 
     function activate(user: User) {
+        if (!window.confirm(`Aktifkan kembali akun ${user.nama ?? user.name}? Akun dapat login dan menggunakan layanan sesuai perannya.`))
+            return;
+
         router.patch(
             `/admin/users/${user.id}/activate`,
             {},
@@ -196,22 +198,14 @@ export default function Index({ users }: Props) {
                                         <td className="px-6 py-4">
                                             <div className="space-y-1">
                                                 <span
-                                                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${user.deleted_at ? 'bg-slate-100 text-slate-600' : user.approved_at ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}
+                                                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${user.deleted_at ? 'bg-slate-100 text-slate-600' : user.role === 'pengguna' && !user.approved_at ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}
                                                 >
                                                     {user.deleted_at
                                                         ? 'Nonaktif'
-                                                        : user.approved_at
-                                                          ? 'Aktif'
-                                                          : 'Menunggu Persetujuan'}
+                                                        : user.role === 'pengguna' && !user.approved_at
+                                                          ? 'Menunggu Persetujuan'
+                                                          : 'Aktif'}
                                                 </span>
-                                                {!user.deleted_at &&
-                                                    user.role === 'pengguna' &&
-                                                    !user.email_verified_at && (
-                                                        <div className="text-[11px] text-amber-700">
-                                                            Email belum
-                                                            diverifikasi
-                                                        </div>
-                                                    )}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-right">

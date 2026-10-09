@@ -23,10 +23,7 @@ export default function Register() {
                 <div className="p-6">
                     <div className="mb-5 rounded border-l-4 border-[#2D4C79] bg-blue-50 p-3 text-xs leading-relaxed text-slate-700">
                         <b className="text-[#2D4C79]">Informasi Akun:</b>{' '}
-                        Setelah mendaftar, akun harus menunggu persetujuan
-                        Admin. Setelah disetujui, Anda dapat masuk dan
-                        memverifikasi email sebelum mengajukan reservasi atau
-                        laporan.
+                        Akun dapat digunakan setelah disetujui oleh Admin.
                     </div>
                     {errors.length > 0 && (
                         <div

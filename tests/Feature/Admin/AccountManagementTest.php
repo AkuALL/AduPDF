@@ -7,7 +7,6 @@ use App\Models\Reservation;
 use App\Models\User;
 use Database\Seeders\AdminUserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -44,6 +43,7 @@ test('admin can view all other accounts in the account list', function () {
 });
 
 test('admin can create Petugas account directly (FR-15 / US-13, GAL-06)', function () {
+    Notification::fake();
     $admin = User::factory()->admin()->create();
 
     $response = $this->actingAs($admin)->post(route('admin.users.petugas.store'), [
@@ -63,7 +63,9 @@ test('admin can create Petugas account directly (FR-15 / US-13, GAL-06)', functi
         'approved_by' => $admin->id,
     ]);
 
-    expect(User::query()->where('email', 'petugas.baru@kampus.ac.id')->sole()->approved_at)->not->toBeNull();
+    $petugas = User::query()->where('email', 'petugas.baru@kampus.ac.id')->sole();
+    expect($petugas->approved_at)->not->toBeNull();
+    Notification::assertNothingSent();
 });
 
 test('admin can create Pengguna account directly (FR-16 / US-14, GAL-06)', function () {
@@ -85,21 +87,19 @@ test('admin can create Pengguna account directly (FR-16 / US-14, GAL-06)', funct
         'email' => 'dosen.khusus@kampus.ac.id',
         'role' => 'pengguna',
         'approved_by' => $admin->id,
-        'email_verified_at' => null,
     ]);
 
     $pengguna = User::query()->where('email', 'dosen.khusus@kampus.ac.id')->sole();
     expect($pengguna->approved_at)->not->toBeNull();
-    Notification::assertSentTo($pengguna, VerifyEmail::class);
+    Notification::assertNothingSent();
 });
 
-test('admin can approve a self-registered Pengguna and sends email verification (FR-20)', function () {
+test('admin can approve a self-registered Pengguna without email verification (FR-20)', function () {
     Notification::fake();
     $admin = User::factory()->admin()->create();
     $pengguna = User::factory()->pengguna()->create([
         'approved_at' => null,
         'approved_by' => null,
-        'email_verified_at' => null,
     ]);
 
     $response = $this->actingAs($admin)->patch(route('admin.users.approve', $pengguna));
@@ -108,7 +108,7 @@ test('admin can approve a self-registered Pengguna and sends email verification 
     $response->assertSessionHas('success');
     expect($pengguna->fresh()->approved_at)->not->toBeNull()
         ->and($pengguna->fresh()->approved_by)->toBe($admin->id);
-    Notification::assertSentTo($pengguna, VerifyEmail::class);
+    Notification::assertNothingSent();
 
     $this->post(route('logout'));
     $this->post(route('login'), [

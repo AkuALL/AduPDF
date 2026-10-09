@@ -262,7 +262,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                             </p>
                         </div>
 
-                        {/* Related Resources: Child Tools (Design Section 15.3 & BR-10) */}
+                        {/* Peralatan yang berada di dalam ruangan */}
                         {isRoom && (
                             <div className="mt-8 border-t border-[#E5E7EB] pt-6">
                                 <div className="flex items-center justify-between">
@@ -310,7 +310,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                             })}
                                         </div>
 
-                                        {/* Contextual Notice per Section 15.3 & BR-10 */}
+                                        {/* Informasi pemesanan saat ada alat dalam perbaikan */}
                                         <div className="mt-3 rounded-md bg-[#FFF5E6] border border-[#F5D6A6] p-3 text-xs text-[#A15C00]">
                                             <strong>Ketentuan Kampus:</strong> Apabila salah satu peralatan di atas sedang dalam perbaikan, ruangan induk ini tetap dapat diajukan untuk reservasi penuh.
                                         </div>
@@ -321,7 +321,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
 
                     </article>
 
-                    {/* Availability Schedule Section (AG-04, FR-01, FR-02) */}
+                    {/* Jadwal ketersediaan fasilitas */}
                     <section className="mt-8 rounded-lg border border-[#E5E7EB] bg-white p-6 shadow-[0_1px_2px_rgba(16,24,40,0.03)] sm:p-8">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>

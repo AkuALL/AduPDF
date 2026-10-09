@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
-use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,7 +19,6 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property int $id
  * @property string $name
  * @property string $email
- * @property Carbon|null $email_verified_at
  * @property Carbon|null $approved_at
  * @property int|null $approved_by
  * @property string $password
@@ -38,10 +35,10 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  */
 #[Fillable(['nama', 'name', 'email', 'password', 'role', 'institutional_id', 'identity_type', 'whatsapp'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token', 'approved_by'])]
-class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
+class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, MustVerifyEmailTrait, Notifiable, PasskeyAuthenticatable, SoftDeletes, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, PasskeyAuthenticatable, SoftDeletes, TwoFactorAuthenticatable;
 
     protected $appends = ['name'];
 
@@ -53,7 +50,6 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'approved_at' => 'datetime',
             'approved_by' => 'integer',
             'password' => 'hashed',

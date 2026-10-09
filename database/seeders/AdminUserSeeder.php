@@ -22,7 +22,6 @@ class AdminUserSeeder extends Seeder
                 'role' => 'admin',
             ]);
             $admin->forceFill([
-                'email_verified_at' => now(),
                 'approved_at' => now(),
             ])->save();
         }

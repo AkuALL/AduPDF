@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -19,7 +18,6 @@ class ProfileController extends Controller
     public function edit(Request $request): Response
     {
         return Inertia::render('settings/profile', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
         ]);
     }
@@ -45,21 +43,9 @@ class ProfileController extends Controller
 
         $user = $request->user();
         $user->fill($validated);
-        $emailChanged = $user->isDirty('email');
-
-        if ($emailChanged) {
-            $user->email_verified_at = null;
-        }
-
         $user->save();
 
-        if ($emailChanged) {
-            $user->sendEmailVerificationNotification();
-        }
-
-        $message = $emailChanged
-            ? 'Profil diperbarui. Verifikasi email baru sebelum membuat reservasi atau laporan.'
-            : 'Profil berhasil diperbarui.';
+        $message = 'Profil berhasil diperbarui.';
 
         Inertia::flash('toast', ['type' => 'success', 'message' => $message]);
 
