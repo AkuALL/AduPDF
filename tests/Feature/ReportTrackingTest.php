@@ -6,7 +6,7 @@ use App\Models\ReportAttachment;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
-test('approved Pengguna can view only their reports', function () {
+test('active Pengguna can view only their reports', function () {
     $this->withoutVite();
     $user = User::factory()->pengguna()->create();
     $ownReport = Report::factory()->for($user)->create([
@@ -26,7 +26,7 @@ test('approved Pengguna can view only their reports', function () {
     );
 });
 
-test('approved Pengguna can view their report detail', function () {
+test('active Pengguna can view their report detail', function () {
     $this->withoutVite();
     $user = User::factory()->pengguna()->create();
     $report = Report::factory()

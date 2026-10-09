@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\ReservationImpactService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -13,12 +15,13 @@ use Inertia\Response;
 class AccountManagementController extends Controller
 {
     /**
-     * Display Petugas and Pengguna accounts (GAL-06).
+     * Display all accounts except the current Admin account (GAL-06).
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $users = User::query()
-            ->whereIn('role', ['petugas', 'pengguna'])
+        $users = User::withTrashed()
+            ->whereIn('role', ['petugas', 'pengguna', 'admin'])
+            ->where('id', '!=', $request->user()->id)
             ->orderByDesc('created_at')
             ->paginate(15);
 
@@ -62,7 +65,6 @@ class AccountManagementController extends Controller
 
         User::create([
             'nama' => $validated['nama'],
-            'name' => $validated['nama'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'petugas',
@@ -101,7 +103,6 @@ class AccountManagementController extends Controller
 
         User::create([
             'nama' => $validated['nama'],
-            'name' => $validated['nama'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'pengguna',
@@ -114,23 +115,54 @@ class AccountManagementController extends Controller
         );
     }
 
-    /**
-     * Soft-delete an account of any role (FR-16, BR-26, GAL-06).
-     * Prevents deletion of the last Admin account.
-     */
-    public function destroy(Request $request, User $user): RedirectResponse
+    /** Reactivate an account previously deactivated by Admin. */
+    public function activate(int $userId): RedirectResponse
     {
-        // BR-26 & FR-16: Sistem harus mencegah penghapusan Admin terakhir
-        if ($user->isAdmin() && User::where('role', 'admin')->count() <= 1) {
-            return back()->with('error', 'Admin terakhir tidak dapat dihapus.');
+        $user = User::withTrashed()->findOrFail($userId);
+
+        if (! $user->trashed()) {
+            return back()->with('error', 'Akun tersebut sudah aktif.');
         }
 
-        $nama = $user->nama ?? $user->name ?? $user->email;
-        $user->delete();
+        $user->restore();
 
         return redirect()->route('admin.users.index')->with(
             'success',
-            'Akun '.$nama.' berhasil dihapus.'
+            'Akun '.$user->nama.' berhasil diaktifkan kembali.'
+        );
+    }
+
+    /** Deactivate an account and apply its reservation status changes atomically. */
+    public function deactivate(Request $request, User $user, ReservationImpactService $impacts): RedirectResponse
+    {
+        if ((int) $request->user()->id === (int) $user->id) {
+            return back()->with('error', 'Admin tidak dapat menonaktifkan akunnya sendiri.');
+        }
+
+        $result = DB::transaction(function () use ($user, $impacts): ?array {
+            $activeAdmins = User::query()
+                ->where('role', 'admin')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get(['id']);
+            $target = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+            if ($target->isAdmin() && $activeAdmins->count() <= 1) {
+                return null;
+            }
+
+            return $impacts->deactivateUser($target);
+        });
+
+        if ($result === null) {
+            return back()->with('error', 'Admin terakhir tidak dapat dinonaktifkan.');
+        }
+
+        $name = $user->nama ?? $user->email;
+
+        return redirect()->route('admin.users.index')->with(
+            'success',
+            "Akun {$name} berhasil dinonaktifkan. {$result['rejected']} reservasi menunggu ditolak dan {$result['cancelled']} reservasi disetujui dibatalkan."
         );
     }
 }

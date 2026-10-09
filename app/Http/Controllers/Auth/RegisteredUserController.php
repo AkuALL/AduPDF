@@ -41,7 +41,6 @@ class RegisteredUserController extends Controller
 
         User::create([
             'nama' => $validated['nama'],
-            'name' => $validated['nama'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'pengguna',

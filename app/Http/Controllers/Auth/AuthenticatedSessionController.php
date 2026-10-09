@@ -40,7 +40,7 @@ class AuthenticatedSessionController extends Controller
 
         $user = User::withTrashed()->where('email', strtolower($request->email))->first();
 
-        // SRS 7.1 & BR-26: Soft-deleted accounts cannot log in; messages do not leak sensitive details
+        // Nonaktif accounts cannot log in; messages do not leak sensitive details.
         if (! $user || $user->trashed() || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => 'Email atau kata sandi yang Anda masukkan salah.',

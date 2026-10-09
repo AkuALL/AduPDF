@@ -5,10 +5,50 @@ namespace App\Services;
 use App\Enums\ReservationStatus;
 use App\Models\Facility;
 use App\Models\Reservation;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class ReservationImpactService
 {
+    /**
+     * @return array{rejected: int, cancelled: int}
+     */
+    public function deactivateUser(User $user): array
+    {
+        return DB::transaction(function () use ($user): array {
+            $user = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $now = now();
+            $unfinished = Reservation::query()
+                ->where('user_id', $user->id)
+                ->where('end_time', '>', $now)
+                ->whereIn('status', [ReservationStatus::Pending->value, ReservationStatus::Approved->value])
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get(['id', 'status']);
+
+            $pendingIds = $unfinished
+                ->filter(fn (Reservation $reservation): bool => $reservation->status === ReservationStatus::Pending)
+                ->modelKeys();
+            $approvedIds = $unfinished
+                ->filter(fn (Reservation $reservation): bool => $reservation->status === ReservationStatus::Approved)
+                ->modelKeys();
+
+            $rejected = Reservation::query()->whereKey($pendingIds)->update([
+                'status' => ReservationStatus::Rejected->value,
+                'alasan_penolakan' => 'Reservasi ditolak karena akun pemesan dinonaktifkan oleh Admin.',
+                'ditolak_pada' => $now,
+            ]);
+            $cancelled = Reservation::query()->whereKey($approvedIds)->update([
+                'status' => ReservationStatus::Cancelled->value,
+                'alasan_pembatalan' => 'Reservasi dibatalkan karena akun pemesan dinonaktifkan oleh Admin.',
+            ]);
+
+            $user->delete();
+
+            return ['rejected' => $rejected, 'cancelled' => $cancelled];
+        });
+    }
+
     /**
      * @return array{rejected: int, cancelled: int}
      */

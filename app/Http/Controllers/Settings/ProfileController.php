@@ -3,13 +3,10 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Settings\ProfileDeleteRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
-use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -58,28 +55,5 @@ class ProfileController extends Controller
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Profil berhasil diperbarui.']);
 
         return to_route('profile.edit')->with('status', 'profile-updated')->with('success', 'Profil berhasil diperbarui.');
-    }
-
-    /**
-     * Delete the user's profile (soft-delete).
-     * Prevents deletion of the last Admin account (BR-26).
-     */
-    public function destroy(ProfileDeleteRequest $request): RedirectResponse
-    {
-        $user = $request->user();
-
-        // BR-26 & FR-16: Sistem harus mencegah penghapusan Admin terakhir
-        if ($user->isAdmin() && User::where('role', 'admin')->count() <= 1) {
-            return back()->with('error', 'Admin terakhir tidak dapat dihapus.');
-        }
-
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/');
     }
 }

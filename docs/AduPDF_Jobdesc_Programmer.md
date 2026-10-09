@@ -35,7 +35,7 @@ Prinsip utama:
 |---|---|---|---|
 | **AL** | **Reservation End-to-End** | Sangat Tinggi | Pengajuan, validasi identitas, horizon 90 hari, auto-reject pending saat kedaluwarsa, conflict engine, room-tool rules, history/detail, H-2 cancellation, approval/reject, emergency cancellation, reservation contracts |
 | **Agil** | **Facility + Availability + Room–Tool Relation** | Tinggi | Facility master, parent room-child tool, public catalog, search/filter, status kondisi, availability, admin facility management, deactivate integration |
-| **Galang** | **Authentication + Registration + Profile + RBAC** | Sedang–Tinggi | User foundation, self-registration aktif, login/logout, profil NIM/NIP/No. Pegawai/WhatsApp, soft-delete account, role middleware/policy, account management, single Admin provisioning |
+| **Galang** | **Authentication + Registration + Profile + RBAC** | Sedang–Tinggi | User foundation, self-registration aktif, login/logout, profil NIM/NIP/No. Pegawai/WhatsApp, penonaktifan/pengaktifan kembali akun, role middleware/policy, account management, single Admin provisioning |
 | **Abhi** | **Damage Report + Repair Flow** | Tinggi | Report, multi-attachment upload, tracking, Petugas processing, maintenance flow, report statistics contract |
 | **Daniel** | **Dashboard + Recap/Export + Integration/QA** | Sedang–Tinggi | Shared UI shell, Petugas dashboard, occupancy/damage recap, CSV/Excel/PDF export, E2E/integration test dan merge coordination |
 
@@ -238,7 +238,7 @@ Galang memegang seluruh lifecycle identitas dan authorization.
 - Migration/table `users`.
 - Model `User`.
 - Role: `pengguna`, `petugas`, `admin`.
-- `institutional_id`, `identity_type`, `whatsapp`, dan `deleted_at` untuk profil/soft-delete.
+- `institutional_id`, `identity_type`, `whatsapp`, dan `deleted_at` untuk profil serta penanda waktu penonaktifan akun.
 - Provision tepat satu Admin pertama oleh developer.
 
 **GAL-02 — Self Registration Pengguna**
@@ -267,8 +267,10 @@ Galang memegang seluruh lifecycle identitas dan authorization.
 - Admin membuat Petugas.
 - Admin membuat Pengguna langsung.
 - Admin tidak dapat membuat Admin lain.
-- Admin dapat soft-delete akun role apa pun.
-- Admin terakhir tidak dapat dihapus.
+- Admin dapat menonaktifkan dan mengaktifkan kembali akun role apa pun.
+- Pengguna tidak dapat menonaktifkan akunnya sendiri.
+- Admin terakhir tidak dapat dinonaktifkan.
+- Penonaktifan mengubah reservasi menunggu yang belum selesai menjadi ditolak dan reservasi disetujui yang belum selesai menjadi dibatalkan; masing-masing alasan menyebut akun pemesan dinonaktifkan oleh Admin. Histori laporan tetap dipertahankan.
 
 **GAL-07 — Admin Change Password**
 - Admin tunggal dapat mengubah password sendiri.
@@ -384,7 +386,7 @@ Daniel menjadi owner integrasi tampilan lintas-domain, reporting administratif, 
 - Batas `now + 90 hari` dan pengajuan sesaat sebelum slot.
 - Pending auto-reject saat `start_time` dengan `alasan_penolakan` bahwa pengajuan kedaluwarsa.
 - Queue Petugas bersegmen slot dan `created_at ASC` di dalam segmen.
-- Soft-delete akun tanpa menghapus histori.
+- Nonaktifkan/aktifkan kembali akun; pastikan histori laporan tetap tersedia dan reservasi yang belum selesai diputus sesuai aturan.
 - Facility discovery.
 - Tool vs room availability.
 - Reservation submit → approve → conflicting pending auto-reject.
@@ -639,7 +641,7 @@ Global checklist setiap fitur:
 
 | Owner | Halaman/UX utama |
 |---|---|
-| **Galang** | Login, Register, Profile, NIM/NIP/No. Pegawai, WhatsApp, Create Petugas, Create Pengguna, soft-delete account, account management |
+| **Galang** | Login, Register, Profile, NIM/NIP/No. Pegawai, WhatsApp, Create Petugas, Create Pengguna, penonaktifan/pengaktifan kembali akun, account management |
 | **Agil** | Facility List, Facility Detail, Availability, search/filter, Facility Management, warning tool `dalam_perbaikan`, confirmation deactivate |
 | **AL** | Create Reservation, My Reservations, Reservation Detail, conflict/error feedback, H-2 cancellation confirmation, Petugas reservation action/detail |
 | **Abhi** | Create Report, My Reports, Report Detail, upload 1–8 foto, Petugas report processing/detail |

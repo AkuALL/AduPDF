@@ -27,7 +27,7 @@ test('pengguna can authenticate successfully', function () {
     $response->assertRedirect(url('/facilities'));
 });
 
-test('soft-deleted account CANNOT authenticate (BR-26, SRS 7.1)', function () {
+test('nonaktif account cannot authenticate (BR-26, SRS 7.1)', function () {
     $user = User::factory()->pengguna()->create([
         'email' => 'deleted@kampus.ac.id',
         'password' => bcrypt('password123'),

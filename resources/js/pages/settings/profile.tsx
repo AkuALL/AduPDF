@@ -1,6 +1,5 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { UserNavbar } from '@/components/user-navbar';
-import DeleteUser from '@/components/delete-user';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -202,9 +201,6 @@ export default function Profile({
                     )}
                 </Form>
 
-              </section>
-              <section className="rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)] sm:p-8">
-                  <DeleteUser />
               </section>
             </main>
         </div>

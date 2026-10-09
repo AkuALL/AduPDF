@@ -9,7 +9,7 @@ Tech Stack: Laravel 13 + Inertia.js 3 + React 19 + TypeScript + Tailwind CSS v4
 
 Primary UI Color: #2D4C79
 
-> Status dokumen: Baseline lengkap Iterasi 2. Pembagian User Story, Functional Requirement, dan ownership tetap mengikuti V1; perubahan yang disepakati pada registrasi, identitas, reservasi, antrian Petugas, dan akun telah diterapkan di seluruh bagian terkait.
+> Status dokumen: Baseline lengkap Iterasi 2. Pembagian User Story, Functional Requirement, dan ownership tetap mengikuti V1; perubahan yang disepakati pada persetujuan akun, verifikasi email, identitas, reservasi, antrian Petugas, dan penonaktifan akun telah diterapkan di seluruh bagian terkait.
 
 # Dasar Penyusunan
 
@@ -17,7 +17,7 @@ Dokumen ini disusun berdasarkan spesifikasi proyek PPK 2026, draft SRS AduPDF se
 
 - DetailProyekPPK2026.pdf — ketentuan umum, 17 User Story, aturan waktu reservasi, aktor, dan hint rancangan database.
 - DRAFT_AduPDF.pdf — draft kebutuhan fungsional, non-fungsional, business rules, dan rancangan database awal.
-- Keputusan Iterasi 2 — Laravel + Inertia.js React + TypeScript, warna utama #2D4C79, terminologi Pengunjung, registrasi langsung aktif, profil dengan NIM/NIP/No. Pegawai dan WhatsApp, identitas wajib sebelum reservasi, horizon reservasi 90 hari, auto-reject pending dengan alasan kedaluwarsa, antrian Petugas bersegmen slot, serta soft-delete akun.
+- Keputusan Iterasi 2 — Laravel + Inertia.js React + TypeScript, warna utama #2D4C79, terminologi Pengunjung, registrasi mandiri yang menunggu persetujuan Admin, verifikasi email sebelum reservasi/laporan, profil dengan NIM/NIP/No. Pegawai dan WhatsApp, identitas wajib sebelum reservasi, horizon reservasi 90 hari, auto-reject pending dengan alasan kedaluwarsa, antrian Petugas bersegmen slot, serta penonaktifan akun yang dapat dipulihkan Admin. Saat akun dinonaktifkan, reservasi menunggu yang belum selesai ditolak dan reservasi disetujui yang belum selesai dibatalkan dengan alasan penonaktifan akun.
 # 1. Pendahuluan dan Ruang Lingkup
 
 ## 1.1 Tujuan Dokumen
@@ -33,7 +33,7 @@ AduPDF adalah aplikasi web terpusat untuk membantu pengelolaan penggunaan fasili
 
 - Daftar fasilitas dan ketersediaan per slot waktu.
 - Pencarian dan filter berdasarkan tipe, lokasi, dan kapasitas.
-- Registrasi mandiri Pengguna, login langsung, dan pengelolaan profil.
+- Registrasi mandiri Pengguna, persetujuan Admin sebelum akun dapat login, verifikasi email sebelum transaksi, dan pengelolaan profil.
 - Login dan logout sesuai role.
 - Pengajuan, riwayat, detail, dan pembatalan reservasi Pengguna.
 - Approval/rejection reservasi oleh Petugas dengan validasi anti-bentrok.
@@ -58,7 +58,7 @@ AduPDF adalah aplikasi web terpusat untuk membantu pengelolaan penggunaan fasili
 | Istilah | Definisi |
 | --- | --- |
 | Pengunjung | Pengakses yang belum login dan hanya dapat menggunakan informasi publik. |
-| Pengguna | Mahasiswa, dosen, atau staf yang memiliki akun aktif. |
+| Pengguna | Mahasiswa, dosen, atau staf yang akunnya telah disetujui dan tidak dinonaktifkan. |
 | Petugas | Aktor yang memproses reservasi dan laporan kerusakan serta memperbarui kondisi fasilitas. Akunnya dibuat Admin. |
 | Admin | Aktor yang mengelola akun, data fasilitas, serta rekapitulasi. |
 | Fasilitas | Objek kampus yang dikelola sistem: ruang kelas, aula, laboratorium, alat, atau lapangan. |
@@ -109,11 +109,11 @@ Admin: Mengelola akun, fasilitas, dan rekap.
 | Mengubah kondisi fasilitas | ✗ | ✗ | ✓ | — |
 | Membuat akun Petugas | ✗ | ✗ | ✗ | ✓ |
 | Membuat akun Pengguna | ✗ | ✗ | ✗ | ✓ |
-| Soft-delete akun role apa pun | ✗ | ✗ | ✗ | ✓ |
+| Menonaktifkan/mengaktifkan kembali akun role apa pun | ✗ | ✗ | ✗ | ✓ |
 | Kelola fasilitas | ✗ | ✗ | ✗ | ✓ |
 | Lihat/export rekap | ✗ | ✗ | ✗ | ✓ |
 
-Keterangan: Akun hasil registrasi mandiri dapat langsung digunakan setelah registrasi berhasil. Tanda “—” berarti aksi tersebut bukan aksi utama role tersebut atau tidak relevan.
+Keterangan: Akun hasil registrasi mandiri baru dapat login setelah disetujui Admin; akun yang dibuat langsung oleh Admin sudah disetujui saat dibuat. Tanda “—” berarti aksi tersebut bukan aksi utama role tersebut atau tidak relevan.
 
 ## 3.3 Aturan Otorisasi Resource
 
@@ -129,8 +129,8 @@ Keterangan: Akun hasil registrasi mandiri dapat langsung digunakan setelah regis
 | BR-02 | Slot Waktu | Start time dan end time harus berada pada kelipatan slot 30 menit. |
 | BR-03 | Validasi Server | Aturan waktu, bentrok, hak akses, dan validasi penting wajib diverifikasi server-side; UI hanya validasi tambahan. |
 | BR-04 | Akses Publik | Pengunjung dapat melihat fasilitas, ketersediaan, dan melakukan search/filter tanpa login. |
-| BR-05 | Registrasi Pengguna | Mahasiswa/Dosen/Staf dapat membuat akun secara mandiri. |
-| BR-06 | Dihapus dari MVP | Verifikasi/approval akun hasil registrasi mandiri tidak diimplementasikan pada Iterasi 2 karena menambah beban operasional Admin. |
+| BR-05 | Registrasi Pengguna | Mahasiswa/Dosen/Staf dapat membuat akun secara mandiri; akun baru menunggu persetujuan Admin sebelum dapat login. |
+| BR-06 | Persetujuan Registrasi Mandiri | Akun Pengguna hasil registrasi mandiri berstatus menunggu persetujuan dan tidak dapat login sampai Admin menyetujuinya. Akun yang dibuat langsung oleh Admin sudah disetujui saat dibuat. |
 | BR-07 | Akun Petugas | Petugas tidak melakukan registrasi mandiri; akun Petugas dibuat langsung oleh Admin. |
 | BR-08 | Privasi Jadwal | Pengunjung hanya melihat status tersedia/tidak tersedia dan tidak boleh melihat identitas pemesan atau tujuan reservasi. |
 | BR-09 | Anti-Bentrok & Konflik | Approval reservasi wajib mempertimbangkan konflik langsung pada fasilitas, relasi ruangan–alat, serta overlap reservasi milik Pengguna. Sistem tidak boleh menghasilkan kombinasi reservasi disetujui yang melanggar aturan tersebut. |
@@ -150,7 +150,8 @@ Keterangan: Akun hasil registrasi mandiri dapat langsung digunakan setelah regis
 | BR-23 | Horizon Reservasi | Pengguna boleh mengajukan reservasi hingga `now + 90 hari`, tanpa minimum lead time; pengajuan sampai sesaat sebelum slot dimulai tetap diperbolehkan. |
 | BR-24 | Penolakan Otomatis Pengajuan Kedaluwarsa | Reservasi berstatus menunggu yang belum diproses ketika `start_time` tiba otomatis berubah menjadi `ditolak`; `alasan_penolakan` diisi bahwa pengajuan kedaluwarsa. Reservasi tersebut tidak menjadi occupancy. |
 | BR-25 | Segmen Antrian Petugas | Queue reservasi Petugas dikelompokkan berdasarkan slot waktu. Segmen slot diurutkan dari yang paling dekat dengan waktu sekarang ke yang lebih jauh; di dalam setiap segmen, pengajuan diurutkan `created_at ASC`. |
-| BR-26 | Penghapusan Akun | Admin dapat melakukan soft-delete akun dengan role apa pun. Histori reservasi/laporan tetap dipertahankan; akun yang dihapus tidak dapat login atau membuat transaksi baru. Sistem harus mencegah penghapusan Admin terakhir. |
+| BR-26 | Penonaktifan Akun | Pengguna tidak dapat menonaktifkan akunnya sendiri. Admin dapat menonaktifkan akun role apa pun dan mengaktifkannya kembali; histori reservasi dan laporan tetap tersimpan. Akun nonaktif tidak dapat login atau membuat transaksi baru. Saat akun dinonaktifkan, reservasi menunggu yang belum selesai berubah menjadi ditolak dan `alasan_penolakan` menyatakan akun pemesan dinonaktifkan oleh Admin; reservasi disetujui yang belum selesai, termasuk yang sedang berlangsung, berubah menjadi dibatalkan dan `alasan_pembatalan` menyatakan hal yang sama. Waktu penolakan dicatat di `ditolak_pada`. Reservasi selesai dan reservasi berstatus terminal tidak berubah. Pengaktifan kembali hanya memulihkan akses dan tidak mengubah status reservasi. Admin terakhir tidak dapat dinonaktifkan. |
+| BR-27 | Verifikasi Email Sebelum Transaksi | Pengguna hanya dapat membuat reservasi dan laporan kerusakan jika email telah diverifikasi. Perubahan email mengosongkan waktu verifikasi; Pengguna harus memverifikasi alamat baru sebelum transaksi berikutnya. Persetujuan Admin dan verifikasi email adalah syarat terpisah. |
 
 > Keputusan terkunci: deadline pembatalan Pengguna adalah H-2 (tepat 48 jam sebelum start_time); hanya satu Admin yang diprovision developer; Admin nonaktifkan fasilitas bersifat absolut; upload laporan maksimal 8 foto × 2 MB JPG/JPEG/PNG; relasi room–tool bersifat asimetris; pending conflict diputus Petugas dan pending lain yang konflik otomatis ditolak setelah approval; overlap Pengguna lintas ruangan dilarang; room reservation dihitung sebagai usage room, sedangkan usage tool hanya dari reservasi tool eksplisit.
 
@@ -165,16 +166,20 @@ Registrasi mandiri
         ↓
 Validasi data
         ↓
-Akun dibuat: aktif
+Akun dibuat: menunggu persetujuan Admin
+        ↓
+Admin menyetujui akun
         ↓
 Login
         ↓
 Lengkapi profil: NIM/NIP/No. Pegawai + WhatsApp
         ↓
-Reservasi tersedia setelah identitas institusional terisi
+Verifikasi email
+        ↓
+Reservasi tersedia setelah identitas institusional terisi dan email terverifikasi
 ```
 
-Registrasi hanya memerlukan email, nama lengkap, dan password. Pengguna yang belum memiliki NIM/NIP/No. Pegawai diarahkan melengkapi profil sebelum reservasi.
+Registrasi mandiri hanya memerlukan email, nama lengkap, dan password. Akun belum dapat digunakan untuk login sebelum disetujui Admin. Akun yang dibuat langsung oleh Admin sudah disetujui saat dibuat. Setelah dapat login, Pengguna harus memverifikasi email sebelum dapat membuat reservasi maupun laporan; Pengguna yang belum memiliki NIM/NIP/No. Pegawai juga harus melengkapi profil sebelum reservasi.
 
 ## 5.2 Facility Discovery
 
@@ -256,7 +261,7 @@ Admin Dashboard
    ├── Account Management
    │      ├── Create Petugas
    │      ├── Create Pengguna
-   │      └── Soft-delete Account
+   │      └── Nonaktifkan / Aktifkan Kembali Akun
    ├── Facility Management
    │      └── Nonaktifkan → putus otomatis seluruh reservasi belum selesai
    ├── Change Password
@@ -265,7 +270,7 @@ Admin Dashboard
 
 # 6. Functional Requirements
 
-Functional Requirements diturunkan dari 17 User Story. US-01 dan US-09 masing-masing didekomposisi menjadi dua requirement atomik, sehingga total menjadi 19 FR. Dekomposisi ini menjaga traceability tanpa memaksa jumlah FR sama dengan jumlah User Story.
+Functional Requirements diturunkan dari 17 User Story. US-01 dan US-09 masing-masing didekomposisi menjadi dua requirement atomik dan persetujuan akun dicatat sebagai FR tersendiri, sehingga total menjadi 20 FR. Dekomposisi ini menjaga traceability tanpa memaksa jumlah FR sama dengan jumlah User Story.
 
 ## 6.1 Pengunjung
 
@@ -305,6 +310,7 @@ Pengguna yang login dan memiliki identitas institusional dapat mengajukan reserv
 Preconditions
 
 - Pengguna login.
+- Akun telah disetujui Admin dan email Pengguna telah diverifikasi.
 - Profil memiliki salah satu NIM/NIP/No. Pegawai.
 - Fasilitas aktif.
 Perilaku/Aturan
@@ -346,6 +352,11 @@ Acceptance Criteria
 ### FR-07 — Pelaporan Kerusakan
 
 Pengguna dapat membuat laporan kerusakan untuk fasilitas tertentu.
+
+Preconditions
+
+- Pengguna login dan akun telah disetujui Admin.
+- Email Pengguna telah diverifikasi.
 
 Perilaku/Aturan
 
@@ -431,21 +442,24 @@ Acceptance Criteria
 - Akun Petugas yang dibuat Admin dapat login sesuai kredensial.
 ### FR-16 — Pengelolaan Akun Pengguna oleh Admin
 
-Admin dapat membuat akun Pengguna secara langsung tanpa melalui registrasi mandiri dan melakukan soft-delete akun dengan role apa pun.
+Admin dapat membuat akun Pengguna secara langsung tanpa melalui registrasi mandiri, menonaktifkan akun role apa pun, dan mengaktifkan kembali akun nonaktif.
 
 Acceptance Criteria
 
 - Akun yang dibuat Admin tercatat sebagai akun Pengguna.
-- Soft-delete tidak menghapus histori reservasi atau laporan.
-- Admin terakhir tidak dapat di-soft-delete.
+- Penonaktifan akun mempertahankan histori reservasi dan laporan.
+- Reservasi menunggu yang belum selesai ditolak dan `alasan_penolakan` menyebut akun pemesan dinonaktifkan oleh Admin; reservasi disetujui yang belum selesai dibatalkan dan `alasan_pembatalan` menyebut hal yang sama.
+- Pengaktifan kembali hanya memulihkan akses akun; status reservasi tidak dipulihkan.
+- Pengguna tidak dapat menonaktifkan akunnya sendiri.
+- Admin terakhir tidak dapat dinonaktifkan.
 ### FR-17 — Pengelolaan Profil dan Identitas Pengguna
 
 Pengguna dapat melihat dan mengubah profil setelah login, termasuk nama, email, WhatsApp, password, dan salah satu identitas institusional berupa NIM/NIP/No. Pegawai.
 
 Acceptance Criteria
 
-- Registrasi hanya membutuhkan email, nama lengkap, dan password.
-- Pengguna dapat login tanpa approval Admin.
+- Registrasi mandiri hanya membutuhkan email, nama lengkap, dan password; akun menunggu persetujuan Admin sebelum dapat login.
+- Pengguna dapat memperbarui alamat email; perubahan alamat menghapus status verifikasi email sampai alamat baru diverifikasi.
 - Pengguna tanpa identitas institusional diarahkan melengkapi profil sebelum reservasi.
 - Form reservasi tidak meminta identitas ulang.
 ### FR-18 — Pengelolaan Fasilitas
@@ -469,19 +483,37 @@ Acceptance Criteria
 
 - Rekap dapat difilter sesuai data yang tersedia.
 - Export menghasilkan format yang dipilih atau error yang informatif.
+
+### FR-20 — Persetujuan Akun Hasil Registrasi Mandiri
+
+Admin dapat melihat akun Pengguna hasil registrasi mandiri yang menunggu persetujuan dan menyetujuinya.
+
+Acceptance Criteria
+
+- Akun hasil registrasi mandiri tidak dapat login sebelum disetujui Admin.
+- Setelah disetujui, akun dapat login; reservasi dan laporan tetap mensyaratkan email terverifikasi.
+- Persetujuan mencatat waktu dan Admin yang menyetujui.
+- Akun Pengguna atau Petugas yang dibuat langsung oleh Admin berstatus disetujui saat dibuat.
 # 7. Validasi dan Penanganan Kasus Tepi
 
 ## 7.1 Authentication, Registration & Profile
 
 - Email registrasi sudah terdaftar → tolak dengan validation error.
 - Email/password tidak valid → tolak dengan pesan yang tidak membocorkan detail sensitif.
-- Registrasi berhasil → akun langsung aktif dan dapat login.
+- Registrasi mandiri berhasil → akun berstatus menunggu persetujuan Admin dan belum dapat login.
+- Login dengan akun yang masih menunggu persetujuan → tolak dan jelaskan bahwa akun belum disetujui.
+- Akun hasil registrasi mandiri yang disetujui Admin → dapat login.
+- Email belum diverifikasi → tolak pembuatan reservasi dan laporan.
+- Email profil diubah → kosongkan verifikasi email dan blokir transaksi sampai alamat baru diverifikasi.
 - Pengguna tanpa NIM/NIP/No. Pegawai lalu mencoba reservasi → arahkan ke halaman profil.
-- Akun soft-deleted tidak dapat login atau membuat transaksi baru; histori tetap dapat direferensikan.
-- Admin terakhir tidak boleh di-soft-delete.
+- Akun nonaktif tidak dapat login atau membuat transaksi baru; histori tetap dapat direferensikan.
+- Admin dapat mengaktifkan kembali akun nonaktif; Admin terakhir tidak dapat dinonaktifkan.
+- Saat akun dinonaktifkan, reservasi menunggu yang belum selesai berubah menjadi ditolak dengan alasan penonaktifan Admin; reservasi disetujui yang belum selesai berubah menjadi dibatalkan dengan alasan yang sama. Reservasi selesai dan status terminal tidak berubah.
+- Pengaktifan kembali akun tidak memulihkan status reservasi yang sudah berubah.
 ## 7.2 Reservasi
 
 - start_time >= end_time → tolak.
+- Pengguna belum login, akunnya belum disetujui, atau email belum diverifikasi → tolak akses/pengajuan reservasi.
 - Waktu sebelum 07:00 atau sesudah 20:00 → tolak.
 - Waktu bukan kelipatan 30 menit → tolak.
 - start_time lebih dari `now + 90 hari` → tolak.
@@ -503,6 +535,7 @@ Acceptance Criteria
 ## 7.3 Laporan Kerusakan
 
 - Facility ID tidak valid → not found.
+- Pengguna belum login, akunnya belum disetujui, atau email belum diverifikasi → tolak akses/pengajuan laporan.
 - Kategori/deskripsi kosong → validation error.
 - Tidak ada foto pendukung → validation error karena FR-07 menetapkan foto sebagai input minimal.
 - Foto bukan tipe image yang diperbolehkan → tolak upload.
@@ -533,6 +566,8 @@ Acceptance Criteria
 - Navigasi menyesuaikan role dan tidak menampilkan aksi yang tidak berhak digunakan.
 - Status reservasi, laporan, dan fasilitas harus mudah dibedakan secara visual tanpa hanya mengandalkan warna.
 - Aksi destruktif/berdampak besar seperti cancel, reject, dan nonaktifkan membutuhkan confirmation. Untuk nonaktifkan fasilitas, konfirmasi Admin harus menjelaskan bahwa seluruh reservasi menunggu/disetujui yang belum selesai akan diputus otomatis.
+- Konfirmasi penonaktifan akun menjelaskan bahwa reservasi menunggu yang belum selesai akan ditolak dan reservasi disetujui yang belum selesai akan dibatalkan dengan alasan akun dinonaktifkan oleh Admin.
+- Setelah registrasi mandiri, tampilkan bahwa akun menunggu persetujuan Admin dan belum dapat login. Tampilkan status persetujuan serta verifikasi email secara terpisah setelah Pengguna dapat login.
 - Pengguna tidak menerima pesan pembatalan khusus akibat penonaktifan fasilitas oleh Admin; namun status reservasi yang berubah tetap ditampilkan pada riwayat/detail.
 - UI pemilihan fasilitas harus menampilkan konteks ruangan–alat: tool reservation dapat berbagi ruangan dengan tool lain, tetapi membuat full-room reservation unavailable pada slot overlap; full-room reservation membuat seluruh tool unavailable. Jika suatu tool sedang dalam_perbaikan tetapi room tetap reservable, kondisi tool harus terlihat dan dapat diperkuat melalui konfirmasi langsung Petugas.
 
@@ -541,7 +576,7 @@ Acceptance Criteria
 - Semua halaman menyediakan loading, empty, error, dan success state yang relevan.
 - Desain responsif pada desktop dan mobile browser.
 - Primary color #2D4C79 digunakan konsisten dengan kontras teks yang memadai.
-- Setelah registrasi, Pengguna diberi pesan bahwa akun aktif dan dapat login.
+- Setelah registrasi mandiri, Pengguna diberi pesan bahwa akun menunggu persetujuan Admin. Setelah Admin menyetujui, Pengguna dapat login, lalu wajib memverifikasi email sebelum reservasi/laporan.
 ## 8.2 Struktur Halaman Pengunjung
 
 ```text
@@ -615,7 +650,7 @@ Catatan: Target kuantitatif seperti response time <500 ms, uptime 99.9%, atau ju
 | R-01 | Double booking akibat concurrency | Tinggi | Dua atau lebih reservasi disetujui yang melanggar konflik resource/personal. | Validasi konflik server-side saat approval, transaction, state terbaru, dan auto-reject pending requests yang menjadi konflik setelah satu approval. |
 | R-02 | Bypass validasi waktu di client | Tinggi | Reservasi melanggar jam operasional/slot. | Validasi BR-01/BR-02 di server untuk semua request. |
 | R-03 | Unauthorized access | Tinggi | User mengakses data role atau pemilik lain. | Middleware RBAC + Policy/Gate/ownership check. |
-| R-04 | Akun atau hak akses tidak sah | Tinggi | Akun soft-delete masih digunakan, akun Petugas dibuat di luar alur Admin, atau Pengguna bertransaksi tanpa identitas institusional. | Blokir login/transaksi akun soft-delete, buat akun Petugas hanya melalui Admin, wajibkan identitas sebelum reservasi, dan terapkan RBAC server-side. |
+| R-04 | Akun atau hak akses tidak sah | Tinggi | Akun nonaktif masih digunakan, akun Petugas dibuat di luar alur Admin, atau Pengguna bertransaksi tanpa identitas institusional. | Blokir login/transaksi akun nonaktif, buat akun Petugas hanya melalui Admin, wajibkan identitas sebelum reservasi, dan terapkan RBAC server-side. |
 | R-05 | Kebocoran informasi reservasi | Tinggi | Pengunjung melihat nama/tujuan pemesan. | Pisahkan response/view publik dari data reservasi internal. |
 | R-06 | Upload file berbahaya | Sedang | Security/storage issue dari foto laporan. | Maksimal 8 file, masing-masing 2 MB; hanya JPG/JPEG/PNG; validasi MIME/type, nama file aman, dan storage non-executable. |
 | R-07 | Hard delete fasilitas | Tinggi | Histori reservasi/laporan kehilangan referensi. | Gunakan status nonaktif, bukan delete untuk deactivation. |
@@ -645,11 +680,11 @@ Catatan: Target kuantitatif seperti response time <500 ms, uptime 99.9%, atau ju
 | US-12 | FR-14 | Petugas | Facility Condition | BR-10 |
 | US-13 | FR-15 | Admin | Account Management | BR-07, BR-18 |
 | US-14 | FR-16 | Admin | Account Management | — |
-| US-15 | — | Admin | Out of Scope MVP | BR-06 dihapus |
+| US-15 | FR-20 | Admin | Account Approval | BR-06 |
 | US-16 | FR-18 | Admin | Facility Management | BR-14, BR-18 |
 | US-17 | FR-19 | Admin | Analytics/Export | BR-21 |
 
-US-15 ditandai out of scope pada Iterasi 2. FR-17 tetap dimiliki owner V1 yang sama, tetapi scope-nya berubah menjadi pengelolaan profil dan identitas Pengguna.
+US-15 kembali masuk scope berdasarkan keputusan persetujuan akun terbaru dan dipenuhi oleh FR-20. FR-17 tetap dimiliki owner V1 yang sama, dengan scope pengelolaan profil, identitas, dan email Pengguna.
 
 # 12. Technical Design Overview
 
@@ -664,7 +699,7 @@ Bagian ini ditempatkan setelah requirement inti agar desain teknis tidak mengunc
 - Version control: GitHub atau GitLab repository bersama.
 ## 12.2 Rancangan Database Rekomendasi
 
-Empat tabel inti berasal dari hint rancangan database proyek. Atribut tambahan di bawah mendukung requirement yang telah didefinisikan. Akun menggunakan soft-delete agar histori tetap utuh.
+Tabel domain di bawah mengikuti migration aplikasi. Tabel pendukung Laravel dan Passkeys juga dicantumkan agar rancangan mencerminkan database kosong setelah seluruh migration dijalankan. Akun dinonaktifkan dengan mencatat waktu penonaktifan; histori tetap utuh dan akses dapat dipulihkan oleh Admin.
 
 ### users
 
@@ -673,12 +708,22 @@ Empat tabel inti berasal dari hint rancangan database proyek. Atribut tambahan d
 | id | BIGINT PK AI | ID |
 | nama | VARCHAR(100) | Nama lengkap |
 | email | VARCHAR(100) UNIQUE | Email login |
+| email_verified_at | TIMESTAMP NULL | Waktu verifikasi email; NULL berarti belum diverifikasi dan Pengguna belum boleh membuat reservasi/laporan. |
 | password | VARCHAR(255) | Password hash |
+| two_factor_secret | TEXT NULL | Secret autentikasi dua faktor yang dikelola Fortify |
+| two_factor_recovery_codes | TEXT NULL | Kode pemulihan autentikasi dua faktor |
+| two_factor_confirmed_at | TIMESTAMP NULL | Waktu autentikasi dua faktor dikonfirmasi |
 | role | ENUM | pengguna/petugas/admin |
+| approved_at | TIMESTAMP NULL | Waktu akun disetujui; NULL berarti registrasi mandiri masih menunggu persetujuan Admin. Akun yang dibuat Admin disetujui saat dibuat. |
+| approved_by | BIGINT FK NULL | ID Admin yang menyetujui akun registrasi mandiri; NULL selama menunggu persetujuan. |
 | institutional_id | VARCHAR(100) NULL | NIM/NIP/No. Pegawai; salah satu wajib sebelum reservasi |
 | identity_type | ENUM NULL | nim/nip/no_pegawai |
 | whatsapp | VARCHAR(30) NULL | Nomor WhatsApp pada profil |
-| deleted_at | DATETIME NULL | Soft-delete akun; histori tidak dihapus |
+| remember_token | VARCHAR(100) NULL | Token sesi login "remember me" |
+| created_at, updated_at | TIMESTAMP NULL | Waktu pembuatan dan perubahan data |
+| deleted_at | TIMESTAMP NULL | Waktu akun dinonaktifkan; NULL berarti aktif. Admin dapat mengaktifkan kembali akun dengan mengosongkan nilai ini. |
+
+> Kode aplikasi juga menyediakan properti `name` untuk kompatibilitas framework; nilainya berasal dari `nama` dan bukan kolom database terpisah.
 
 ### facilities
 
@@ -692,6 +737,7 @@ Empat tabel inti berasal dari hint rancangan database proyek. Atribut tambahan d
 | description | TEXT NULL | Deskripsi |
 | condition | ENUM | aktif/dalam_perbaikan/nonaktif. Status parent room memengaruhi reservability child tools; status tool tidak otomatis mengubah status parent room. |
 | parent_facility_id | BIGINT FK NULL | Nullable di database; aplikasi mewajibkan ruangan induk untuk tipe Alat. Lapangan tidak dapat menjadi parent; alat harus terkait ke satu ruang kelas/aula/lab. |
+| created_at, updated_at | TIMESTAMP | Waktu pembuatan dan perubahan data |
 
 ### reservations
 
@@ -704,9 +750,10 @@ Empat tabel inti berasal dari hint rancangan database proyek. Atribut tambahan d
 | start_time | DATETIME | Mulai |
 | end_time | DATETIME | Selesai |
 | status | ENUM | menunggu/disetujui/ditolak/dibatalkan |
-| alasan_penolakan | TEXT NULL | Alasan penolakan, termasuk penolakan otomatis karena pengajuan kedaluwarsa |
+| alasan_penolakan | TEXT NULL | Alasan penolakan, termasuk pengajuan kedaluwarsa atau akun pemesan dinonaktifkan Admin |
 | ditolak_pada | TIMESTAMP NULL | Waktu reservasi ditolak; dipakai untuk riwayat penolakan |
-| alasan_pembatalan | TEXT NULL | Alasan cancel darurat Petugas |
+| alasan_pembatalan | TEXT NULL | Alasan pembatalan oleh Petugas atau pembatalan otomatis saat akun pemesan dinonaktifkan |
+| created_at, updated_at | TIMESTAMP | Waktu pembuatan dan perubahan data |
 
 ### reports
 
@@ -719,6 +766,7 @@ Empat tabel inti berasal dari hint rancangan database proyek. Atribut tambahan d
 | deskripsi | TEXT | Rincian |
 | status_laporan | ENUM | baru/diproses/selesai/ditolak |
 | catatan_resolusi | TEXT NULL | Catatan penutupan |
+| created_at, updated_at | TIMESTAMP | Waktu pembuatan dan perubahan data |
 
 ### report_attachments
 
@@ -730,8 +778,36 @@ Empat tabel inti berasal dari hint rancangan database proyek. Atribut tambahan d
 | original_name | VARCHAR(255) | Nama file asli untuk display/audit |
 | mime_type | VARCHAR(100) | Harus image/jpeg atau image/png sesuai validasi |
 | file_size | INT UNSIGNED | Ukuran byte; maksimum 2 MB per file |
+| created_at, updated_at | TIMESTAMP | Waktu pembuatan dan perubahan data |
 
-> Perubahan desain akun Iterasi 2: status verifikasi/persetujuan akun dihapus. Gunakan `deleted_at` untuk soft-delete dan `institutional_id` + `identity_type` untuk identitas institusional.
+### passkeys
+
+| Field | Tipe/Constraint | Keterangan |
+| --- | --- | --- |
+| id | BIGINT PK AI | ID passkey |
+| user_id | BIGINT FK | Pemilik passkey; dihapus bersama akun yang dihapus permanen |
+| name | VARCHAR(255) | Nama passkey yang ditetapkan pengguna |
+| credential_id | VARCHAR(255) UNIQUE | ID credential WebAuthn |
+| credential | JSON | Data credential WebAuthn |
+| last_used_at | TIMESTAMP NULL | Waktu terakhir passkey digunakan |
+| created_at, updated_at | TIMESTAMP NULL | Waktu pembuatan dan perubahan data |
+
+### Tabel pendukung Laravel
+
+Tabel berikut dibuat oleh migration kerangka kerja untuk autentikasi, session, cache, antrean, dan pelacakan migration; tabel ini bukan entitas domain AduPDF.
+
+| Tabel | Field utama dan tipe |
+| --- | --- |
+| password_reset_tokens | `email` VARCHAR(255) PK, `token` VARCHAR(255), `created_at` TIMESTAMP NULL |
+| sessions | `id` VARCHAR(255) PK, `user_id` BIGINT NULL INDEX, `ip_address` VARCHAR(45) NULL, `user_agent` TEXT NULL, `payload` LONGTEXT, `last_activity` INT INDEX |
+| cache | `key` VARCHAR(255) PK, `value` MEDIUMTEXT, `expiration` BIGINT INDEX |
+| cache_locks | `key` VARCHAR(255) PK, `owner` VARCHAR(255), `expiration` BIGINT INDEX |
+| jobs | `id` BIGINT PK AI, `queue` VARCHAR(255) INDEX, `payload` LONGTEXT, `attempts` SMALLINT UNSIGNED, `reserved_at` INT UNSIGNED NULL, `available_at` INT UNSIGNED, `created_at` INT UNSIGNED |
+| job_batches | `id` VARCHAR(255) PK, `name` VARCHAR(255), `total_jobs` INT, `pending_jobs` INT, `failed_jobs` INT, `failed_job_ids` LONGTEXT, `options` MEDIUMTEXT NULL, `cancelled_at` INT NULL, `created_at` INT, `finished_at` INT NULL |
+| failed_jobs | `id` BIGINT PK AI, `uuid` VARCHAR(255) UNIQUE, `connection` VARCHAR(255), `queue` VARCHAR(255), `payload` LONGTEXT, `exception` LONGTEXT, `failed_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP |
+| migrations | `id` INT UNSIGNED PK AI, `migration` VARCHAR(255), `batch` INT |
+
+> Akun hasil registrasi mandiri menunggu persetujuan Admin; akun yang dibuat Admin langsung berstatus disetujui. `approved_at` dan `approved_by` mencatat persetujuan, `deleted_at` menandai waktu penonaktifan, dan `institutional_id` + `identity_type` menyimpan identitas institusional. `email_verified_at` wajib terisi sebelum Pengguna membuat reservasi atau laporan.
 
 ## 12.3 Relasi Data
 
@@ -777,9 +853,11 @@ Laravel menyediakan route dan mengirimkan data halaman melalui Inertia; React me
 | Method | Route | Aktor | Fungsi |
 | --- | --- | --- | --- |
 | GET | /register | Pengunjung | Form registrasi Pengguna |
-| POST | /register | Pengunjung | Submit registrasi → akun aktif |
+| POST | /register | Pengunjung | Submit registrasi → akun menunggu persetujuan Admin dan belum dapat login |
 | GET | /login | Pengunjung | Form login |
-| POST | /login | Pengunjung | Login akun aktif |
+| POST | /login | Pengunjung | Login hanya untuk akun yang disetujui dan tidak dinonaktifkan |
+| GET | /admin/users | Admin | Daftar/pengelolaan akun, termasuk akun registrasi mandiri yang menunggu persetujuan |
+| PATCH | /admin/users/{user}/approve | Admin | Setujui akun hasil registrasi mandiri dan catat Admin/waktu persetujuan |
 | POST | /logout | Authenticated | Logout |
 | GET/PATCH | /profile | Pengguna | Lihat/ubah profil, identitas institusional, WhatsApp, password |
 | GET | /facilities | Semua | Daftar/search/filter fasilitas |
@@ -803,7 +881,8 @@ Laravel menyediakan route dan mengirimkan data halaman melalui Inertia; React me
 | POST | /admin/users/petugas | Admin | Create Petugas |
 | GET | /admin/users/pengguna/create | Admin | Form Pengguna |
 | POST | /admin/users/pengguna | Admin | Create Pengguna |
-| PATCH | /admin/users/{user}/deactivate | Admin | Soft-delete akun; histori dipertahankan |
+| PATCH | /admin/users/{user}/deactivate | Admin | Nonaktifkan akun; tolak reservasi menunggu dan batalkan reservasi disetujui yang belum selesai dengan alasan akun dinonaktifkan Admin |
+| PATCH | /admin/users/{user}/activate | Admin | Aktifkan kembali akun; histori tetap tersedia |
 | GET | /admin/facilities | Admin | Kelola fasilitas |
 | POST | /admin/facilities | Admin | Tambah fasilitas |
 | PATCH | /admin/facilities/{facility} | Admin | Update fasilitas |
@@ -815,13 +894,14 @@ Laravel menyediakan route dan mengirimkan data halaman melalui Inertia; React me
 
 | Perubahan | Alasan |
 | --- | --- |
-| FR menjadi 19 | Sumber tetap 17 User Story, tetapi US-01 dan US-09 mengandung lebih dari satu perilaku sehingga dipecah menjadi requirement atomik yang dapat diuji. |
-| Registrasi mandiri langsung aktif | BR-06/US-15 keluar dari scope karena approval akun menambah beban operasional Admin. |
+| FR menjadi 20 | Sumber tetap 17 User Story; US-01 dan US-09 dipecah menjadi requirement atomik, dan persetujuan akun dicatat terpisah agar dapat diuji. |
+| Persetujuan akun registrasi mandiri | Akun Pengguna baru menunggu persetujuan Admin sebelum login; akun yang dibuat Admin sudah disetujui saat pembuatan. |
+| Verifikasi email sebelum transaksi | Reservasi dan laporan memerlukan email terverifikasi; perubahan email mengatur ulang verifikasi. |
 | Profil identitas institusional | NIM/NIP/No. Pegawai dilengkapi setelah login dan salah satunya wajib sebelum reservasi. |
 | Horizon reservasi 90 hari | Pengajuan boleh sampai `now + 90 hari` tanpa minimum lead time. |
 | Pending auto-reject | Pengajuan menunggu menjadi ditolak dengan alasan kedaluwarsa saat `start_time` tiba. |
 | Queue Petugas bersegmen slot | Slot paling dekat ditampilkan lebih dahulu; dalam setiap segmen pengajuan diurutkan created_at paling lama ke paling baru. |
-| Soft-delete akun | Admin dapat menghapus akun tanpa menghapus histori; Admin terakhir dilindungi. |
+| Penonaktifan akun | Admin dapat menonaktifkan dan mengaktifkan kembali akun tanpa menghapus histori; reservasi menunggu yang belum selesai ditolak, reservasi disetujui yang belum selesai dibatalkan dengan alasan penonaktifan Admin, dan Admin terakhir dilindungi. |
 | Petugas tidak self-register | User Story 13 menyatakan akun Petugas dibuat Admin. |
 | Status laporan tidak memiliki “dalam_perbaikan” | “dalam_perbaikan” adalah kondisi fasilitas; status laporan mengikuti baru/diproses/selesai/ditolak. |
 | Dashboard Petugas memakai reservasi menunggu + laporan baru | Menyelaraskan state awal masing-masing domain. |
@@ -844,7 +924,7 @@ Laravel menyediakan route dan mengirimkan data halaman melalui Inertia; React me
 
 # 14. Status Keputusan / Open Decisions
 
-Tidak ada Open Decision aktif pada versi ini. Keputusan utama yang dikunci: registrasi langsung aktif tanpa approval akun, identitas institusional wajib sebelum reservasi, horizon 90 hari, pending auto-reject dengan alasan kedaluwarsa, queue Petugas bersegmen slot, soft-delete akun, H-2 cancellation, provisioning Admin tunggal, relasi ruangan–alat, konflik pending/approval, propagasi kondisi fasilitas, penonaktifan absolut oleh Admin, upload 8 × 2 MB JPG/JPEG/PNG, serta definisi rekap penggunaan room–tool. Perubahan berikutnya diperlakukan sebagai change request terhadap baseline ini.
+Tidak ada Open Decision aktif pada versi ini. Keputusan utama yang dikunci: registrasi langsung aktif tanpa approval akun, identitas institusional wajib sebelum reservasi, horizon 90 hari, pending auto-reject dengan alasan kedaluwarsa, queue Petugas bersegmen slot, penonaktifan akun yang dapat dipulihkan Admin dengan transisi reservasi menunggu→ditolak dan disetujui→dibatalkan beserta alasan, H-2 cancellation, provisioning Admin tunggal, relasi ruangan–alat, konflik pending/approval, propagasi kondisi fasilitas, penonaktifan absolut oleh Admin, upload 8 × 2 MB JPG/JPEG/PNG, serta definisi rekap penggunaan room–tool. Perubahan berikutnya diperlakukan sebagai change request terhadap baseline ini.
 
 | ID | Keputusan | Catatan |
 | --- | --- | --- |
