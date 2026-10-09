@@ -12,9 +12,9 @@ export default function Login({ status }: { status?: string }) {
     return (
         <AuthPageLayout>
             <Head title="Masuk — AduPDF" />
-            <div className="w-full max-w-md overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+            <div className="relative w-full max-w-md overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
                 <div className="bg-[#2D4C79] p-6 text-center text-white">
-                    <h1 className="text-2xl font-bold">Masuk ke AduPDF</h1>
+                    <h1 className="text-xl font-bold tracking-tight">Masuk ke AduPDF</h1>
                     <p className="mt-1 text-xs text-slate-200">Sistem Reservasi & Pelaporan Fasilitas Kampus</p>
                 </div>
                 <div className="p-6">
@@ -62,7 +62,7 @@ export default function Login({ status }: { status?: string }) {
                                 value={form.data.email}
                                 onChange={(event) => form.setData('email', event.target.value)}
                                 placeholder="nama@kampus.ac.id"
-                                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                                className="w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
                             />
                         </div>
                         <PasswordField
@@ -77,13 +77,13 @@ export default function Login({ status }: { status?: string }) {
                                 type="checkbox"
                                 checked={form.data.remember}
                                 onChange={(event) => form.setData('remember', event.target.checked)}
-                                className="rounded border-slate-300 text-[#2D4C79]"
+                                className="rounded border-slate-300 text-[#2D4C79] focus:ring-[#2D4C79]"
                             />
                             <span className="ml-2">Ingat saya</span>
                         </label>
                         <button
                             disabled={form.processing}
-                            className="w-full rounded-md bg-[#2D4C79] px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#1e3454] disabled:opacity-60"
+                            className="h-10 w-full rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition disabled:opacity-60"
                         >
                             Masuk
                         </button>
