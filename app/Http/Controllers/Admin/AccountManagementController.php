@@ -42,7 +42,9 @@ class AccountManagementController extends Controller
      */
     public function createPetugas(): Response
     {
-        return Inertia::render('admin/accounts/create-petugas');
+        return Inertia::render('admin/accounts/account-form', [
+            'role' => 'Petugas',
+        ]);
     }
 
     /**
@@ -83,7 +85,9 @@ class AccountManagementController extends Controller
      */
     public function createPengguna(): Response
     {
-        return Inertia::render('admin/accounts/create-pengguna');
+        return Inertia::render('admin/accounts/account-form', [
+            'role' => 'Pengguna',
+        ]);
     }
 
     /**

@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { AlertTriangle, CalendarCheck, CalendarClock, Wrench } from 'lucide-react';
 import ConfirmationDialog, {
     type ConfirmationRequest,
-} from '@/components/confirmation-dialog';
+} from '@/components/confirm-dialog';
 import { FlashAlert } from '@/components/flash-alert';
 import PetugasLayout from '@/layouts/petugas-layout';
 

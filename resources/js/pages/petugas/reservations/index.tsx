@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import ConfirmationDialog, {
     type ConfirmationRequest,
-} from '@/components/confirmation-dialog';
+} from '@/components/confirm-dialog';
 import PetugasLayout from '@/layouts/petugas-layout';
 
 type Reservation = {

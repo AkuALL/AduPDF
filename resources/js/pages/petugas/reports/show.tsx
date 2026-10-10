@@ -2,7 +2,7 @@ import { Form, Head } from '@inertiajs/react';
 import { useState } from 'react';
 import ConfirmationDialog, {
     type ConfirmationRequest,
-} from '@/components/confirmation-dialog';
+} from '@/components/confirm-dialog';
 import PetugasLayout from '@/layouts/petugas-layout';
 
 type ReportStatus = 'baru' | 'diproses' | 'selesai' | 'ditolak';

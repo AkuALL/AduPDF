@@ -3,7 +3,7 @@ import { Eye, Pencil, Power } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import ConfirmationDialog, {
     type ConfirmationRequest,
-} from '@/components/confirmation-dialog';
+} from '@/components/confirm-dialog';
 import FacilityConditionBadge from '@/components/facility-condition-badge';
 import AdminLayout from '@/layouts/admin-layout';
 

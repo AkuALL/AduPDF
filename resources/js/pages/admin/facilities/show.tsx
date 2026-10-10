@@ -3,7 +3,7 @@ import { useState } from 'react';
 import AdminBackLink from '@/components/admin-back-link';
 import ConfirmationDialog, {
     type ConfirmationRequest,
-} from '@/components/confirmation-dialog';
+} from '@/components/confirm-dialog';
 import FacilityConditionBadge from '@/components/facility-condition-badge';
 import AdminLayout from '@/layouts/admin-layout';
 

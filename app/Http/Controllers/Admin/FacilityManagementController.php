@@ -70,7 +70,7 @@ class FacilityManagementController extends Controller
 
         $parentFacilityId = $parentRooms->firstWhere('id', $request->query('parent_facility_id'))?->id;
 
-        return Inertia::render('admin/facilities/create', compact('parentRooms', 'parentFacilityId'));
+        return Inertia::render('admin/facilities/facility-form', compact('parentRooms', 'parentFacilityId'));
     }
 
     /**
@@ -114,7 +114,7 @@ class FacilityManagementController extends Controller
             ->orderBy('name')
             ->get();
 
-        return Inertia::render('admin/facilities/edit', compact('facility', 'parentRooms'));
+        return Inertia::render('admin/facilities/facility-form', compact('facility', 'parentRooms'));
     }
 
     /**

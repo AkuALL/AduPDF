@@ -2,7 +2,7 @@ import { Head, useForm } from '@inertiajs/react';
 import AdminBackLink from '@/components/admin-back-link';
 import ConfirmationDialog, {
     type ConfirmationRequest,
-} from '@/components/confirmation-dialog';
+} from '@/components/confirm-dialog';
 import PasswordField from '@/components/password-field';
 import AdminLayout from '@/layouts/admin-layout';
 import { useState } from 'react';

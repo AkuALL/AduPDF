@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import ConfirmationDialog, {
     type ConfirmationRequest,
-} from '@/components/confirmation-dialog';
+} from '@/components/confirm-dialog';
 import { approve as approveAccount } from '@/actions/App/Http/Controllers/Admin/AccountManagementController';
 import {
     Dialog,
