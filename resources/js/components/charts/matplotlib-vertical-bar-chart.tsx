@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { Camera } from 'lucide-react';
+import { exportSvgToPng } from '@/lib/chart-exporter';
 
 export type LocationDamagePoint = {
     location: string;
@@ -10,6 +12,7 @@ type Props = {
 };
 
 export default function MatplotlibVerticalBarChart({ data }: Props) {
+    const svgRef = useRef<SVGSVGElement>(null);
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
     const width = 760;
@@ -38,13 +41,26 @@ export default function MatplotlibVerticalBarChart({ data }: Props) {
     return (
         <div className="relative w-full overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             {/* Header */}
-            <div className="mb-3 border-b border-slate-100 pb-2.5">
-                <h3 className="text-sm font-bold text-slate-800">
-                    Distribusi Insiden Kerusakan per Lokasi Kampus
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                    Sumbu Y: Frekuensi Laporan Gangguan · Sumbu X: Gedung / Kawasan Kampus
-                </p>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                <div>
+                    <h3 className="text-sm font-bold text-slate-800">
+                        Distribusi Insiden Kerusakan per Lokasi Kampus
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                        Sumbu Y: Frekuensi Laporan Gangguan · Sumbu X: Gedung / Kawasan Kampus
+                    </p>
+                </div>
+
+                {/* Plotly-style Snapshot Button */}
+                <button
+                    type="button"
+                    onClick={() => exportSvgToPng(svgRef.current, 'distribusi-insiden-lokasi')}
+                    title="Unduh Snapshot Gambar (PNG)"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900 cursor-pointer shadow-2xs"
+                >
+                    <Camera className="size-3.5 text-slate-500" />
+                    <span>Simpan Plot</span>
+                </button>
             </div>
 
             {/* SVG Canvas */}
@@ -59,7 +75,11 @@ export default function MatplotlibVerticalBarChart({ data }: Props) {
                         </p>
                     </div>
                 ) : (
-                    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto select-none">
+                    <svg
+                        ref={svgRef}
+                        viewBox={`0 0 ${width} ${height}`}
+                        className="w-full h-auto select-none"
+                    >
                         {/* Plotting area box (axes frame) */}
                         <rect
                             x={padding.left}

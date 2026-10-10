@@ -34,6 +34,8 @@ type UnderRepairItem = {
 
 type Props = {
     month_label: string;
+    selected_month?: string;
+    available_months?: Array<{ value: string; label: string }>;
     facility_stats: {
         total: number;
         active: number;
@@ -75,6 +77,8 @@ type Props = {
 
 export default function AdminDashboard({
     month_label,
+    selected_month,
+    available_months,
     facility_stats,
     usage_stats,
     maintenance_stats,
@@ -175,7 +179,12 @@ export default function AdminDashboard({
 
                 {/* Visualisasi Data & Analitik Kampus (Matplotlib Engine) */}
                 {chart_stats && (
-                    <AdminDataVisualization stats={chart_stats} monthLabel={month_label} />
+                    <AdminDataVisualization
+                        stats={chart_stats}
+                        monthLabel={month_label}
+                        selectedMonth={selected_month}
+                        availableMonths={available_months}
+                    />
                 )}
 
                 {/* Pantauan Pemeliharaan Fasilitas */}

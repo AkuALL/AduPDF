@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Queries\DamageStatisticsQuery;
 use App\Queries\ReservationStatisticsQuery;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -29,8 +30,24 @@ class AdminDashboardController extends Controller
         ReservationStatisticsQuery $reservationQuery,
         DamageStatisticsQuery $damageQuery,
     ): Response {
-        $startOfMonth = now()->startOfMonth();
-        $endOfMonth = now()->endOfMonth();
+        $selectedMonthStr = $request->query('month');
+        try {
+            $baseDate = $selectedMonthStr ? Carbon::createFromFormat('Y-m', (string) $selectedMonthStr)->startOfMonth() : now()->startOfMonth();
+        } catch (\Throwable) {
+            $baseDate = now()->startOfMonth();
+        }
+
+        $startOfMonth = $baseDate->copy()->startOfMonth();
+        $endOfMonth = $baseDate->copy()->endOfMonth();
+
+        $availableMonths = [];
+        for ($i = 0; $i <= 5; $i++) {
+            $m = now()->subMonths($i);
+            $availableMonths[] = [
+                'value' => $m->format('Y-m'),
+                'label' => $m->locale('id')->translatedFormat('F Y'),
+            ];
+        }
 
         // 1. Facilities Infrastructure Overview
         $totalFacilitiesCount = Facility::count();
@@ -203,7 +220,9 @@ class AdminDashboardController extends Controller
             ->all();
 
         $data = [
-            'month_label' => now()->locale('id')->translatedFormat('F Y'),
+            'month_label' => $startOfMonth->locale('id')->translatedFormat('F Y'),
+            'selected_month' => $startOfMonth->format('Y-m'),
+            'available_months' => $availableMonths,
             'facility_stats' => [
                 'total' => $totalFacilitiesCount,
                 'active' => $activeFacilitiesCount,

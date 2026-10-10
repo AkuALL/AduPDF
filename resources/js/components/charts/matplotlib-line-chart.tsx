@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { Camera } from 'lucide-react';
+import { exportSvgToPng } from '@/lib/chart-exporter';
 
 export type DailyTrendPoint = {
     day: number;
@@ -13,7 +15,10 @@ type Props = {
 };
 
 export default function MatplotlibLineChart({ data, monthLabel }: Props) {
+    const svgRef = useRef<SVGSVGElement>(null);
     const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+    const [showHours, setShowHours] = useState(true);
+    const [showCount, setShowCount] = useState(true);
 
     // Dimension setup (standard 16:7 matplotlib figure aspect ratio)
     const width = 760;
@@ -23,12 +28,15 @@ export default function MatplotlibLineChart({ data, monthLabel }: Props) {
     const plotWidth = width - padding.left - padding.right;
     const plotHeight = height - padding.top - padding.bottom;
 
-    // Calculate Y scales
+    // Calculate Y scales dynamically based on active series
     const { maxHours, yTicks, xTickIndices } = useMemo(() => {
-        const rawMaxHours = Math.max(...data.map((d) => d.total_hours), 1);
-        // Round up to nice clean step (e.g. 4 -> 5, 8 -> 10, 23 -> 25)
-        const step = rawMaxHours <= 5 ? 1 : rawMaxHours <= 15 ? 2.5 : rawMaxHours <= 30 ? 5 : 10;
-        const calculatedMax = Math.max(step * 4, Math.ceil(rawMaxHours / step) * step);
+        const activeHours = showHours ? data.map((d) => d.total_hours) : [0];
+        const activeCounts = showCount ? data.map((d) => d.reservations_count) : [0];
+        const rawMax = Math.max(...activeHours, ...activeCounts, 1);
+
+        // Round up to clean step
+        const step = rawMax <= 5 ? 1 : rawMax <= 15 ? 2.5 : rawMax <= 30 ? 5 : 10;
+        const calculatedMax = Math.max(step * 4, Math.ceil(rawMax / step) * step);
 
         const ticks = [
             0,
@@ -47,7 +55,7 @@ export default function MatplotlibLineChart({ data, monthLabel }: Props) {
         });
 
         return { maxHours: calculatedMax, yTicks: ticks, xTickIndices: tickIndices };
-    }, [data]);
+    }, [data, showHours, showCount]);
 
     const getX = (index: number) => {
         if (data.length <= 1) return padding.left + plotWidth / 2;
@@ -60,27 +68,28 @@ export default function MatplotlibLineChart({ data, monthLabel }: Props) {
 
     // Build SVG path for total_hours line
     const hoursPath = useMemo(() => {
-        if (data.length === 0) return '';
+        if (data.length === 0 || !showHours) return '';
         return data.reduce((acc, point, index) => {
             const x = getX(index);
             const y = getYHours(point.total_hours);
             return `${acc} ${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
         }, '');
-    }, [data, maxHours]);
+    }, [data, maxHours, showHours]);
 
     // Build SVG path for reservations count line
     const countPath = useMemo(() => {
-        if (data.length === 0) return '';
+        if (data.length === 0 || !showCount) return '';
         return data.reduce((acc, point, index) => {
             const x = getX(index);
             const y = getYHours(point.reservations_count);
             return `${acc} ${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
         }, '');
-    }, [data, maxHours]);
+    }, [data, maxHours, showCount]);
 
     // Handle mouse move for crosshair & tooltip
     const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
-        const svg = e.currentTarget;
+        const svg = svgRef.current;
+        if (!svg) return;
         const rect = svg.getBoundingClientRect();
         const clientX = e.clientX - rect.left;
         const normalizedX = (clientX / rect.width) * width;
@@ -103,19 +112,33 @@ export default function MatplotlibLineChart({ data, monthLabel }: Props) {
 
     return (
         <div className="relative w-full overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            {/* Header / Figure Title */}
-            <div className="mb-3 border-b border-slate-100 pb-2.5">
-                <h3 className="text-sm font-bold text-slate-800">
-                    Tren Okupansi Fasilitas Harian ({monthLabel})
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                    Sumbu Y: Total Jam & Frekuensi · Sumbu X: Hari dalam Bulan
-                </p>
+            {/* Header / Figure Title + Plotly Toolbar */}
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                <div>
+                    <h3 className="text-sm font-bold text-slate-800">
+                        Tren Okupansi Fasilitas Harian ({monthLabel})
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                        Sumbu Y: Total Jam & Frekuensi · Sumbu X: Hari dalam Bulan (Klik legenda untuk filter garis)
+                    </p>
+                </div>
+
+                {/* Plotly-style Snapshot Button */}
+                <button
+                    type="button"
+                    onClick={() => exportSvgToPng(svgRef.current, `tren-okupansi-${monthLabel}`)}
+                    title="Unduh Snapshot Gambar (PNG)"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900 cursor-pointer shadow-2xs"
+                >
+                    <Camera className="size-3.5 text-slate-500" />
+                    <span>Simpan Plot</span>
+                </button>
             </div>
 
             {/* SVG Chart Canvas */}
             <div className="relative w-full">
                 <svg
+                    ref={svgRef}
                     viewBox={`0 0 ${width} ${height}`}
                     className="w-full h-auto select-none"
                     onMouseMove={handleMouseMove}
@@ -226,59 +249,63 @@ export default function MatplotlibLineChart({ data, monthLabel }: Props) {
                     </text>
 
                     {/* Plot Line 1: Total Hours (Navy #2D4C79 with markers) */}
-                    <path
-                        d={hoursPath}
-                        fill="none"
-                        stroke="#2D4C79"
-                        strokeWidth="2.2"
-                        strokeLinejoin="round"
-                    />
+                    {showHours && (
+                        <>
+                            <path
+                                d={hoursPath}
+                                fill="none"
+                                stroke="#2D4C79"
+                                strokeWidth="2.2"
+                                strokeLinejoin="round"
+                            />
+                            {data.map((point, index) => {
+                                const x = getX(index);
+                                const y = getYHours(point.total_hours);
+                                return (
+                                    <circle
+                                        key={`h-${index}`}
+                                        cx={x}
+                                        cy={y}
+                                        r={point.total_hours > 0 ? 3.5 : 2}
+                                        fill={point.total_hours > 0 ? '#2D4C79' : '#94A3B8'}
+                                        stroke="#FFFFFF"
+                                        strokeWidth="1"
+                                    />
+                                );
+                            })}
+                        </>
+                    )}
 
                     {/* Plot Line 2: Reservations Count (Emerald #16A34A with markers) */}
-                    <path
-                        d={countPath}
-                        fill="none"
-                        stroke="#16A34A"
-                        strokeWidth="1.8"
-                        strokeDasharray="5 3"
-                        strokeLinejoin="round"
-                    />
-
-                    {/* Markers for Total Hours */}
-                    {data.map((point, index) => {
-                        const x = getX(index);
-                        const y = getYHours(point.total_hours);
-                        return (
-                            <circle
-                                key={`h-${index}`}
-                                cx={x}
-                                cy={y}
-                                r={point.total_hours > 0 ? 3.5 : 2}
-                                fill={point.total_hours > 0 ? '#2D4C79' : '#94A3B8'}
-                                stroke="#FFFFFF"
-                                strokeWidth="1"
+                    {showCount && (
+                        <>
+                            <path
+                                d={countPath}
+                                fill="none"
+                                stroke="#16A34A"
+                                strokeWidth="1.8"
+                                strokeDasharray="5 3"
+                                strokeLinejoin="round"
                             />
-                        );
-                    })}
+                            {data.map((point, index) => {
+                                const x = getX(index);
+                                const y = getYHours(point.reservations_count);
+                                return (
+                                    <circle
+                                        key={`c-${index}`}
+                                        cx={x}
+                                        cy={y}
+                                        r={point.reservations_count > 0 ? 3 : 1.5}
+                                        fill={point.reservations_count > 0 ? '#16A34A' : '#CBD5E1'}
+                                        stroke="#FFFFFF"
+                                        strokeWidth="0.8"
+                                    />
+                                );
+                            })}
+                        </>
+                    )}
 
-                    {/* Markers for Reservations Count */}
-                    {data.map((point, index) => {
-                        const x = getX(index);
-                        const y = getYHours(point.reservations_count);
-                        return (
-                            <circle
-                                key={`c-${index}`}
-                                cx={x}
-                                cy={y}
-                                r={point.reservations_count > 0 ? 3 : 1.5}
-                                fill={point.reservations_count > 0 ? '#16A34A' : '#CBD5E1'}
-                                stroke="#FFFFFF"
-                                strokeWidth="0.8"
-                            />
-                        );
-                    })}
-
-                    {/* Matplotlib Legend Box (Top Right within spines) */}
+                    {/* Matplotlib Legend Box with Plotly Toggle Functionality */}
                     <g transform={`translate(${padding.left + plotWidth - 170}, ${padding.top + 10})`}>
                         <rect
                             x="0"
@@ -286,32 +313,56 @@ export default function MatplotlibLineChart({ data, monthLabel }: Props) {
                             width="160"
                             height="50"
                             fill="#FFFFFF"
-                            fillOpacity="0.94"
+                            fillOpacity="0.95"
                             stroke="#CBD5E1"
                             strokeWidth="1"
                             rx="2"
                         />
-                        {/* Legend item 1: Durasi Jam */}
-                        <line x1="12" y1="16" x2="32" y2="16" stroke="#2D4C79" strokeWidth="2.2" />
-                        <circle cx="22" cy="16" r="3" fill="#2D4C79" stroke="#FFF" strokeWidth="0.8" />
-                        <text x="38" y="19" className="font-mono text-[10px] fill-slate-700">
-                            Durasi (Jam)
-                        </text>
+                        {/* Legend item 1: Durasi Jam (Clickable) */}
+                        <g
+                            onClick={() => setShowHours(!showHours)}
+                            className="cursor-pointer"
+                            opacity={showHours ? 1 : 0.35}
+                        >
+                            <line x1="12" y1="16" x2="32" y2="16" stroke="#2D4C79" strokeWidth="2.2" />
+                            <circle cx="22" cy="16" r="3" fill="#2D4C79" stroke="#FFF" strokeWidth="0.8" />
+                            <text
+                                x="38"
+                                y="19"
+                                className={`font-mono text-[10px] select-none ${
+                                    showHours ? 'fill-slate-800 font-medium' : 'fill-slate-400 line-through'
+                                }`}
+                            >
+                                Durasi (Jam)
+                            </text>
+                        </g>
 
-                        {/* Legend item 2: Frekuensi Reservasi */}
-                        <line
-                            x1="12"
-                            y1="34"
-                            x2="32"
-                            y2="34"
-                            stroke="#16A34A"
-                            strokeWidth="1.8"
-                            strokeDasharray="4 2"
-                        />
-                        <circle cx="22" cy="34" r="2.5" fill="#16A34A" stroke="#FFF" strokeWidth="0.8" />
-                        <text x="38" y="37" className="font-mono text-[10px] fill-slate-700">
-                            Jumlah Reservasi
-                        </text>
+                        {/* Legend item 2: Frekuensi Reservasi (Clickable) */}
+                        <g
+                            onClick={() => setShowCount(!showCount)}
+                            className="cursor-pointer"
+                            opacity={showCount ? 1 : 0.35}
+                        >
+                            <line
+                                x1="12"
+                                y1="34"
+                                x2="32"
+                                y2="34"
+                                stroke="#16A34A"
+                                strokeWidth="1.8"
+                                strokeDasharray="4 2"
+                            />
+                            <circle cx="22" cy="34" r="2.5" fill="#16A34A" stroke="#FFF" strokeWidth="0.8" />
+                            <text
+                                x="38"
+                                y="37"
+                                className={`font-mono text-[10px] select-none ${
+                                    showCount ? 'fill-slate-800 font-medium' : 'fill-slate-400 line-through'
+                                }`}
+                            >
+                                Jumlah Reservasi
+                            </text>
+                        </g>
                     </g>
 
                     {/* Crosshair Guideline on Hover */}
@@ -326,23 +377,26 @@ export default function MatplotlibLineChart({ data, monthLabel }: Props) {
                                 strokeDasharray="3 3"
                                 strokeWidth="1"
                             />
-                            {/* Highlight circles on hover */}
-                            <circle
-                                cx={getX(hoverIndex)}
-                                cy={getYHours(data[hoverIndex].total_hours)}
-                                r="5.5"
-                                fill="#2D4C79"
-                                stroke="#FFFFFF"
-                                strokeWidth="2"
-                            />
-                            <circle
-                                cx={getX(hoverIndex)}
-                                cy={getYHours(data[hoverIndex].reservations_count)}
-                                r="4.5"
-                                fill="#16A34A"
-                                stroke="#FFFFFF"
-                                strokeWidth="2"
-                            />
+                            {showHours && (
+                                <circle
+                                    cx={getX(hoverIndex)}
+                                    cy={getYHours(data[hoverIndex].total_hours)}
+                                    r="5.5"
+                                    fill="#2D4C79"
+                                    stroke="#FFFFFF"
+                                    strokeWidth="2"
+                                />
+                            )}
+                            {showCount && (
+                                <circle
+                                    cx={getX(hoverIndex)}
+                                    cy={getYHours(data[hoverIndex].reservations_count)}
+                                    r="4.5"
+                                    fill="#16A34A"
+                                    stroke="#FFFFFF"
+                                    strokeWidth="2"
+                                />
+                            )}
                         </g>
                     )}
                 </svg>
@@ -363,12 +417,16 @@ export default function MatplotlibLineChart({ data, monthLabel }: Props) {
                             {activePoint.label} (Hari {activePoint.day})
                         </div>
                         <div className="flex items-center gap-3 mt-1 text-[11px]">
-                            <span className="text-sky-300">
-                                ● Durasi: <strong>{activePoint.total_hours} Jam</strong>
-                            </span>
-                            <span className="text-emerald-300">
-                                ■ Reservasi: <strong>{activePoint.reservations_count}x</strong>
-                            </span>
+                            {showHours && (
+                                <span className="text-sky-300">
+                                    ● Durasi: <strong>{activePoint.total_hours} Jam</strong>
+                                </span>
+                            )}
+                            {showCount && (
+                                <span className="text-emerald-300">
+                                    ■ Reservasi: <strong>{activePoint.reservations_count}x</strong>
+                                </span>
+                            )}
                         </div>
                     </div>
                 )}

@@ -171,3 +171,18 @@ test('admin dashboard returns matplotlib analytical chart stats with daily trend
         ->where('chart_stats.damage_by_location.0.total_reports', 1)
     );
 });
+
+test('admin dashboard accurately filters analytics by month parameter and dynamically scales days (e.g. September has 30 days)', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)->get(route('admin.dashboard', ['month' => '2024-09']));
+
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('admin/dashboard')
+        ->where('selected_month', '2024-09')
+        ->has('available_months')
+        ->has('chart_stats.daily_usage_trend', 30)
+        ->where('chart_stats.daily_usage_trend.0.day', 1)
+        ->where('chart_stats.daily_usage_trend.29.day', 30)
+    );
+});

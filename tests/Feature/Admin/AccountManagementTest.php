@@ -74,6 +74,8 @@ test('admin can create Pengguna account directly (FR-16 / US-14, GAL-06)', funct
     $response = $this->actingAs($admin)->post(route('admin.users.pengguna.store'), [
         'nama' => 'Dosen Khusus',
         'email' => 'dosen.khusus@kampus.ac.id',
+        'identity_type' => 'nip',
+        'institutional_id' => '198501012010121001',
         'password' => 'Password123!',
         'password_confirmation' => 'Password123!',
     ]);
