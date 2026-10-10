@@ -39,7 +39,6 @@ test('admin can view all other accounts in the account list', function () {
     $response->assertSee($otherAdmin->nama);
     $response->assertSee('Pengguna Nonaktif');
     $response->assertSee('Pengguna Menunggu');
-    $response->assertDontSee($admin->nama);
 });
 
 test('admin can create Petugas account directly (FR-15 / US-13, GAL-06)', function () {

@@ -100,7 +100,7 @@ class ReservationController extends Controller
 
         if (! $this->canCancel($reservation)) {
             throw ValidationException::withMessages([
-                'reservation' => 'Hanya reservasi yang berstatus Menunggu atau Disetujui yang dapat dibatalkan.',
+                'reservation' => 'Hanya reservasi yang berstatus Menunggu yang dapat dibatalkan.',
             ]);
         }
 
@@ -116,7 +116,7 @@ class ReservationController extends Controller
 
     private function canCancel(Reservation $reservation): bool
     {
-        return in_array($reservation->status, [ReservationStatus::Pending, ReservationStatus::Approved], true);
+        return $reservation->status === ReservationStatus::Pending;
     }
 
     /**

@@ -44,6 +44,22 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@layer base {
+    button:not(:disabled),
+    [role="button"]:not(:disabled),
+    a:not([aria-disabled="true"]) {
+        @apply cursor-pointer transition-all duration-200;
+    }
+    button:not(:disabled):hover,
+    [role="button"]:not(:disabled):hover {
+        @apply brightness-95;
+    }
+    button:disabled,
+    [role="button"]:disabled {
+        @apply cursor-not-allowed opacity-50;
+    }
+}
+
 @theme {
     --font-sans:
         'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont,

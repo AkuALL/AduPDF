@@ -82,7 +82,7 @@ export default function ReservationShow({ reservation, can_cancel, success }: Pr
                                         setCancelError(null);
                                         setIsCancelOpen(true);
                                     }}
-                                    className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 active:bg-red-100 transition"
+                                    className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-600 hover:text-white hover:border-red-600 active:bg-red-700 transition"
                                 >
                                     Batalkan reservasi
                                 </button>

@@ -1,6 +1,9 @@
 <?php
 
 use App\Models\User;
+use Tests\TestCase;
+
+uses(TestCase::class);
 
 test('role helper methods identify roles accurately', function () {
     $pengguna = new User(['role' => 'pengguna']);

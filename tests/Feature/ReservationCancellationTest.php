@@ -5,7 +5,7 @@ use App\Models\Facility;
 use App\Models\Reservation;
 use App\Models\User;
 
-test('pengguna dapat membatalkan reservasi miliknya yang berstatus menunggu atau disetujui', function (ReservationStatus $status) {
+test('pengguna dapat membatalkan reservasi miliknya yang berstatus menunggu', function (ReservationStatus $status) {
     $user = User::factory()->create(['role' => 'pengguna', 'approved_at' => now()]);
     $facility = Facility::factory()->create(['condition' => 'aktif']);
 
@@ -28,10 +28,9 @@ test('pengguna dapat membatalkan reservasi miliknya yang berstatus menunggu atau
     expect($reservation->fresh()->status)->toBe(ReservationStatus::Cancelled);
 })->with([
     'menunggu' => ReservationStatus::Pending,
-    'disetujui' => ReservationStatus::Approved,
 ]);
 
-test('pengguna tidak dapat membatalkan reservasi yang sudah ditolak atau dibatalkan', function (ReservationStatus $status) {
+test('pengguna tidak dapat membatalkan reservasi yang sudah disetujui, ditolak atau dibatalkan', function (ReservationStatus $status) {
     $user = User::factory()->create(['role' => 'pengguna', 'approved_at' => now()]);
     $facility = Facility::factory()->create(['condition' => 'aktif']);
 
@@ -51,6 +50,7 @@ test('pengguna tidak dapat membatalkan reservasi yang sudah ditolak atau dibatal
     $response->assertSessionHasErrors('reservation');
     expect($reservation->fresh()->status)->toBe($status);
 })->with([
+    'disetujui' => ReservationStatus::Approved,
     'ditolak' => ReservationStatus::Rejected,
     'dibatalkan' => ReservationStatus::Cancelled,
 ]);
