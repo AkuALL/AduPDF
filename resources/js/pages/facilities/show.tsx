@@ -335,13 +335,13 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <span className="text-xs font-semibold uppercase tracking-wider text-[#2D4C79]">
-                                    Integrasi Jadwal Operasional
+                                    Informasi Jadwal
                                 </span>
                                 <h2 className="mt-1 text-xl font-bold tracking-tight text-[#111827]">
-                                    Ketersediaan Slot (07:00 – 20:00 WIB)
+                                    Cek Ketersediaan Waktu
                                 </h2>
                                 <p className="mt-1 text-xs text-[#667085]">
-                                    Interval 30 menit. Ketersediaan otomatis mencerminkan kondisi fisik fasilitas dan reservasi yang disetujui.
+                                    Pilih waktu antara 07.00 – 20.00 WIB (slot 30 menit).
                                 </p>
                             </div>
 
