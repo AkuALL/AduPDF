@@ -186,3 +186,31 @@ test('facility under repair or inactive marks all slots unavailable with appropr
         ->where('availability.slots.0.status', 'dalam_perbaikan')
     );
 });
+
+test('on today date, past slots are marked unavailable in public availability (AG-04, FR-01)', function () {
+    $this->travelTo(CarbonImmutable::parse('2026-10-15 14:05:00', 'Asia/Jakarta'));
+
+    $facility = Facility::factory()->create([
+        'name' => 'Ruang Riset 1',
+        'type' => FacilityType::Laboratory,
+    ]);
+
+    $response = $this->get("/facilities/{$facility->id}?date=2026-10-15");
+
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('facilities/show')
+        ->where('availability.date', '2026-10-15')
+        ->where('availability.total_slots', 26)
+        ->where('availability.slots.0.start_time', '07:00')
+        ->where('availability.slots.0.is_available', false)
+        ->where('availability.slots.0.status', 'tidak_tersedia')
+        ->where('availability.slots.14.start_time', '14:00')
+        ->where('availability.slots.14.is_available', false)
+        ->where('availability.slots.14.status', 'tidak_tersedia')
+        ->where('availability.slots.15.start_time', '14:30')
+        ->where('availability.slots.15.is_available', true)
+        ->where('availability.slots.15.status', 'tersedia')
+        ->where('availability.available_slots_count', 11)
+        ->where('availability.occupied_slots_count', 15)
+    );
+});
