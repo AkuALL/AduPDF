@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
-export default function PasswordField({ label, name, placeholder, value, onChange, autoFocus = false }: { label: string; name: string; placeholder: string; value: string; onChange: (value: string) => void; autoFocus?: boolean }) {
+export default function PasswordField({ label, name, placeholder, value, onChange, autoFocus = false }: { label: ReactNode; name: string; placeholder: string; value: string; onChange: (value: string) => void; autoFocus?: boolean }) {
     const [visible, setVisible] = useState(false);
     return (
         <div>

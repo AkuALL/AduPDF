@@ -131,6 +131,12 @@ export default function CreateReservation({ facility, reservable, success, serve
         }
     }, [requestedDate, requestedStartTime, requestedEndTime]);
 
+    useEffect(() => {
+        if (success) {
+            document.cookie = 'pending_reservation=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
+        }
+    }, [success]);
+
     const noCurrentDaySlots = selectedDate === currentWib.date && todayUnavailable;
     const startTimeError = noCurrentDaySlots
         ? 'Tanggal ini tidak tersedia karena jam operasional sudah berakhir. Pilih tanggal lain.'
@@ -178,10 +184,41 @@ export default function CreateReservation({ facility, reservable, success, serve
                         </div>
                         <h1 className="mt-6 text-2xl font-bold">Ajukan reservasi</h1>
                         <p className="mt-2 text-sm text-[#667085]">{facility.name} · {facility.location}</p>
-                        {success && <p role="status" className="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
-                        {!reservable && <p role="alert" className="mt-6 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Fasilitas ini sedang tidak dapat direservasi.</p>}
+                        {success ? (
+                            <div className="mt-6 space-y-5 rounded-lg border border-emerald-200 bg-emerald-50/60 p-6 shadow-sm">
+                                <div className="flex items-start gap-3.5">
+                                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-base font-bold text-white shadow-xs">
+                                        ✓
+                                    </span>
+                                    <div>
+                                        <h2 className="text-base font-bold text-emerald-900">
+                                            Pengajuan Reservasi Berhasil!
+                                        </h2>
+                                        <p role="status" className="mt-1 text-sm text-emerald-800">
+                                            {success}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-3 border-t border-emerald-200/60 pt-4">
+                                    <Link
+                                        href="/reservations"
+                                        className="inline-flex items-center gap-1.5 rounded-md bg-[#2D4C79] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] transition"
+                                    >
+                                        Lihat Riwayat Reservasi →
+                                    </Link>
+                                    <Link
+                                        href={`/facilities/${facility.id}`}
+                                        className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-4 py-2 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] transition"
+                                    >
+                                        Kembali ke Detail Fasilitas
+                                    </Link>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                {!reservable && <p role="alert" className="mt-6 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Fasilitas ini sedang tidak dapat direservasi.</p>}
 
-                        <Form {...storeReservation.form()} resetOnSuccess onSuccess={() => { setSelectedDate(''); setStartTime(''); setEndTime(''); }} className="mt-6 space-y-5 rounded-lg border border-[#E5E7EB] bg-white p-6">
+                                <Form {...storeReservation.form()} resetOnSuccess onSuccess={() => { setSelectedDate(''); setStartTime(''); setEndTime(''); }} className="mt-6 space-y-5 rounded-lg border border-[#E5E7EB] bg-white p-6">
                             {({ errors, processing }) => (
                                 <>
                                     <input type="hidden" name="facility_id" value={facility.id} />
@@ -201,12 +238,19 @@ export default function CreateReservation({ facility, reservable, success, serve
                                         name="end_time"
                                         value={
                                             parsedSchedules.length > 0
-                                                ? `${parsedSchedules[parsedSchedules.length - 1].date}T${parsedSchedules[parsedSchedules.length - 1].end_time}`
+                                                ? `${parsedSchedules[0].date}T${parsedSchedules[0].end_time}`
                                                 : selectedDate && endTime
                                                 ? `${selectedDate}T${endTime}`
                                                 : ''
                                         }
                                     />
+                                    {parsedSchedules.length > 0 && (
+                                        <input
+                                            type="hidden"
+                                            name="schedules"
+                                            value={JSON.stringify(parsedSchedules)}
+                                        />
+                                    )}
                                     {errors.facility_id && <p role="alert" className="text-sm text-red-700">{errors.facility_id}</p>}
                                     {errors.start_time && <p role="alert" className="text-sm text-red-700">{errors.start_time}</p>}
                                     {errors.end_time && <p role="alert" className="text-sm text-red-700">{errors.end_time}</p>}
@@ -361,6 +405,8 @@ export default function CreateReservation({ facility, reservable, success, serve
                                 </>
                             )}
                         </Form>
+                            </>
+                        )}
                     </div>
                 </main>
             </div>

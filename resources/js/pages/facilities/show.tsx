@@ -3,7 +3,7 @@ import { UserNavbar } from '@/components/user-navbar';
 import FacilityPhotoCarousel from '@/components/facility-photo-carousel';
 import { facilityImages } from '@/lib/facility-images';
 import DateCalendarGrid from '@/components/date-calendar-grid';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const wibDateFormatter = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Jakarta',
@@ -330,6 +330,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
 
     const handleResetAll = () => {
         setDays((prev) => prev.map((d) => ({ ...d, selectedRange: null })));
+        document.cookie = 'pending_reservation=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
     };
 
     const selectedDays = days.filter((d) => d.selectedRange !== null && d.availability?.slots);
@@ -337,6 +338,43 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
         if (!d.selectedRange) return sum;
         return sum + (d.selectedRange.end - d.selectedRange.start + 1);
     }, 0);
+
+    const savePendingReservationCookie = () => {
+        if (selectedDays.length === 0) return;
+        const reservationUrl = `/reservations/create?facility_id=${facility.id}&start_time=${selectedDays[0].date}T${selectedDays[0].availability!.slots[selectedDays[0].selectedRange!.start].start_time}&end_time=${selectedDays[selectedDays.length - 1].date}T${selectedDays[selectedDays.length - 1].availability!.slots[selectedDays[selectedDays.length - 1].selectedRange!.end].end_time}&schedules=${encodeURIComponent(
+            JSON.stringify(
+                selectedDays.map((d) => ({
+                    date: d.date,
+                    start_time: d.availability!.slots[d.selectedRange!.start].start_time,
+                    end_time: d.availability!.slots[d.selectedRange!.end].end_time,
+                    slots_count: d.selectedRange!.end - d.selectedRange!.start + 1,
+                }))
+            )
+        )}`;
+
+        const payload = {
+            facility_id: facility.id,
+            facility_name: facility.name,
+            start_time: `${selectedDays[0].date}T${selectedDays[0].availability!.slots[selectedDays[0].selectedRange!.start].start_time}`,
+            end_time: `${selectedDays[selectedDays.length - 1].date}T${selectedDays[selectedDays.length - 1].availability!.slots[selectedDays[selectedDays.length - 1].selectedRange!.end].end_time}`,
+            schedules: selectedDays.map((d) => ({
+                date: d.date,
+                start_time: d.availability!.slots[d.selectedRange!.start].start_time,
+                end_time: d.availability!.slots[d.selectedRange!.end].end_time,
+                slots_count: d.selectedRange!.end - d.selectedRange!.start + 1,
+            })),
+            url: reservationUrl,
+        };
+
+        const expires = new Date(Date.now() + 7 * 864e5).toUTCString();
+        document.cookie = `pending_reservation=${encodeURIComponent(JSON.stringify(payload))}; expires=${expires}; path=/; SameSite=Lax`;
+    };
+
+    useEffect(() => {
+        if (selectedDays.length > 0) {
+            savePendingReservationCookie();
+        }
+    }, [days]);
 
     return (
         <>
@@ -563,7 +601,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                                 className="absolute right-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg bg-white shadow-lg"
                                             >
                                                 <DateCalendarGrid
-                                                    value={getNextDate(days.map((d) => d.date))}
+                                                    value={today}
                                                     minimumDate={today}
                                                     maximumDate={latestDate}
                                                     onSelect={(date) => handleAddDate(date)}
@@ -855,6 +893,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                                 }))
                                             )
                                         )}`}
+                                        onClick={savePendingReservationCookie}
                                         className="inline-flex h-10 items-center justify-center rounded-md bg-[#2D4C79] px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
                                     >
                                         Ajukan Reservasi ({totalSelectedSlots} slot • {selectedDays.length} hari)

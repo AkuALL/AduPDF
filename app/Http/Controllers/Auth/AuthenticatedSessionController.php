@@ -66,6 +66,21 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('petugas.dashboard');
         }
 
+        $pendingReservation = $request->cookie('pending_reservation');
+        if ($pendingReservation && $user->isPengguna()) {
+            $data = json_decode(urldecode($pendingReservation), true) ?: json_decode($pendingReservation, true);
+            $targetUrl = $data['url'] ?? null;
+            if ($targetUrl) {
+                if (! $user->hasInstitutionalIdentity()) {
+                    return redirect()->route('profile.edit')
+                        ->with('warning', 'Lengkapi profil untuk melanjutkan reservasi')
+                        ->with('from', 'reservation');
+                }
+
+                return redirect($targetUrl);
+            }
+        }
+
         return redirect()->intended(route('facilities.index'));
     }
 

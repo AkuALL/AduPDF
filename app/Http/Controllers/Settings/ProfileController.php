@@ -19,6 +19,7 @@ class ProfileController extends Controller
     {
         return Inertia::render('settings/profile', [
             'status' => $request->session()->get('status'),
+            'from' => $request->session()->get('from') ?? $request->query('from'),
         ]);
     }
 
@@ -48,6 +49,17 @@ class ProfileController extends Controller
         $message = 'Profil berhasil diperbarui.';
 
         Inertia::flash('toast', ['type' => 'success', 'message' => $message]);
+
+        $from = $request->input('from') ?? $request->session()->get('from');
+        $pendingReservation = $request->cookie('pending_reservation');
+
+        if ($from === 'reservation' && $pendingReservation && $user->hasInstitutionalIdentity()) {
+            $data = json_decode(urldecode($pendingReservation), true) ?: json_decode($pendingReservation, true);
+            $targetUrl = $data['url'] ?? null;
+            if ($targetUrl) {
+                return redirect($targetUrl)->with('success', 'Profil berhasil dilengkapi. Silakan lanjutkan reservasi Anda.');
+            }
+        }
 
         return to_route('profile.edit')->with('status', 'profile-updated')->with('success', $message);
     }

@@ -1,4 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { UserNavbar } from '@/components/user-navbar';
 import { facilityImages } from '@/lib/facility-images';
@@ -162,20 +163,60 @@ export default function FacilityIndex({
                                 <label className="mb-1.5 block text-base font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Kapasitas
                                 </label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    value={form.minimum_capacity}
-                                    onChange={(e) =>
-                                        setForm({
-                                            ...form,
-                                            minimum_capacity:
-                                                e.target.value === '' ? '' : Number(e.target.value),
-                                        })
-                                    }
-                                    placeholder="0 orang"
-                                    className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white px-3 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition-all hover:border-[#2D4C79] hover:shadow-xs group-hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
-                                />
+                                <div className="relative flex items-center">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={form.minimum_capacity}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                minimum_capacity:
+                                                    e.target.value === '' ? '' : Math.max(0, Number(e.target.value)),
+                                            })
+                                        }
+                                        placeholder="0 orang"
+                                        className="h-10 w-full rounded-md border border-[#D0D5DD] bg-white pl-3 pr-8 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition-all hover:border-[#2D4C79] hover:shadow-xs group-hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    />
+                                    <div className="absolute right-1.5 flex flex-col items-center justify-center -space-y-0.5">
+                                        <button
+                                            type="button"
+                                            tabIndex={-1}
+                                            aria-label="Tambah kapasitas"
+                                            onClick={() =>
+                                                setForm({
+                                                    ...form,
+                                                    minimum_capacity:
+                                                        form.minimum_capacity === ''
+                                                            ? 1
+                                                            : Number(form.minimum_capacity) + 1,
+                                                })
+                                            }
+                                            className="flex h-3.5 w-5 items-center justify-center rounded-xs text-[#98A2B3] hover:bg-[#F3F5F7] hover:text-[#2D4C79] active:text-[#111827] transition cursor-pointer"
+                                        >
+                                            <ChevronUp className="h-3.5 w-3.5 stroke-[2.5]" />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            tabIndex={-1}
+                                            aria-label="Kurangi kapasitas"
+                                            onClick={() =>
+                                                setForm({
+                                                    ...form,
+                                                    minimum_capacity:
+                                                        form.minimum_capacity === '' || Number(form.minimum_capacity) <= 0
+                                                            ? ''
+                                                            : Number(form.minimum_capacity) - 1 === 0
+                                                            ? ''
+                                                            : Number(form.minimum_capacity) - 1,
+                                                })
+                                            }
+                                            className="flex h-3.5 w-5 items-center justify-center rounded-xs text-[#98A2B3] hover:bg-[#F3F5F7] hover:text-[#2D4C79] active:text-[#111827] transition cursor-pointer"
+                                        >
+                                            <ChevronDown className="h-3.5 w-3.5 stroke-[2.5]" />
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
