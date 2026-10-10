@@ -1,4 +1,4 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { UserNavbar } from '@/components/user-navbar';
 import FacilityPhotoCarousel from '@/components/facility-photo-carousel';
 import { facilityImages } from '@/lib/facility-images';
@@ -113,81 +113,220 @@ const conditionConfig: Record<
     },
 };
 
+const longDateFormatter = new Intl.DateTimeFormat('id-ID', {
+    timeZone: 'UTC',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+});
+
+type DayPlan = {
+    id: string;
+    date: string;
+    availability: Availability | null;
+    isLoading: boolean;
+    selectedRange: { start: number; end: number } | null;
+    isCalendarOpen: boolean;
+    isExpanded: boolean;
+};
+
 export default function FacilityShow({ facility, availability, selectedDate }: Props) {
-    const { auth } = usePage<{ auth?: { user?: AuthUser | null } }>().props;
-    const user = auth?.user;
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const [selectedRange, setSelectedRange] = useState<{ start: number; end: number } | null>(null);
+    const page = usePage<{ auth?: { user?: AuthUser | null } }>();
+    const user = page.props.auth?.user;
+    const pageVersion = page.version;
+
+    const today = todayWibDate();
+    const currentTime = currentWibTime();
+    const isTodayUnavailable = currentTime >= '19:30';
+
+    const tomorrowValue = new Date(`${today}T00:00:00Z`);
+    tomorrowValue.setUTCDate(tomorrowValue.getUTCDate() + 1);
+    const tomorrow = tomorrowValue.toISOString().slice(0, 10);
+
+    const latestDateValue = new Date(`${today}T00:00:00Z`);
+    latestDateValue.setUTCDate(latestDateValue.getUTCDate() + 90);
+    const latestDate = latestDateValue.toISOString().slice(0, 10);
+    const defaultDate = isTodayUnavailable ? tomorrow : today;
+    const initialDate = selectedDate || availability?.date || defaultDate;
+
+    const [days, setDays] = useState<DayPlan[]>([
+        {
+            id: `day-${initialDate}`,
+            date: initialDate,
+            availability: availability || null,
+            isLoading: false,
+            selectedRange: null,
+            isCalendarOpen: false,
+            isExpanded: true,
+        },
+    ]);
 
     const status = conditionConfig[facility.condition] || conditionConfig.aktif;
     const isRoom = ['ruang_kelas', 'aula', 'laboratorium'].includes(facility.type);
 
-    const today = todayWibDate();
-    const currentTime = currentWibTime();
-    const latestDateValue = new Date(`${today}T00:00:00Z`);
-    latestDateValue.setUTCDate(latestDateValue.getUTCDate() + 90);
-    const latestDate = latestDateValue.toISOString().slice(0, 10);
-    const currentDate = selectedDate || availability?.date || today;
-
-    const isSlotPast = (slotStartTime: string) => {
-        if (currentDate < today) return true;
-        if (currentDate > today) return false;
+    const isSlotPast = (dayDate: string, slotStartTime: string) => {
+        if (dayDate < today) return true;
+        if (dayDate > today) return false;
         return slotStartTime <= currentTime;
     };
 
-    const isSlotSelectable = (slot: AvailabilitySlot) => {
-        return slot.is_available && (availability?.is_reservable ?? false) && !isSlotPast(slot.start_time);
+    const isSlotSelectable = (day: DayPlan, slot: AvailabilitySlot) => {
+        return slot.is_available && (day.availability?.is_reservable ?? false) && !isSlotPast(day.date, slot.start_time);
     };
 
-    const handleDateChange = (newDate: string) => {
-        setIsCalendarOpen(false);
-        setSelectedRange(null);
-        router.get(
-            `/facilities/${facility.id}`,
-            { date: newDate },
-            { preserveState: true, preserveScroll: true }
+    const fetchAvailability = async (targetDate: string): Promise<Availability | null> => {
+        try {
+            const headers: Record<string, string> = {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-Inertia': 'true',
+                Accept: 'application/json',
+            };
+            if (pageVersion) {
+                headers['X-Inertia-Version'] = pageVersion;
+            }
+
+            const res = await fetch(`/facilities/${facility.id}?date=${targetDate}`, { headers });
+            if (res.ok) {
+                const data = await res.json();
+                return data.props?.availability || null;
+            }
+        } catch (e) {
+            console.error('Gagal mengambil ketersediaan via AJAX:', e);
+        }
+        return null;
+    };
+
+    const getNextDate = (existingDates: string[]): string => {
+        const sorted = [...existingDates].sort();
+        const last = sorted[sorted.length - 1] || today;
+        const d = new Date(`${last}T00:00:00Z`);
+        d.setUTCDate(d.getUTCDate() + 1);
+        let nextStr = d.toISOString().slice(0, 10);
+        let count = 0;
+        while (existingDates.includes(nextStr) && count < 60) {
+            d.setUTCDate(d.getUTCDate() + 1);
+            nextStr = d.toISOString().slice(0, 10);
+            count++;
+        }
+        return nextStr;
+    };
+
+    const toggleCalendar = (dayId: string) => {
+        setDays((prev) =>
+            prev.map((d) => (d.id === dayId ? { ...d, isCalendarOpen: !d.isCalendarOpen } : { ...d, isCalendarOpen: false }))
         );
     };
 
-    const handleSlotClick = (idx: number) => {
-        if (!availability?.slots) return;
-
-        if (!selectedRange) {
-            setSelectedRange({ start: idx, end: idx });
-            return;
-        }
-
-        const { start, end } = selectedRange;
-
-        // Clicking start slot: deselect if single, collapse to start if range
-        if (idx === start) {
-            setSelectedRange(start === end ? null : { start, end: start });
-            return;
-        }
-
-        // Clicking end slot when range is active: undo time window, revert to start slot only
-        if (idx === end && start !== end) {
-            setSelectedRange({ start, end: start });
-            return;
-        }
-
-        // Clicking backwards (idx < start): move forward only, so change selection
-        if (idx < start) {
-            setSelectedRange({ start: idx, end: idx });
-            return;
-        }
-
-        // Clicking forward (idx > start): adjust end to idx if contiguous range is available
-        const allAvailable = availability.slots
-            .slice(start, idx + 1)
-            .every((s) => isSlotSelectable(s));
-
-        if (allAvailable) {
-            setSelectedRange({ start, end: idx });
-        } else {
-            setSelectedRange({ start: idx, end: idx });
-        }
+    const toggleDayExpanded = (dayId: string) => {
+        setDays((prev) =>
+            prev.map((d) => (d.id === dayId ? { ...d, isExpanded: !d.isExpanded } : d))
+        );
     };
+
+    const handleDayDateChange = (dayId: string, newDate: string) => {
+        setDays((prev) =>
+            prev.map((d) =>
+                d.id === dayId
+                    ? {
+                          ...d,
+                          date: newDate,
+                          availability: null,
+                          isLoading: true,
+                          selectedRange: null,
+                          isCalendarOpen: false,
+                      }
+                    : d
+            )
+        );
+
+        fetchAvailability(newDate).then((avail) => {
+            setDays((prev) =>
+                prev.map((d) => (d.id === dayId ? { ...d, availability: avail, isLoading: false } : d))
+            );
+        });
+    };
+
+    const handleAddDay = () => {
+        const existingDates = days.map((d) => d.date);
+        const newDate = getNextDate(existingDates);
+        const newDayId = `day-${Date.now()}`;
+
+        // Collapse all older days and open the new day!
+        setDays((prev) => [
+            ...prev.map((d) => ({ ...d, isExpanded: false, isCalendarOpen: false })),
+            {
+                id: newDayId,
+                date: newDate,
+                availability: null,
+                isLoading: true,
+                selectedRange: null,
+                isCalendarOpen: false,
+                isExpanded: true,
+            },
+        ]);
+
+        fetchAvailability(newDate).then((avail) => {
+            setDays((prev) =>
+                prev.map((d) => (d.id === newDayId ? { ...d, availability: avail, isLoading: false } : d))
+            );
+        });
+    };
+
+    const handleRemoveDay = (dayId: string) => {
+        if (days.length <= 1) return;
+        setDays((prev) => prev.filter((d) => d.id !== dayId));
+    };
+
+    const handleSlotClick = (dayId: string, idx: number) => {
+        setDays((prev) =>
+            prev.map((day) => {
+                if (day.id !== dayId || !day.availability?.slots) return day;
+
+                const currentRange = day.selectedRange;
+                if (!currentRange) {
+                    return { ...day, selectedRange: { start: idx, end: idx } };
+                }
+
+                const { start, end } = currentRange;
+
+                // Clicking start slot: deselect if single, collapse to start if range
+                if (idx === start) {
+                    return { ...day, selectedRange: start === end ? null : { start, end: start } };
+                }
+
+                // Clicking end slot when range is active: undo time window, revert to start slot only
+                if (idx === end && start !== end) {
+                    return { ...day, selectedRange: { start, end: start } };
+                }
+
+                // Clicking backwards (idx < start): move forward only, so change selection
+                if (idx < start) {
+                    return { ...day, selectedRange: { start: idx, end: idx } };
+                }
+
+                // Clicking forward (idx > start): adjust end to idx if contiguous range is available
+                const allAvailable = day.availability.slots
+                    .slice(start, idx + 1)
+                    .every((s) => isSlotSelectable(day, s));
+
+                return {
+                    ...day,
+                    selectedRange: allAvailable ? { start, end: idx } : { start: idx, end: idx },
+                };
+            })
+        );
+    };
+
+    const handleResetAll = () => {
+        setDays((prev) => prev.map((d) => ({ ...d, selectedRange: null })));
+    };
+
+    const selectedDays = days.filter((d) => d.selectedRange !== null && d.availability?.slots);
+    const totalSelectedSlots = selectedDays.reduce((sum, d) => {
+        if (!d.selectedRange) return sum;
+        return sum + (d.selectedRange.end - d.selectedRange.start + 1);
+    }, 0);
 
     return (
         <>
@@ -345,194 +484,372 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                 </p>
                             </div>
 
-                            {/* Date Picker Control */}
-                            <div className="relative flex items-center gap-2">
-                                <span id="availability-date-label" className="text-sm font-medium text-[#667085] whitespace-nowrap">
-                                    Pilih Tanggal:
-                                </span>
-                                <button
-                                    type="button"
-                                    aria-haspopup="dialog"
-                                    aria-expanded={isCalendarOpen}
-                                    aria-labelledby="availability-date-label availability-date-value"
-                                    onClick={() => setIsCalendarOpen((open) => !open)}
-                                    className="inline-flex min-w-44 items-center justify-between gap-3 rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm font-semibold text-[#111827] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/30"
-                                >
-                                    <span id="availability-date-value">{displayDateFormatter.format(new Date(`${currentDate}T00:00:00Z`))}</span>
-                                    <span aria-hidden="true" className="text-[#667085]">▾</span>
-                                </button>
-                                {isCalendarOpen && (
-                                    <div
-                                        role="dialog"
-                                        aria-label="Pilih tanggal ketersediaan"
-                                        onKeyDown={(event) => {
-                                            if (event.key === 'Escape') {
-                                                setIsCalendarOpen(false);
-                                            }
-                                        }}
-                                        className="absolute right-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg bg-white shadow-lg"
-                                    >
-                                        <DateCalendarGrid
-                                            value={currentDate}
-                                            minimumDate={today}
-                                            maximumDate={latestDate}
-                                            onSelect={handleDateChange}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Availability Summary Stats */}
-                        {availability && (
-                            <div className="mt-5 flex flex-wrap items-center gap-3 border-y border-[#E5E7EB] py-3 text-sm">
-                                <div className="flex items-center gap-1.5 font-medium text-[#16794A]">
-                                    <span className="inline-block h-2 w-2 rounded-full bg-[#16794A]" />
-                                    <span>{availability.available_slots_count} Slot Tersedia</span>
-                                </div>
-                                <span className="text-[#D0D5DD]">•</span>
-                                <div className="flex items-center gap-1.5 font-medium text-[#667085]">
-                                    <span className="inline-block h-2 w-2 rounded-full bg-[#98A2B3]" />
-                                    <span>{availability.occupied_slots_count} Tidak Tersedia</span>
-                                </div>
-                                <span className="text-[#D0D5DD]">•</span>
-                                <span className="text-[#667085]">Total {availability.total_slots} slot (30 mnt/slot)</span>
-
-                                {!availability.is_reservable && (
-                                    <span className="ml-auto rounded bg-[#FFF0E8] border border-[#F5C6A7] px-2 py-0.5 text-xs font-semibold text-[#B54708]">
-                                        Fasilitas Saat Ini Tidak Dapat Direservasi
-                                    </span>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Slot Grid */}
-                        <div className="mt-6">
-                            {availability && availability.slots.length > 0 ? (
-                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7">
-                                    {availability.slots.map((slot, index) => {
-                                        const isPast = isSlotPast(slot.start_time);
-                                        const isSelectable = isSlotSelectable(slot);
-                                        const isSelected = selectedRange !== null && index >= selectedRange.start && index <= selectedRange.end;
-
-                                        let slotStyle = 'bg-[#EAF7F0] border-[#B7E2CB] text-[#16794A]';
-                                        let statusBadge = 'Tersedia';
-
-                                        if (isSelected) {
-                                            slotStyle = 'bg-[#2D4C79] border-[#1C3150] text-white shadow-sm ring-2 ring-[#2D4C79]/30';
-                                            statusBadge = 'Dipilih';
-                                        } else if (isPast) {
-                                            slotStyle = 'bg-[#F3F5F7] border-[#E5E7EB] text-[#98A2B3] opacity-60';
-                                            statusBadge = 'Lewat';
-                                        } else if (slot.status === 'terisi') {
-                                            slotStyle = 'bg-[#F3F5F7] border-[#E5E7EB] text-[#667085] opacity-80';
-                                            statusBadge = 'Dipesan';
-                                        } else if (slot.status === 'dalam_perbaikan') {
-                                            slotStyle = 'bg-[#FFF0E8] border-[#F5C6A7] text-[#B54708]';
-                                            statusBadge = 'Perbaikan';
-                                        } else if (slot.status === 'nonaktif' || !slot.is_available) {
-                                            slotStyle = 'bg-[#F0F2F4] border-[#D7DBE0] text-[#5D6673]';
-                                            statusBadge = 'Nonaktif';
-                                        }
-
-                                        if (isSelectable) {
-                                            return (
-                                                <button
-                                                    key={slot.start_time}
-                                                    type="button"
-                                                    onClick={() => handleSlotClick(index)}
-                                                    aria-pressed={isSelected}
-                                                    title={
-                                                        isSelected
-                                                            ? `Slot ${slot.start_time} - ${slot.end_time} dipilih (klik untuk ubah/batalkan)`
-                                                            : `Klik untuk memilih slot ${slot.start_time} - ${slot.end_time}`
-                                                    }
-                                                    className={`group flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all cursor-pointer ${
-                                                        isSelected
-                                                            ? slotStyle
-                                                            : `${slotStyle} hover:bg-[#D4EFE0] hover:border-[#16794A] hover:shadow-sm hover:scale-[1.02]`
-                                                    }`}
-                                                >
-                                                    <span className="text-sm font-bold tracking-tight">
-                                                        {slot.start_time} - {slot.end_time}
-                                                    </span>
-                                                    <span className={`mt-1 inline-flex items-center text-xs font-semibold uppercase tracking-wider ${isSelected ? 'text-white/90' : ''}`}>
-                                                        {statusBadge}
-                                                    </span>
-                                                </button>
-                                            );
-                                        }
-
-                                        return (
-                                            <div
-                                                key={slot.start_time}
-                                                aria-disabled="true"
-                                                title={`Slot ${slot.start_time} - ${slot.end_time} (${statusBadge})`}
-                                                className={`flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all cursor-not-allowed select-none ${slotStyle}`}
-                                            >
-                                                <span className="text-sm font-bold tracking-tight">
-                                                    {slot.start_time} - {slot.end_time}
-                                                </span>
-                                                <span className="mt-1 inline-flex items-center text-xs font-semibold uppercase tracking-wider">
-                                                    {statusBadge}
-                                                </span>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            ) : (
-                                <p className="text-center text-sm text-[#667085] py-8">
-                                    Memuat informasi slot ketersediaan...
-                                </p>
-                            )}
-                        </div>
-
-                        {/* CTA / Quick Link to Reservation */}
-                        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-[#E5E7EB] pt-5">
-                            <div>
-                                {selectedRange !== null && availability ? (
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        <span className="text-sm font-semibold text-[#111827]">
-                                            Slot dipilih: {availability.slots[selectedRange.start].start_time} - {availability.slots[selectedRange.end].end_time} (WIB)
-                                        </span>
-                                        <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-xs font-semibold text-[#2D4C79]">
-                                            {selectedRange.end - selectedRange.start + 1} slot
+                            {/* Date Picker Control & Tambah Hari Button */}
+                            {days.length === 1 ? (
+                                <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                                    <div className="relative flex items-center gap-2">
+                                        <span id="availability-date-label" className="text-sm font-medium text-[#667085] whitespace-nowrap">
+                                            Pilih Tanggal:
                                         </span>
                                         <button
                                             type="button"
-                                            onClick={() => setSelectedRange(null)}
-                                            className="text-sm text-[#B54708] hover:underline"
+                                            aria-haspopup="dialog"
+                                            aria-expanded={days[0].isCalendarOpen}
+                                            aria-labelledby="availability-date-label availability-date-value"
+                                            onClick={() => toggleCalendar(days[0].id)}
+                                            className="inline-flex min-w-44 items-center justify-between gap-3 rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm font-semibold text-[#111827] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/30"
                                         >
-                                            Reset pilihan
+                                            <span id="availability-date-value">{displayDateFormatter.format(new Date(`${days[0].date}T00:00:00Z`))}</span>
+                                            <span aria-hidden="true" className="text-[#667085]">▾</span>
                                         </button>
+                                        {days[0].isCalendarOpen && (
+                                            <div
+                                                role="dialog"
+                                                aria-label="Pilih tanggal ketersediaan"
+                                                onKeyDown={(event) => {
+                                                    if (event.key === 'Escape') {
+                                                        toggleCalendar(days[0].id);
+                                                    }
+                                                }}
+                                                className="absolute right-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg bg-white shadow-lg"
+                                            >
+                                                <DateCalendarGrid
+                                                    value={days[0].date}
+                                                    minimumDate={today}
+                                                    maximumDate={latestDate}
+                                                    onSelect={(date) => handleDayDateChange(days[0].id, date)}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleAddDay}
+                                        className="inline-flex items-center gap-1.5 rounded-md border border-[#2D4C79] bg-[#2D4C79] px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition cursor-pointer"
+                                        title="Tambah hari untuk reservasi multi-hari"
+                                    >
+                                        <span aria-hidden="true">+</span> Tambah Hari
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                                    <button
+                                        type="button"
+                                        onClick={handleAddDay}
+                                        className="inline-flex items-center gap-1.5 rounded-md border border-[#2D4C79] bg-[#2D4C79] px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition cursor-pointer"
+                                        title="Tambah hari untuk reservasi multi-hari"
+                                    >
+                                        <span aria-hidden="true">+</span> Tambah Hari ({days.length} Hari Aktif)
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* List of Days (Single or Multi-Day) */}
+                        <div className="mt-6 flex flex-col gap-6">
+                            {days.map((day, dayIndex) => (
+                                <div
+                                    key={day.id}
+                                    className={`rounded-lg transition ${
+                                        days.length > 1
+                                            ? 'border border-[#D0D5DD] bg-[#FAFAFC] p-4 sm:p-5 shadow-sm'
+                                            : ''
+                                    }`}
+                                >
+                                    {/* Multi-day Header per day */}
+                                    {days.length > 1 && (
+                                        <div className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${day.isExpanded ? 'pb-3 border-b border-[#E5E7EB]' : ''}`}>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className="inline-flex items-center rounded-md bg-[#2D4C79] px-2.5 py-1 text-xs font-bold text-white">
+                                                    Hari {dayIndex + 1}
+                                                </span>
+                                                <span className="text-base font-semibold text-[#111827]">
+                                                    {longDateFormatter.format(new Date(`${day.date}T00:00:00Z`))}
+                                                </span>
+                                                {day.selectedRange !== null && day.availability ? (
+                                                    <span className="inline-flex items-center rounded bg-[#EAF7F0] border border-[#B7E2CB] px-2.5 py-0.5 text-xs font-semibold text-[#16794A]">
+                                                        ✓ {day.availability.slots[day.selectedRange.start].start_time} - {day.availability.slots[day.selectedRange.end].end_time} ({day.selectedRange.end - day.selectedRange.start + 1} slot)
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-xs text-[#98A2B3] italic">
+                                                        (Belum ada slot dipilih)
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <div className="relative flex items-center gap-2">
+                                                {day.isExpanded && (
+                                                    <>
+                                                        <span className="text-sm font-medium text-[#667085] whitespace-nowrap">
+                                                            Ubah Tanggal:
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            aria-haspopup="dialog"
+                                                            aria-expanded={day.isCalendarOpen}
+                                                            onClick={() => toggleCalendar(day.id)}
+                                                            className="inline-flex min-w-40 items-center justify-between gap-2 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-sm font-semibold text-[#111827] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/30"
+                                                        >
+                                                            <span>{displayDateFormatter.format(new Date(`${day.date}T00:00:00Z`))}</span>
+                                                            <span aria-hidden="true" className="text-[#667085]">▾</span>
+                                                        </button>
+                                                        {day.isCalendarOpen && (
+                                                            <div
+                                                                role="dialog"
+                                                                aria-label={`Pilih tanggal ketersediaan hari ${dayIndex + 1}`}
+                                                                onKeyDown={(event) => {
+                                                                    if (event.key === 'Escape') {
+                                                                        toggleCalendar(day.id);
+                                                                    }
+                                                                }}
+                                                                className="absolute right-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg bg-white shadow-lg"
+                                                            >
+                                                                <DateCalendarGrid
+                                                                    value={day.date}
+                                                                    minimumDate={today}
+                                                                    maximumDate={latestDate}
+                                                                    onSelect={(date) => handleDayDateChange(day.id, date)}
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
+
+                                                {/* Tombol Panah Expand/Collapse |^ */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => toggleDayExpanded(day.id)}
+                                                    className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] transition cursor-pointer"
+                                                    title={day.isExpanded ? "Sembunyikan slot waktu" : "Buka slot waktu untuk melihat/mengubah"}
+                                                >
+                                                    <span>{day.isExpanded ? 'Tutup Slot' : 'Lihat Slot'}</span>
+                                                    <span aria-hidden="true" className="font-mono text-xs font-bold">{day.isExpanded ? '▲' : '▼'}</span>
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveDay(day.id)}
+                                                    className="inline-flex items-center gap-1 rounded-md border border-[#F5C6A7] bg-[#FFF0E8] px-2.5 py-1.5 text-sm font-semibold text-[#B54708] hover:bg-[#FDE2D2] transition cursor-pointer"
+                                                    title="Hapus hari ini"
+                                                >
+                                                    ✕ Hapus
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Availability Summary Stats & Slot Grid only shown when isExpanded is true */}
+                                    {day.isExpanded && (
+                                        <>
+                                            {day.isLoading ? (
+                                                <div className="py-8 text-center text-sm font-medium text-[#667085]">
+                                                    <span className="inline-block animate-pulse mr-2">⏳</span> Memuat ketersediaan {day.date}...
+                                                </div>
+                                            ) : day.availability ? (
+                                                <>
+                                                    <div className="mt-4 flex flex-wrap items-center gap-3 border-y border-[#E5E7EB] py-3 text-sm">
+                                                        <div className="flex items-center gap-1.5 font-medium text-[#16794A]">
+                                                            <span className="inline-block h-2 w-2 rounded-full bg-[#16794A]" />
+                                                            <span>{day.availability.available_slots_count} Slot Tersedia</span>
+                                                        </div>
+                                                        <span className="text-[#D0D5DD]">•</span>
+                                                        <div className="flex items-center gap-1.5 font-medium text-[#667085]">
+                                                            <span className="inline-block h-2 w-2 rounded-full bg-[#98A2B3]" />
+                                                            <span>{day.availability.occupied_slots_count} Tidak Tersedia</span>
+                                                        </div>
+                                                        <span className="text-[#D0D5DD]">•</span>
+                                                        <span className="text-[#667085]">Total {day.availability.total_slots} slot (30 mnt/slot)</span>
+
+                                                        {!day.availability.is_reservable && (
+                                                            <span className="ml-auto rounded bg-[#FFF0E8] border border-[#F5C6A7] px-2 py-0.5 text-xs font-semibold text-[#B54708]">
+                                                                Fasilitas Saat Ini Tidak Dapat Direservasi
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Slot Grid */}
+                                                    <div className="mt-5">
+                                                        {day.availability.slots.length > 0 ? (
+                                                            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7">
+                                                                {day.availability.slots.map((slot, index) => {
+                                                                    const isPast = isSlotPast(day.date, slot.start_time);
+                                                                    const isSelectable = isSlotSelectable(day, slot);
+                                                                    const isSelected =
+                                                                        day.selectedRange !== null &&
+                                                                        index >= day.selectedRange.start &&
+                                                                        index <= day.selectedRange.end;
+
+                                                                    let slotStyle = 'bg-[#EAF7F0] border-[#B7E2CB] text-[#16794A]';
+                                                                    let statusBadge = 'Tersedia';
+
+                                                                    if (isSelected) {
+                                                                        slotStyle = 'bg-[#2D4C79] border-[#1C3150] text-white shadow-sm ring-2 ring-[#2D4C79]/30';
+                                                                        statusBadge = 'Dipilih';
+                                                                    } else if (isPast) {
+                                                                        slotStyle = 'bg-[#F3F5F7] border-[#E5E7EB] text-[#98A2B3] opacity-60';
+                                                                        statusBadge = 'Lewat';
+                                                                    } else if (slot.status === 'terisi') {
+                                                                        slotStyle = 'bg-[#F3F5F7] border-[#E5E7EB] text-[#667085] opacity-80';
+                                                                        statusBadge = 'Dipesan';
+                                                                    } else if (slot.status === 'dalam_perbaikan') {
+                                                                        slotStyle = 'bg-[#FFF0E8] border-[#F5C6A7] text-[#B54708]';
+                                                                        statusBadge = 'Perbaikan';
+                                                                    } else if (slot.status === 'nonaktif' || !slot.is_available) {
+                                                                        slotStyle = 'bg-[#F0F2F4] border-[#D7DBE0] text-[#5D6673]';
+                                                                        statusBadge = 'Nonaktif';
+                                                                    }
+
+                                                                    if (isSelectable) {
+                                                                        return (
+                                                                            <button
+                                                                                key={slot.start_time}
+                                                                                type="button"
+                                                                                onClick={() => handleSlotClick(day.id, index)}
+                                                                                aria-pressed={isSelected}
+                                                                                title={
+                                                                                    isSelected
+                                                                                        ? `Slot ${slot.start_time} - ${slot.end_time} dipilih (klik untuk ubah/batalkan)`
+                                                                                        : `Klik untuk memilih slot ${slot.start_time} - ${slot.end_time}`
+                                                                                }
+                                                                                className={`group flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all cursor-pointer ${
+                                                                                    isSelected
+                                                                                        ? slotStyle
+                                                                                        : `${slotStyle} hover:bg-[#D4EFE0] hover:border-[#16794A] hover:shadow-sm hover:scale-[1.02]`
+                                                                                }`}
+                                                                            >
+                                                                                <span className="text-sm font-bold tracking-tight">
+                                                                                    {slot.start_time} - {slot.end_time}
+                                                                                </span>
+                                                                                <span className={`mt-1 inline-flex items-center text-xs font-semibold uppercase tracking-wider ${isSelected ? 'text-white/90' : ''}`}>
+                                                                                    {statusBadge}
+                                                                                </span>
+                                                                            </button>
+                                                                        );
+                                                                    }
+
+                                                                    return (
+                                                                        <div
+                                                                            key={slot.start_time}
+                                                                            aria-disabled="true"
+                                                                            title={`Slot ${slot.start_time} - ${slot.end_time} (${statusBadge})`}
+                                                                            className={`flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all cursor-not-allowed select-none ${slotStyle}`}
+                                                                        >
+                                                                            <span className="text-sm font-bold tracking-tight">
+                                                                                {slot.start_time} - {slot.end_time}
+                                                                            </span>
+                                                                            <span className="mt-1 inline-flex items-center text-xs font-semibold uppercase tracking-wider">
+                                                                                {statusBadge}
+                                                                            </span>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-center text-sm text-[#667085] py-8">
+                                                                Tidak ada slot ketersediaan pada tanggal ini.
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <div className="py-8 text-center text-sm text-[#B54708]">
+                                                    Gagal memuat ketersediaan untuk tanggal ini.{' '}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDayDateChange(day.id, day.date)}
+                                                        className="underline font-semibold cursor-pointer"
+                                                    >
+                                                        Coba lagi
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+
+                            {/* Tombol Tambah Hari lainnya jika sudah multi-hari */}
+                            {days.length > 1 && (
+                                <div className="flex justify-center pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={handleAddDay}
+                                        className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-[#2D4C79] bg-white px-4 py-2 text-sm font-semibold text-[#2D4C79] hover:bg-[#F0F4F8] transition cursor-pointer"
+                                    >
+                                        <span aria-hidden="true">+</span> Tambah Hari Lainnya
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* CTA / Summary Pilihan Slot */}
+                        <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-t border-[#E5E7EB] pt-5">
+                            <div>
+                                {selectedDays.length > 0 ? (
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="text-sm font-bold text-[#111827]">
+                                                Total Pilihan: {totalSelectedSlots} slot ({selectedDays.length} hari)
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={handleResetAll}
+                                                className="text-sm text-[#B54708] hover:underline cursor-pointer"
+                                            >
+                                                Reset semua pilihan
+                                            </button>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 text-xs">
+                                            {selectedDays.map((d) => {
+                                                const startStr = d.availability!.slots[d.selectedRange!.start].start_time;
+                                                const endStr = d.availability!.slots[d.selectedRange!.end].end_time;
+                                                const count = d.selectedRange!.end - d.selectedRange!.start + 1;
+                                                return (
+                                                    <span
+                                                        key={d.id}
+                                                        className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-[#F9FAFB] px-2.5 py-1 text-xs text-[#344054]"
+                                                    >
+                                                        <span className="font-semibold text-[#2D4C79]">{d.date}:</span>
+                                                        <span>{startStr} - {endStr}</span>
+                                                        <span className="rounded bg-[#E9EEF5] px-1.5 py-0.2 text-[11px] font-bold text-[#2D4C79]">
+                                                            {count} slot
+                                                        </span>
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
                                 ) : (
-                                    !availability?.is_reservable && (
-                                        <span className="text-sm text-[#B54708]">
-                                            Fasilitas ini sedang tidak menerima pengajuan reservasi baru.
-                                        </span>
-                                    )
+                                    <span className="text-sm text-[#667085]">
+                                        Belum ada slot waktu yang dipilih. Klik slot di atas untuk memilih.
+                                    </span>
                                 )}
                             </div>
                             <div className="flex gap-2">
-                                {availability?.is_reservable && selectedRange !== null ? (
+                                {totalSelectedSlots > 0 ? (
                                     <Link
-                                        href={
-                                            user
-                                                ? `/reservations/create?facility_id=${facility.id}&start_time=${currentDate}T${availability.slots[selectedRange.start].start_time}&end_time=${currentDate}T${availability.slots[selectedRange.end].end_time}`
-                                                : '/login'
-                                        }
-                                        className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
+                                        href={`/reservations/create?facility_id=${facility.id}&start_time=${selectedDays[0].date}T${selectedDays[0].availability!.slots[selectedDays[0].selectedRange!.start].start_time}&end_time=${selectedDays[selectedDays.length - 1].date}T${selectedDays[selectedDays.length - 1].availability!.slots[selectedDays[selectedDays.length - 1].selectedRange!.end].end_time}&schedules=${encodeURIComponent(
+                                            JSON.stringify(
+                                                selectedDays.map((d) => ({
+                                                    date: d.date,
+                                                    start_time: d.availability!.slots[d.selectedRange!.start].start_time,
+                                                    end_time: d.availability!.slots[d.selectedRange!.end].end_time,
+                                                    slots_count: d.selectedRange!.end - d.selectedRange!.start + 1,
+                                                }))
+                                            )
+                                        )}`}
+                                        className="inline-flex h-10 items-center justify-center rounded-md bg-[#2D4C79] px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
                                     >
-                                        Ajukan Reservasi ({availability.slots[selectedRange.start].start_time} - {availability.slots[selectedRange.end].end_time})
+                                        Ajukan Reservasi ({totalSelectedSlots} slot • {selectedDays.length} hari)
                                     </Link>
                                 ) : (
                                     <button
                                         type="button"
                                         disabled
-                                        className="inline-flex h-9 cursor-not-allowed items-center justify-center rounded-md bg-[#E5E7EB] px-4 text-sm font-semibold text-[#98A2B3]"
+                                        className="inline-flex h-10 cursor-not-allowed items-center justify-center rounded-md bg-[#E5E7EB] px-5 text-sm font-semibold text-[#98A2B3]"
                                     >
-                                        {!availability?.is_reservable ? 'Tidak Tersedia untuk Reservasi' : 'Pilih Slot Waktu'}
+                                        Pilih Slot Waktu
                                     </button>
                                 )}
                             </div>
