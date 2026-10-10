@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import { UserNavbar } from '@/components/user-navbar';
+import { facilityImages } from '@/lib/facility-images';
 
 type Facility = {
     id: number;
@@ -228,8 +229,17 @@ export default function FacilityIndex({
                                     <Link
                                         key={fac.id}
                                         href={`/facilities/${fac.id}`}
-                                        className="group flex flex-col justify-between rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#2D4C79] hover:shadow-md transition"
+                                        className="group flex flex-col justify-between overflow-hidden rounded-lg border border-[#E5E7EB] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#2D4C79] hover:shadow-md transition"
                                     >
+                                        {facilityImages[fac.type]?.[0] && (
+                                            <img
+                                                src={facilityImages[fac.type][0]}
+                                                alt={fac.name}
+                                                loading="lazy"
+                                                className="h-40 w-full object-cover"
+                                            />
+                                        )}
+                                        <div className="flex flex-1 flex-col justify-between p-5">
                                         <div>
                                             <div className="flex items-center justify-between gap-2">
                                                 <span className="text-sm font-semibold text-[#2D4C79]">
@@ -281,6 +291,7 @@ export default function FacilityIndex({
                                             <div className="inline-flex h-10 w-full items-center justify-center rounded-md border border-[#D0D5DD] bg-white text-sm font-semibold text-[#2D4C79] group-hover:bg-[#E9EEF5] group-hover:border-[#2D4C79] transition">
                                                 Lihat Detail & Jadwal →
                                             </div>
+                                        </div>
                                         </div>
                                     </Link>
                                 );
