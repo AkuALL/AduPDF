@@ -61,9 +61,6 @@ export default function AdminDataVisualization({
                                 Visualisasi Data & Analitik Kampus
                             </h2>
                         </div>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                            Plot data analitik eksekutif untuk pemantauan utilisasi dan pemeliharaan fasilitas kampus
-                        </p>
                     </div>
 
                     {/* Month Filter Selector (Rata Kanan) */}
