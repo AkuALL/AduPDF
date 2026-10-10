@@ -1,4 +1,4 @@
-import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { Form, Head, Link, usePage, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { FlashAlert } from '@/components/flash-alert';
 import PetugasLayout from '@/layouts/petugas-layout';
@@ -197,7 +197,7 @@ export default function PetugasDashboard({
                     {/* Metric 1: Antrean Reservasi */}
                     <button
                         type="button"
-                        onClick={() => setActiveTab('reservations')}
+                        onClick={() => setActiveTab(activeTab === 'reservations' ? 'all' : 'reservations')}
                         className={`flex items-center justify-between rounded-lg border p-5 text-left transition shadow-2xs ${
                             activeTab === 'reservations' ? 'border-[#2D4C79] bg-white ring-2 ring-[#2D4C79]/20' : 'border-[#E5E7EB] bg-white hover:border-[#D0D5DD]'
                         }`}
@@ -217,7 +217,7 @@ export default function PetugasDashboard({
                     {/* Metric 2: Agenda Pemakaian Hari Ini */}
                     <button
                         type="button"
-                        onClick={() => setActiveTab('today')}
+                        onClick={() => setActiveTab(activeTab === 'today' ? 'all' : 'today')}
                         className={`flex items-center justify-between rounded-lg border p-5 text-left transition shadow-2xs ${
                             activeTab === 'today' ? 'border-[#2D4C79] bg-white ring-2 ring-[#2D4C79]/20' : 'border-[#E5E7EB] bg-white hover:border-[#D0D5DD]'
                         }`}
@@ -237,7 +237,7 @@ export default function PetugasDashboard({
                     {/* Metric 3: Laporan Kerusakan Baru */}
                     <button
                         type="button"
-                        onClick={() => setActiveTab('reports')}
+                        onClick={() => setActiveTab(activeTab === 'reports' ? 'all' : 'reports')}
                         className={`flex items-center justify-between rounded-lg border p-5 text-left transition shadow-2xs ${
                             activeTab === 'reports' ? 'border-[#2D4C79] bg-white ring-2 ring-[#2D4C79]/20' : 'border-[#E5E7EB] bg-white hover:border-[#D0D5DD]'
                         }`}
@@ -257,7 +257,7 @@ export default function PetugasDashboard({
                     {/* Metric 4: Fasilitas Dalam Perbaikan */}
                     <button
                         type="button"
-                        onClick={() => setActiveTab('repair')}
+                        onClick={() => setActiveTab(activeTab === 'repair' ? 'all' : 'repair')}
                         className={`flex items-center justify-between rounded-lg border p-5 text-left transition shadow-2xs ${
                             activeTab === 'repair' ? 'border-[#2D4C79] bg-white ring-2 ring-[#2D4C79]/20' : 'border-[#E5E7EB] bg-white hover:border-[#D0D5DD]'
                         }`}
@@ -277,52 +277,8 @@ export default function PetugasDashboard({
 
                 {/* Filter Bar & Tabs Navigation */}
                 <div className="mb-6 flex flex-col gap-3 rounded-lg border border-[#E5E7EB] bg-white p-3 shadow-2xs md:flex-row md:items-center md:justify-between">
-                    <div className="flex flex-wrap items-center gap-1">
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('all')}
-                            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-                                activeTab === 'all' ? 'bg-[#2D4C79] text-white' : 'text-[#667085] hover:bg-[#F3F5F7] hover:text-[#111827]'
-                            }`}
-                        >
-                            Semua Tampilan
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('reservations')}
-                            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-                                activeTab === 'reservations' ? 'bg-[#2D4C79] text-white' : 'text-[#667085] hover:bg-[#F3F5F7] hover:text-[#111827]'
-                            }`}
-                        >
-                            Antrean Reservasi ({pending_reservations_count})
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('today')}
-                            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-                                activeTab === 'today' ? 'bg-[#2D4C79] text-white' : 'text-[#667085] hover:bg-[#F3F5F7] hover:text-[#111827]'
-                            }`}
-                        >
-                            Agenda Hari Ini ({today_reservations_count})
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('reports')}
-                            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-                                activeTab === 'reports' ? 'bg-[#2D4C79] text-white' : 'text-[#667085] hover:bg-[#F3F5F7] hover:text-[#111827]'
-                            }`}
-                        >
-                            Laporan Baru ({new_reports_count})
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('repair')}
-                            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-                                activeTab === 'repair' ? 'bg-[#2D4C79] text-white' : 'text-[#667085] hover:bg-[#F3F5F7] hover:text-[#111827]'
-                            }`}
-                        >
-                            Fasilitas Perbaikan ({under_repair_facilities_count})
-                        </button>
+                    <div className="text-xs font-medium text-[#667085] px-1">
+                        {activeTab !== 'all' ? 'Tampilan difilter berdasarkan kartu. Klik kartu lagi untuk mereset.' : 'Klik salah satu kartu di atas untuk memfilter tampilan.'}
                     </div>
 
                     <div className="relative w-full md:w-72">
@@ -436,42 +392,18 @@ export default function PetugasDashboard({
                                                                             </button>
                                                                         )}
                                                                     </Form>
-                                                                    <Form
-                                                                        action={`/petugas/reservations/${res.id}/reject`}
-                                                                        method="patch"
-                                                                        onSubmit={(event) => {
-                                                                            if (!window.confirm('Tolak reservasi ini? Statusnya akan menjadi Ditolak dan tidak dapat disetujui lagi.')) {
-                                                                                event.preventDefault();
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            const reason = window.prompt('Alasan penolakan (wajib diisi):');
+                                                                            if (reason) {
+                                                                                router.patch(`/petugas/reservations/${res.id}/reject`, { alasan_penolakan: reason });
                                                                             }
                                                                         }}
-                                                                        className="w-48 text-left"
+                                                                        className="rounded border border-[#F2B8B5] bg-[#FDECEC] px-3 py-1.5 text-xs font-semibold text-[#B42318] hover:bg-[#FCD8D8] transition"
                                                                     >
-                                                                        {({ errors, processing }) => (
-                                                                            <>
-                                                                                <label htmlFor={`dashboard-rejection-reason-${res.id}`} className="sr-only">Alasan penolakan</label>
-                                                                                <textarea
-                                                                                    id={`dashboard-rejection-reason-${res.id}`}
-                                                                                    name="alasan_penolakan"
-                                                                                    required
-                                                                                    maxLength={5000}
-                                                                                    rows={2}
-                                                                                    placeholder="Alasan penolakan"
-                                                                                    aria-invalid={!!errors.alasan_penolakan}
-                                                                                    className="w-full rounded border border-[#D0D5DD] px-2 py-1.5 text-xs"
-                                                                                />
-                                                                                {(errors.alasan_penolakan || errors.reservation) && (
-                                                                                    <p role="alert" className="mt-1 text-xs text-[#B42318]">{errors.alasan_penolakan || errors.reservation}</p>
-                                                                                )}
-                                                                                <button
-                                                                                    type="submit"
-                                                                                    disabled={processing}
-                                                                                    className="mt-1.5 rounded border border-[#F2B8B5] bg-[#FDECEC] px-3 py-1.5 text-xs font-semibold text-[#B42318] hover:bg-[#FCD8D8] disabled:opacity-50"
-                                                                                >
-                                                                                    {processing ? 'Menolak...' : 'Tolak'}
-                                                                                </button>
-                                                                            </>
-                                                                        )}
-                                                                    </Form>
+                                                                        Tolak
+                                                                    </button>
                                                                 </div>
                                                             </td>
                                                         </tr>
