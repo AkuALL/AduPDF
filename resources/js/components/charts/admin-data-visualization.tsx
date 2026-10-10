@@ -3,7 +3,7 @@ import { router } from '@inertiajs/react';
 import MatplotlibLineChart, { type DailyTrendPoint } from './matplotlib-line-chart';
 import MatplotlibHorizontalBarChart, { type CategoryUsage } from './matplotlib-horizontal-bar-chart';
 import MatplotlibVerticalBarChart, { type LocationDamagePoint } from './matplotlib-vertical-bar-chart';
-import { Activity, BarChart2, Calendar, Flame, Layers } from 'lucide-react';
+import { Activity, AlertTriangle, BarChart2, Calendar, Layers } from 'lucide-react';
 
 export type ChartStatsProps = {
     daily_usage_trend: DailyTrendPoint[];
@@ -144,8 +144,8 @@ export default function AdminDataVisualization({
                                     : 'text-slate-600 hover:text-slate-900'
                             }`}
                         >
-                            <Flame className="size-3.5" />
-                            Titik Panas Kerusakan
+                            <AlertTriangle className="size-3.5" />
+                            Sebaran Kerusakan
                         </button>
                     </div>
 
@@ -205,7 +205,7 @@ export default function AdminDataVisualization({
                     </div>
                     <div className="min-w-0">
                         <div className="text-[11px] font-mono uppercase text-slate-500">
-                            Hotspot Laporan Terbanyak
+                            Lokasi Laporan Terbanyak
                         </div>
                         <div className="text-xs font-bold text-slate-900 truncate">
                             {insights.topHotspot ? (
