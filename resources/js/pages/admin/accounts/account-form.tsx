@@ -1,6 +1,11 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
+import AdminBackLink from '@/components/admin-back-link';
+import ConfirmationDialog, {
+    type ConfirmationRequest,
+} from '@/components/confirmation-dialog';
 import PasswordField from '@/components/password-field';
 import AdminLayout from '@/layouts/admin-layout';
+import { useState } from 'react';
 
 export default function AccountForm({
     role,
@@ -16,6 +21,8 @@ export default function AccountForm({
     const endpoint =
         role === 'Petugas' ? '/admin/users/petugas' : '/admin/users/pengguna';
     const errors = Object.values(form.errors);
+    const [confirmation, setConfirmation] =
+        useState<ConfirmationRequest | null>(null);
     return (
         <AdminLayout>
             <Head title={`Buat Akun ${role}`} />
@@ -42,11 +49,12 @@ export default function AccountForm({
                     <form
                         onSubmit={(event) => {
                             event.preventDefault();
-                            if (!window.confirm(`Buat akun ${role} untuk ${form.data.nama}? Akun akan disetujui Admin saat dibuat dan dapat langsung digunakan.`)) {
-                                return;
-                            }
-
-                            form.post(endpoint);
+                            setConfirmation({
+                                title: 'Buat Akun',
+                                description: `Buat akun ${role} untuk ${form.data.nama}? Akun akan disetujui Admin saat dibuat dan dapat langsung digunakan.`,
+                                confirmLabel: 'Ya, Buat Akun',
+                                onConfirm: () => form.post(endpoint),
+                            });
                         }}
                         className="space-y-4"
                     >
@@ -114,12 +122,9 @@ export default function AccountForm({
                             />
                         </div>
                         <div className="flex justify-end gap-3 pt-4">
-                            <Link
-                                href="/admin/users"
-                                className="px-4 py-2 text-xs text-slate-600"
-                            >
-                                Batal
-                            </Link>
+                            <AdminBackLink href="/admin/users">
+                                Kembali ke Daftar Akun
+                            </AdminBackLink>
                             <button
                                 disabled={form.processing}
                                 className="rounded-md bg-[#2D4C79] px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1e3454] disabled:opacity-60"
@@ -130,6 +135,13 @@ export default function AccountForm({
                     </form>
                 </div>
             </div>
+            <ConfirmationDialog
+                confirmation={confirmation}
+                onOpenChange={(open) => {
+                    if (!open) setConfirmation(null);
+                }}
+                confirmDisabled={form.processing}
+            />
         </AdminLayout>
     );
 }

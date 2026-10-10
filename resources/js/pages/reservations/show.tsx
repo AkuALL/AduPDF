@@ -1,4 +1,8 @@
 import { Form, Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
+import ConfirmationDialog, {
+    type ConfirmationRequest,
+} from '@/components/confirmation-dialog';
 import { UserNavbar } from '@/components/user-navbar';
 
 type Reservation = {
@@ -16,6 +20,8 @@ type Reservation = {
 type Props = { reservation: Reservation; can_cancel: boolean; success: string | null };
 
 export default function ReservationShow({ reservation, can_cancel, success }: Props) {
+    const [confirmation, setConfirmation] = useState<ConfirmationRequest | null>(null);
+
     return (
         <>
             <Head title="Detail Reservasi" />
@@ -51,17 +57,12 @@ export default function ReservationShow({ reservation, can_cancel, success }: Pr
                             <Form
                                 action={`/reservations/${reservation.id}/cancel`}
                                 method="patch"
-                                onSubmit={(event) => {
-                                    if (!window.confirm('Batalkan reservasi ini? Status reservasi akan berubah menjadi Dibatalkan.')) {
-                                        event.preventDefault();
-                                    }
-                                }}
                                 className="mt-6"
                             >
-                                {({ processing, errors }) => (
+                                {({ processing, errors, submit }) => (
                                     <>
                                         {errors.reservation && <p role="alert" className="mb-3 text-sm text-red-700">{errors.reservation}</p>}
-                                        <button type="submit" disabled={processing} className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">{processing ? 'Membatalkan...' : 'Batalkan reservasi'}</button>
+                                        <button type="button" onClick={(event) => { if (!event.currentTarget.form?.reportValidity()) return; setConfirmation({ title: 'Batalkan Reservasi', description: 'Batalkan reservasi ini? Status reservasi akan berubah menjadi Dibatalkan.', confirmLabel: 'Ya, Batalkan Reservasi', destructive: true, onConfirm: submit }); }} disabled={processing} className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">{processing ? 'Membatalkan...' : 'Batalkan reservasi'}</button>
                                     </>
                                 )}
                             </Form>
@@ -69,6 +70,12 @@ export default function ReservationShow({ reservation, can_cancel, success }: Pr
                     </article>
                 </div>
             </main>
+            <ConfirmationDialog
+                confirmation={confirmation}
+                onOpenChange={(open) => {
+                    if (!open) setConfirmation(null);
+                }}
+            />
         </div>
     </>
     );

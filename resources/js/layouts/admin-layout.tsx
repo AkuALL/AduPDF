@@ -48,7 +48,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
     const initial = displayName.charAt(0).toUpperCase();
 
     return (
-        <div className="flex min-h-screen flex-col bg-slate-100 text-slate-800 antialiased">
+        <div className="admin-interactions flex min-h-screen flex-col bg-slate-100 text-slate-800 antialiased">
             <header className="sticky top-0 z-40 bg-[#2D4C79] text-white shadow-md border-b border-[#243E63]">
                 <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-6">

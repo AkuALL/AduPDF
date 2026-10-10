@@ -1,4 +1,8 @@
 import { Form, Head } from '@inertiajs/react';
+import { useState } from 'react';
+import ConfirmationDialog, {
+    type ConfirmationRequest,
+} from '@/components/confirmation-dialog';
 import PetugasLayout from '@/layouts/petugas-layout';
 
 type Reservation = {
@@ -20,6 +24,8 @@ type Props = {
 };
 
 export default function PetugasReservationIndex({ reservations, approved_reservations, success }: Props) {
+    const [confirmation, setConfirmation] = useState<ConfirmationRequest | null>(null);
+
     return (
         <PetugasLayout activePage="reservations">
             <Head title="Antrian Reservasi" />
@@ -41,30 +47,20 @@ export default function PetugasReservationIndex({ reservations, approved_reserva
                                         <Form
                                             action={`/petugas/reservations/${reservation.id}/approve`}
                                             method="patch"
-                                            onSubmit={(event) => {
-                                                if (!window.confirm('Setujui reservasi ini? Pengajuan menunggu lain yang berbenturan dapat otomatis ditolak.')) {
-                                                    event.preventDefault();
-                                                }
-                                            }}
                                         >
-                                            {({ processing }) => <button type="submit" disabled={processing} className="rounded-md bg-[#2D4C79] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Setujui</button>}
+                                            {({ processing, submit }) => <button type="button" onClick={(event) => { if (!event.currentTarget.form?.reportValidity()) return; setConfirmation({ title: 'Setujui Reservasi', description: 'Setujui reservasi ini? Pengajuan menunggu lain yang berbenturan dapat otomatis ditolak.', confirmLabel: 'Ya, Setujui Reservasi', onConfirm: submit }); }} disabled={processing} className="rounded-md bg-[#2D4C79] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Setujui</button>}
                                         </Form>
                                         <Form
                                             action={`/petugas/reservations/${reservation.id}/reject`}
                                             method="patch"
-                                            onSubmit={(event) => {
-                                                if (!window.confirm('Tolak reservasi ini? Statusnya akan menjadi Ditolak dan tidak dapat disetujui lagi.')) {
-                                                    event.preventDefault();
-                                                }
-                                            }}
                                             className="w-full max-w-xl"
                                         >
-                                            {({ errors, processing }) => (
+                                            {({ errors, processing, submit }) => (
                                                 <>
                                                     <label htmlFor={`rejection-reason-${reservation.id}`} className="block text-sm font-medium">Alasan penolakan</label>
                                                     <textarea id={`rejection-reason-${reservation.id}`} name="alasan_penolakan" required maxLength={5000} rows={2} aria-invalid={!!errors.alasan_penolakan} className="mt-1 w-full rounded-md border border-[#D0D5DD] px-3 py-2 text-sm" />
                                                     {(errors.alasan_penolakan || errors.reservation) && <p role="alert" className="mt-1 text-sm text-red-700">{errors.alasan_penolakan || errors.reservation}</p>}
-                                                    <button type="submit" disabled={processing} className="mt-3 rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">{processing ? 'Menolak...' : 'Tolak'}</button>
+                                                    <button type="button" onClick={(event) => { if (!event.currentTarget.form?.reportValidity()) return; setConfirmation({ title: 'Tolak Reservasi', description: 'Tolak reservasi ini? Statusnya akan menjadi Ditolak dan tidak dapat disetujui lagi.', confirmLabel: 'Ya, Tolak Reservasi', destructive: true, onConfirm: submit }); }} disabled={processing} className="mt-3 rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">{processing ? 'Menolak...' : 'Tolak'}</button>
                                                 </>
                                             )}
                                         </Form>
@@ -87,19 +83,14 @@ export default function PetugasReservationIndex({ reservations, approved_reserva
                                         <Form
                                             action={`/petugas/reservations/${reservation.id}/cancel`}
                                             method="patch"
-                                            onSubmit={(event) => {
-                                                if (!window.confirm(`Batalkan darurat reservasi ${reservation.facility}? Statusnya akan berubah menjadi Dibatalkan.`)) {
-                                                    event.preventDefault();
-                                                }
-                                            }}
                                             className="mt-4"
                                         >
-                                            {({ errors, processing }) => (
+                                            {({ errors, processing, submit }) => (
                                                 <>
                                                     <label htmlFor={`reason-${reservation.id}`} className="block text-sm font-medium">Alasan pembatalan darurat</label>
                                                     <textarea id={`reason-${reservation.id}`} name="alasan_pembatalan" required maxLength={5000} rows={2} aria-invalid={!!errors.alasan_pembatalan} className="mt-1 w-full rounded-md border border-[#D0D5DD] px-3 py-2 text-sm" />
                                                     {(errors.alasan_pembatalan || errors.reservation) && <p role="alert" className="mt-1 text-sm text-red-700">{errors.alasan_pembatalan || errors.reservation}</p>}
-                                                    <button type="submit" disabled={processing} className="mt-3 rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">{processing ? 'Membatalkan...' : 'Batalkan darurat'}</button>
+                                                    <button type="button" onClick={(event) => { if (!event.currentTarget.form?.reportValidity()) return; setConfirmation({ title: 'Batalkan Reservasi', description: `Batalkan darurat reservasi ${reservation.facility}? Statusnya akan berubah menjadi Dibatalkan.`, confirmLabel: 'Ya, Batalkan Reservasi', destructive: true, onConfirm: submit }); }} disabled={processing} className="mt-3 rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">{processing ? 'Membatalkan...' : 'Batalkan darurat'}</button>
                                                 </>
                                             )}
                                         </Form>
@@ -110,6 +101,12 @@ export default function PetugasReservationIndex({ reservations, approved_reserva
                     </section>
                 </div>
             </main>
+            <ConfirmationDialog
+                confirmation={confirmation}
+                onOpenChange={(open) => {
+                    if (!open) setConfirmation(null);
+                }}
+            />
         </PetugasLayout>
     );
 }

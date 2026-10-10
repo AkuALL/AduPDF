@@ -61,14 +61,16 @@ class FacilityManagementController extends Controller
     /**
      * Show form to create a new facility (AG-05, FR-18).
      */
-    public function create(): Response
+    public function create(Request $request): Response
     {
         $parentRooms = Facility::query()
             ->whereIn('type', [FacilityType::Classroom, FacilityType::Hall, FacilityType::Laboratory])
             ->orderBy('name')
             ->get();
 
-        return Inertia::render('admin/facilities/create', compact('parentRooms'));
+        $parentFacilityId = $parentRooms->firstWhere('id', $request->query('parent_facility_id'))?->id;
+
+        return Inertia::render('admin/facilities/create', compact('parentRooms', 'parentFacilityId'));
     }
 
     /**
@@ -181,23 +183,4 @@ class FacilityManagementController extends Controller
         return back()->with('success', "Fasilitas {$facility->name} telah berhasil diaktifkan kembali.");
     }
 
-    /**
-     * Delete facility with history guard (AG-05, FR-18).
-     */
-    public function destroy(Facility $facility): RedirectResponse
-    {
-        if ($facility->hasHistory()) {
-            return back()->with('error', 'Fasilitas tidak dapat dihapus permanen karena memiliki riwayat reservasi. Silakan gunakan tombol Nonaktifkan.');
-        }
-
-        if ($facility->childTools()->exists()) {
-            return back()->with('error', 'Fasilitas tidak dapat dihapus karena masih memiliki peralatan yang terikat di ruangan ini. Hapus atau pindahkan peralatan terlebih dahulu.');
-        }
-
-        $name = $facility->name;
-        $facility->delete();
-
-        return redirect()->route('admin.facilities.index')
-            ->with('success', "Fasilitas {$name} berhasil dihapus permanen dari sistem.");
-    }
 }
