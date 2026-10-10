@@ -37,23 +37,8 @@ const navigation = [
         href: '/admin/users',
         icon: Users,
         isActive: (currentPath: string) =>
-            currentPath === '/admin/users' ||
-            currentPath.startsWith('/admin/verifications') ||
-            (currentPath.startsWith('/admin/users') &&
-                !currentPath.startsWith('/admin/users/petugas') &&
-                !currentPath.startsWith('/admin/users/pengguna')),
-    },
-    {
-        label: 'Tambah Petugas',
-        href: '/admin/users/petugas/create',
-        icon: UserCheck,
-        isActive: (currentPath: string) => currentPath.startsWith('/admin/users/petugas'),
-    },
-    {
-        label: 'Tambah Pengguna',
-        href: '/admin/users/pengguna/create',
-        icon: UserPlus,
-        isActive: (currentPath: string) => currentPath.startsWith('/admin/users/pengguna'),
+            currentPath.startsWith('/admin/users') ||
+            currentPath.startsWith('/admin/verifications'),
     },
 ];
 
