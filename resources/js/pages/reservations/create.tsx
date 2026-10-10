@@ -344,7 +344,9 @@ export default function CreateReservation({ facility, reservable, success, serve
                                         <textarea id="tujuan" name="tujuan" required maxLength={5000} rows={4} aria-invalid={!!errors.tujuan} className="mt-1 w-full rounded-md border border-[#D0D5DD] px-3 py-2" />
                                         {errors.tujuan && <p role="alert" className="mt-1 text-sm text-red-700">{errors.tujuan}</p>}
                                     </div>
-                                    <p className="text-sm text-[#667085]">Jam operasional 07:00–20:00 WIB, dalam slot 30 menit. Waktu yang sudah lewat tidak dapat dipilih. Pengajuan menunggu persetujuan Petugas.</p>
+                                    {parsedSchedules.length === 0 && (
+                                        <p className="text-sm text-[#667085]">Jam operasional 07:00–20:00 WIB, dalam slot 30 menit. Waktu yang sudah lewat tidak dapat dipilih. Pengajuan menunggu persetujuan Petugas.</p>
+                                    )}
                                     <button
                                         type="submit"
                                         disabled={

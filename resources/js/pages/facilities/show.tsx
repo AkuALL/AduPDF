@@ -247,9 +247,19 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
         });
     };
 
-    const handleAddDay = () => {
-        const existingDates = days.map((d) => d.date);
-        const newDate = getNextDate(existingDates);
+    const [isAddDayOpen, setIsAddDayOpen] = useState(false);
+
+    const handleAddDate = (targetDate: string) => {
+        setIsAddDayOpen(false);
+
+        const existing = days.find((d) => d.date === targetDate);
+        if (existing) {
+            setDays((prev) =>
+                prev.map((d) => (d.date === targetDate ? { ...d, isExpanded: true } : d))
+            );
+            return;
+        }
+
         const newDayId = `day-${Date.now()}`;
 
         // Collapse all older days and open the new day!
@@ -257,7 +267,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
             ...prev.map((d) => ({ ...d, isExpanded: false, isCalendarOpen: false })),
             {
                 id: newDayId,
-                date: newDate,
+                date: targetDate,
                 availability: null,
                 isLoading: true,
                 selectedRange: null,
@@ -266,7 +276,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
             },
         ]);
 
-        fetchAvailability(newDate).then((avail) => {
+        fetchAvailability(targetDate).then((avail) => {
             setDays((prev) =>
                 prev.map((d) => (d.id === newDayId ? { ...d, availability: avail, isLoading: false } : d))
             );
@@ -484,9 +494,9 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                 </p>
                             </div>
 
-                            {/* Date Picker Control & Tambah Hari Button */}
-                            {days.length === 1 ? (
-                                <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                            {/* Date Picker Control & Unified Tambah Hari Dropdown */}
+                            <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                                {days.length === 1 && (
                                     <div className="relative flex items-center gap-2">
                                         <span id="availability-date-label" className="text-sm font-medium text-[#667085] whitespace-nowrap">
                                             Pilih Tanggal:
@@ -503,47 +513,66 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                             <span aria-hidden="true" className="text-[#667085]">▾</span>
                                         </button>
                                         {days[0].isCalendarOpen && (
+                                            <>
+                                                <div className="fixed inset-0 z-30" onClick={() => toggleCalendar(days[0].id)} />
+                                                <div
+                                                    role="dialog"
+                                                    aria-label="Pilih tanggal ketersediaan"
+                                                    onKeyDown={(event) => {
+                                                        if (event.key === 'Escape') {
+                                                            toggleCalendar(days[0].id);
+                                                        }
+                                                    }}
+                                                    className="absolute right-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg bg-white shadow-lg"
+                                                >
+                                                    <DateCalendarGrid
+                                                        value={days[0].date}
+                                                        minimumDate={today}
+                                                        maximumDate={latestDate}
+                                                        onSelect={(date) => handleDayDateChange(days[0].id, date)}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Unified Single Tambah Hari Dropdown Button */}
+                                <div className="relative">
+                                    <button
+                                        type="button"
+                                        aria-haspopup="dialog"
+                                        aria-expanded={isAddDayOpen}
+                                        onClick={() => setIsAddDayOpen((prev) => !prev)}
+                                        className="inline-flex items-center gap-1.5 rounded-md border border-[#2D4C79] bg-[#2D4C79] px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition cursor-pointer"
+                                        title="Pilih tanggal untuk menambah hari reservasi"
+                                    >
+                                        <span aria-hidden="true">+</span> Tambah Hari <span aria-hidden="true" className="text-white/80">▾</span>
+                                    </button>
+                                    {isAddDayOpen && (
+                                        <>
+                                            <div className="fixed inset-0 z-30" onClick={() => setIsAddDayOpen(false)} />
                                             <div
                                                 role="dialog"
-                                                aria-label="Pilih tanggal ketersediaan"
+                                                aria-label="Pilih tanggal untuk menambah hari reservasi"
                                                 onKeyDown={(event) => {
                                                     if (event.key === 'Escape') {
-                                                        toggleCalendar(days[0].id);
+                                                        setIsAddDayOpen(false);
                                                     }
                                                 }}
                                                 className="absolute right-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg bg-white shadow-lg"
                                             >
                                                 <DateCalendarGrid
-                                                    value={days[0].date}
+                                                    value={getNextDate(days.map((d) => d.date))}
                                                     minimumDate={today}
                                                     maximumDate={latestDate}
-                                                    onSelect={(date) => handleDayDateChange(days[0].id, date)}
+                                                    onSelect={(date) => handleAddDate(date)}
                                                 />
                                             </div>
-                                        )}
-                                    </div>
-
-                                    <button
-                                        type="button"
-                                        onClick={handleAddDay}
-                                        className="inline-flex items-center gap-1.5 rounded-md border border-[#2D4C79] bg-[#2D4C79] px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition cursor-pointer"
-                                        title="Tambah hari untuk reservasi multi-hari"
-                                    >
-                                        <span aria-hidden="true">+</span> Tambah Hari
-                                    </button>
+                                        </>
+                                    )}
                                 </div>
-                            ) : (
-                                <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-                                    <button
-                                        type="button"
-                                        onClick={handleAddDay}
-                                        className="inline-flex items-center gap-1.5 rounded-md border border-[#2D4C79] bg-[#2D4C79] px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition cursor-pointer"
-                                        title="Tambah hari untuk reservasi multi-hari"
-                                    >
-                                        <span aria-hidden="true">+</span> Tambah Hari ({days.length} Hari Aktif)
-                                    </button>
-                                </div>
-                            )}
+                            </div>
                         </div>
 
                         {/* List of Days (Single or Multi-Day) */}
@@ -768,19 +797,6 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                     )}
                                 </div>
                             ))}
-
-                            {/* Tombol Tambah Hari lainnya jika sudah multi-hari */}
-                            {days.length > 1 && (
-                                <div className="flex justify-center pt-2">
-                                    <button
-                                        type="button"
-                                        onClick={handleAddDay}
-                                        className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-[#2D4C79] bg-white px-4 py-2 text-sm font-semibold text-[#2D4C79] hover:bg-[#F0F4F8] transition cursor-pointer"
-                                    >
-                                        <span aria-hidden="true">+</span> Tambah Hari Lainnya
-                                    </button>
-                                </div>
-                            )}
                         </div>
 
                         {/* CTA / Summary Pilihan Slot */}
