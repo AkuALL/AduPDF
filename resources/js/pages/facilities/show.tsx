@@ -391,7 +391,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                     <div className="mb-6">
                         <Link
                             href="/facilities"
-                            className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-sm font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
+                            className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
                         >
                             <span aria-hidden="true">←</span> Kembali
                         </Link>
@@ -658,7 +658,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                                             aria-haspopup="dialog"
                                                             aria-expanded={day.isCalendarOpen}
                                                             onClick={() => toggleCalendar(day.id)}
-                                                            className="inline-flex min-w-40 items-center justify-between gap-2 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-sm font-semibold text-[#111827] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/30"
+                                                            className="inline-flex min-w-40 items-center justify-between gap-2 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#111827] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/30"
                                                         >
                                                             <span>{displayDateFormatter.format(new Date(`${day.date}T00:00:00Z`))}</span>
                                                             <span aria-hidden="true" className="text-[#667085]">▾</span>
