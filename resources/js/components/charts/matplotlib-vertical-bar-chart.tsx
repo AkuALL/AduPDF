@@ -38,25 +38,13 @@ export default function MatplotlibVerticalBarChart({ data }: Props) {
     return (
         <div className="relative w-full overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             {/* Header */}
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
-                <div>
-                    <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-semibold text-rose-700">
-                            fig_03.bar()
-                        </span>
-                        <span className="text-xs font-bold text-slate-800">
-                            Distribusi Insiden Kerusakan per Lokasi Kampus
-                        </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 font-mono">
-                        Sumbu Y: Frekuensi Laporan Gangguan · Sumbu X: Gedung / Kawasan Kampus
-                    </p>
-                </div>
-
-                <span className="inline-flex items-center gap-1.5 rounded bg-slate-100 px-2 py-0.5 font-mono text-[11px] text-slate-700">
-                    <span className="size-1.5 rounded-full bg-rose-500"></span>
-                    vertical bar plot
-                </span>
+            <div className="mb-3 border-b border-slate-100 pb-2.5">
+                <h3 className="text-sm font-bold text-slate-800">
+                    Distribusi Insiden Kerusakan per Lokasi Kampus
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                    Sumbu Y: Frekuensi Laporan Gangguan · Sumbu X: Gedung / Kawasan Kampus
+                </p>
             </div>
 
             {/* SVG Canvas */}

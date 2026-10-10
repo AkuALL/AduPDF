@@ -104,26 +104,13 @@ export default function MatplotlibLineChart({ data, monthLabel }: Props) {
     return (
         <div className="relative w-full overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             {/* Header / Figure Title */}
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
-                <div>
-                    <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-semibold text-[#2D4C79]">
-                            fig_01.plot()
-                        </span>
-                        <span className="text-xs font-bold text-slate-800">
-                            Tren Okupansi Fasilitas Harian ({monthLabel})
-                        </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 font-mono">
-                        Sumbu Y: Total Jam & Frekuensi · Sumbu X: Hari dalam Bulan
-                    </p>
-                </div>
-
-                {/* Status Indicator */}
-                <span className="inline-flex items-center gap-1.5 rounded bg-slate-100 px-2 py-0.5 font-mono text-[11px] text-slate-700">
-                    <span className="size-1.5 rounded-full bg-emerald-500"></span>
-                    matplotlib style
-                </span>
+            <div className="mb-3 border-b border-slate-100 pb-2.5">
+                <h3 className="text-sm font-bold text-slate-800">
+                    Tren Okupansi Fasilitas Harian ({monthLabel})
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                    Sumbu Y: Total Jam & Frekuensi · Sumbu X: Hari dalam Bulan
+                </p>
             </div>
 
             {/* SVG Chart Canvas */}

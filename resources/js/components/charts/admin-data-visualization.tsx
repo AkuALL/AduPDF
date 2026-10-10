@@ -52,7 +52,7 @@ export default function AdminDataVisualization({ stats, monthLabel }: Props) {
                         </h2>
                     </div>
                     <p className="text-xs text-slate-500 mt-0.5">
-                        Plot data analitik eksekutif berbasis estetika komputasi ilmiah (Matplotlib engine)
+                        Plot data analitik eksekutif untuk pemantauan utilisasi dan pemeliharaan fasilitas kampus
                     </p>
                 </div>
 
