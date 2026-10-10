@@ -3,6 +3,7 @@ import { UserNavbar } from '@/components/user-navbar';
 import FacilityPhotoCarousel from '@/components/facility-photo-carousel';
 import { facilityImages } from '@/lib/facility-images';
 import DateCalendarGrid from '@/components/date-calendar-grid';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { useEffect, useState } from 'react';
 
 const wibDateFormatter = new Intl.DateTimeFormat('en-CA', {
@@ -161,6 +162,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
             isExpanded: true,
         },
     ]);
+    const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
     const status = conditionConfig[facility.condition] || conditionConfig.aktif;
     const isRoom = ['ruang_kelas', 'aula', 'laboratorium'].includes(facility.type);
@@ -848,7 +850,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                             </span>
                                             <button
                                                 type="button"
-                                                onClick={handleResetAll}
+                                                onClick={() => setIsResetConfirmOpen(true)}
                                                 className="text-sm text-[#B54708] hover:underline cursor-pointer"
                                             >
                                                 Reset semua pilihan
@@ -911,6 +913,19 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                         </div>
                     </section>
                 </main>
+
+                <ConfirmDialog
+                    open={isResetConfirmOpen}
+                    onOpenChange={setIsResetConfirmOpen}
+                    title="Reset Pilihan Jadwal"
+                    description="Apakah Anda yakin ingin menghapus semua slot jadwal yang telah Anda pilih untuk fasilitas ini?"
+                    confirmText="Ya, Reset Pilihan"
+                    variant="destructive"
+                    onConfirm={() => {
+                        handleResetAll();
+                        setIsResetConfirmOpen(false);
+                    }}
+                />
             </div>
         </>
     );

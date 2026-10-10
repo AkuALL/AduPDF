@@ -2,7 +2,8 @@ import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { store as storeReservation } from '@/actions/App/Http/Controllers/ReservationController';
 import DateCalendarGrid from '@/components/date-calendar-grid';
 import { UserNavbar } from '@/components/user-navbar';
-import { useEffect, useState } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
+import { useEffect, useRef, useState } from 'react';
 
 const wibDateTimeFormatter = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Jakarta',
@@ -118,6 +119,9 @@ export default function CreateReservation({ facility, reservable, success, serve
     const [selectedDate, setSelectedDate] = useState(requestedDate || '');
     const [startTime, setStartTime] = useState(requestedStartTime || '');
     const [endTime, setEndTime] = useState(requestedEndTime || '');
+    const [tujuanVal, setTujuanVal] = useState('');
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const submitButtonRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         if (requestedDate) {
@@ -218,7 +222,17 @@ export default function CreateReservation({ facility, reservable, success, serve
                             <>
                                 {!reservable && <p role="alert" className="mt-6 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Fasilitas ini sedang tidak dapat direservasi.</p>}
 
-                                <Form {...storeReservation.form()} resetOnSuccess onSuccess={() => { setSelectedDate(''); setStartTime(''); setEndTime(''); }} className="mt-6 space-y-5 rounded-lg border border-[#E5E7EB] bg-white p-6">
+                                <Form
+                                    {...storeReservation.form()}
+                                    resetOnSuccess
+                                    onSuccess={() => {
+                                        setSelectedDate('');
+                                        setStartTime('');
+                                        setEndTime('');
+                                        setTujuanVal('');
+                                    }}
+                                    className="mt-6 space-y-5 rounded-lg border border-[#E5E7EB] bg-white p-6"
+                                >
                             {({ errors, processing }) => (
                                 <>
                                     <input type="hidden" name="facility_id" value={facility.id} />
@@ -385,19 +399,43 @@ export default function CreateReservation({ facility, reservable, success, serve
 
                                     <div>
                                         <label htmlFor="tujuan" className="block text-sm font-medium">Tujuan penggunaan</label>
-                                        <textarea id="tujuan" name="tujuan" required maxLength={5000} rows={4} aria-invalid={!!errors.tujuan} className="mt-1 w-full rounded-md border border-[#D0D5DD] px-3 py-2" />
+                                        <textarea
+                                            id="tujuan"
+                                            name="tujuan"
+                                            value={tujuanVal}
+                                            onChange={(e) => setTujuanVal(e.target.value)}
+                                            required
+                                            maxLength={5000}
+                                            rows={4}
+                                            aria-invalid={!!errors.tujuan}
+                                            className="mt-1 w-full rounded-md border border-[#D0D5DD] px-3 py-2"
+                                        />
                                         {errors.tujuan && <p role="alert" className="mt-1 text-sm text-red-700">{errors.tujuan}</p>}
                                     </div>
                                     {parsedSchedules.length === 0 && (
                                         <p className="text-sm text-[#667085]">Jam operasional 07:00–20:00 WIB, dalam slot 30 menit. Waktu yang sudah lewat tidak dapat dipilih. Pengajuan menunggu persetujuan Petugas.</p>
                                     )}
                                     <button
+                                        ref={submitButtonRef}
                                         type="submit"
+                                        className="hidden"
+                                        aria-hidden="true"
+                                        tabIndex={-1}
+                                    />
+                                    <button
+                                        type="button"
                                         disabled={
                                             processing ||
                                             !reservable ||
                                             (parsedSchedules.length === 0 && (!selectedDate || !startTime || !endTime || !!startTimeError || !!endTimeError))
                                         }
+                                        onClick={() => {
+                                            const form = submitButtonRef.current?.form;
+                                            if (form && !form.reportValidity()) {
+                                                return;
+                                            }
+                                            setIsConfirmOpen(true);
+                                        }}
                                         className="rounded-md bg-[#2D4C79] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 cursor-pointer"
                                     >
                                         {processing ? 'Mengirim...' : 'Kirim pengajuan'}
@@ -408,6 +446,41 @@ export default function CreateReservation({ facility, reservable, success, serve
                             </>
                         )}
                     </div>
+
+                    <ConfirmDialog
+                        open={isConfirmOpen}
+                        onOpenChange={setIsConfirmOpen}
+                        title="Kirim Pengajuan Reservasi"
+                        description="Pastikan data pengajuan dan jadwal fasilitas sudah sesuai sebelum dikirimkan ke Petugas."
+                        confirmText="Ya, Kirim Pengajuan"
+                        cancelText="Periksa Kembali"
+                        variant="default"
+                        onConfirm={() => {
+                            setIsConfirmOpen(false);
+                            submitButtonRef.current?.click();
+                        }}
+                    >
+                        <div className="mt-3 space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3.5 text-xs">
+                            <div className="flex justify-between border-b border-slate-200 pb-2">
+                                <span className="text-[#667085]">Fasilitas:</span>
+                                <span className="font-semibold text-slate-800">{facility.name}</span>
+                            </div>
+                            <div className="flex justify-between border-b border-slate-200 pb-2">
+                                <span className="text-[#667085]">Jadwal:</span>
+                                <span className="font-medium text-slate-800 text-right">
+                                    {parsedSchedules.length > 0
+                                        ? `${parsedSchedules.length} Hari Dipilih`
+                                        : `${selectedDate}, ${startTime}–${endTime} WIB`}
+                                </span>
+                            </div>
+                            {tujuanVal && (
+                                <div>
+                                    <span className="text-[#667085]">Tujuan:</span>
+                                    <p className="mt-1 font-medium text-slate-800 line-clamp-2">{tujuanVal}</p>
+                                </div>
+                            )}
+                        </div>
+                    </ConfirmDialog>
                 </main>
             </div>
         </>

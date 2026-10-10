@@ -1,5 +1,7 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import { ChevronDown, LogOut, User as UserIcon } from 'lucide-react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -20,6 +22,7 @@ type AuthUser = {
 export function UserNavbar({ current }: { current?: 'facilities' | 'reservations' | 'reports' }) {
     const { auth } = usePage<{ auth?: { user?: AuthUser | null } }>().props;
     const user = auth?.user;
+    const [isLogoutOpen, setIsLogoutOpen] = useState(false);
 
     const navLinkClass = (isActive: boolean) =>
         `relative py-4 ${
@@ -123,16 +126,15 @@ export function UserNavbar({ current }: { current?: 'facilities' | 'reservations
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="my-1 bg-[#F3F4F6]" />
-                                <DropdownMenuItem asChild>
-                                    <Link
-                                        href="/logout"
-                                        method="post"
-                                        as="button"
-                                        className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-rose-600 transition hover:bg-rose-50"
-                                    >
-                                        <LogOut className="h-4 w-4 text-rose-500" />
-                                        <span>Keluar</span>
-                                    </Link>
+                                <DropdownMenuItem
+                                    onSelect={(e) => {
+                                        e.preventDefault();
+                                        setIsLogoutOpen(true);
+                                    }}
+                                    className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-rose-600 transition hover:bg-rose-50"
+                                >
+                                    <LogOut className="h-4 w-4 text-rose-500" />
+                                    <span>Keluar</span>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -154,6 +156,16 @@ export function UserNavbar({ current }: { current?: 'facilities' | 'reservations
                     )}
                 </div>
             </div>
+
+            <ConfirmDialog
+                open={isLogoutOpen}
+                onOpenChange={setIsLogoutOpen}
+                title="Konfirmasi Keluar"
+                description="Apakah Anda yakin ingin keluar dari akun Anda? Sesi login Anda akan diakhiri."
+                confirmText="Keluar"
+                variant="destructive"
+                onConfirm={() => router.post('/logout')}
+            />
         </header>
     );
 }

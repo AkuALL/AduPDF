@@ -100,14 +100,13 @@ class ReservationController extends Controller
 
         if (! $this->canCancel($reservation)) {
             throw ValidationException::withMessages([
-                'reservation' => 'Reservasi hanya dapat dibatalkan hingga tepat 48 jam sebelum waktu mulai.',
+                'reservation' => 'Hanya reservasi yang berstatus Menunggu atau Disetujui yang dapat dibatalkan.',
             ]);
         }
 
         $reservation->update(['status' => ReservationStatus::Cancelled]);
 
-        return redirect()->route('reservations.show', $reservation)
-            ->with('success', 'Reservasi berhasil dibatalkan.');
+        return back()->with('success', 'Reservasi berhasil dibatalkan.');
     }
 
     private function ensureOwner(Request $request, Reservation $reservation): void
@@ -117,12 +116,11 @@ class ReservationController extends Controller
 
     private function canCancel(Reservation $reservation): bool
     {
-        return in_array($reservation->status, [ReservationStatus::Pending, ReservationStatus::Approved], true)
-            && now()->lessThanOrEqualTo($reservation->start_time->copy()->subHours(48));
+        return in_array($reservation->status, [ReservationStatus::Pending, ReservationStatus::Approved], true);
     }
 
     /**
-     * @return array<string, int|string|null|array<string, int|string>>
+     * @return array<string, int|string|null|bool|array<string, int|string>>
      */
     private function reservationData(Reservation $reservation): array
     {
@@ -135,6 +133,7 @@ class ReservationController extends Controller
             'alasan_penolakan' => $reservation->alasan_penolakan,
             'ditolak_pada' => $reservation->ditolak_pada?->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i'),
             'alasan_pembatalan' => $reservation->alasan_pembatalan,
+            'can_cancel' => $this->canCancel($reservation),
             'facility' => [
                 'id' => $reservation->facility->id,
                 'name' => $reservation->facility->name,

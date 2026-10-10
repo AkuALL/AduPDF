@@ -81,12 +81,6 @@ export default function ReportIndex({ reports, success }: Props) {
                             <p className="mt-1 text-sm text-[#667085]">
                                 Laporan kerusakan fasilitas yang Anda kirimkan akan muncul di sini.
                             </p>
-                            <Link
-                                href="/reports/create"
-                                className="mt-4 inline-flex h-9 items-center justify-center rounded-md border border-[#D0D5DD] bg-white px-4 text-xs font-semibold text-[#2D4C79] hover:bg-[#E9EEF5] transition"
-                            >
-                                Laporkan Kerusakan
-                            </Link>
                         </div>
                     ) : (
                         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

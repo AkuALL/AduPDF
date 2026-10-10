@@ -55,9 +55,8 @@ class ProfileController extends Controller
 
         if ($from === 'reservation' && $pendingReservation && $user->hasInstitutionalIdentity()) {
             $data = json_decode(urldecode($pendingReservation), true) ?: json_decode($pendingReservation, true);
-            $targetUrl = $data['url'] ?? null;
-            if ($targetUrl) {
-                return redirect($targetUrl)->with('success', 'Profil berhasil dilengkapi. Silakan lanjutkan reservasi Anda.');
+            if (is_array($data) && ! empty($data['url']) && ! empty($data['facility_id']) && ! empty($data['schedules'])) {
+                return redirect($data['url'])->with('success', 'Profil berhasil dilengkapi. Silakan lanjutkan reservasi Anda.');
             }
         }
 
