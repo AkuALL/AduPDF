@@ -131,3 +131,43 @@ test('admin dashboard inertia response returns complete executive props (DA-01, 
     $response->assertJsonPath('component', 'admin/dashboard');
     $response->assertJsonPath('props.account_stats.admin_count', 1);
 });
+
+test('admin dashboard returns matplotlib analytical chart stats with daily trends and categorization', function () {
+    $admin = User::factory()->admin()->create();
+    $user = User::factory()->pengguna()->create();
+
+    $hall = Facility::factory()->create([
+        'name' => 'Aula Sukarno',
+        'type' => FacilityType::Hall,
+        'location' => 'Gedung Rektorat Lt. 1',
+        'condition' => FacilityCondition::Active,
+    ]);
+
+    Reservation::create([
+        'user_id' => $user->id,
+        'facility_id' => $hall->id,
+        'tujuan' => 'Dies Natalis',
+        'start_time' => now()->startOfMonth()->addDays(4)->setTime(8, 0, 0),
+        'end_time' => now()->startOfMonth()->addDays(4)->setTime(12, 0, 0),
+        'status' => ReservationStatus::Approved,
+    ]);
+
+    Report::factory()->create([
+        'user_id' => $user->id,
+        'facility_id' => $hall->id,
+        'kategori' => 'Kelistrikan',
+        'deskripsi' => 'Lampu panggung padam',
+        'status_laporan' => ReportStatus::New,
+    ]);
+
+    $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('admin/dashboard')
+        ->has('chart_stats.daily_usage_trend')
+        ->has('chart_stats.usage_by_type')
+        ->has('chart_stats.damage_by_location')
+        ->where('chart_stats.damage_by_location.0.location', 'Gedung Rektorat Lt. 1')
+        ->where('chart_stats.damage_by_location.0.total_reports', 1)
+    );
+});

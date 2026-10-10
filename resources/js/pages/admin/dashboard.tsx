@@ -7,6 +7,7 @@ import {
     Users,
 } from 'lucide-react';
 import AdminLayout from '@/layouts/admin-layout';
+import AdminDataVisualization, { type ChartStatsProps } from '@/components/charts/admin-data-visualization';
 
 type TopFacility = {
     id: number;
@@ -69,6 +70,7 @@ type Props = {
         petugas_count: number;
         admin_count: number;
     };
+    chart_stats?: ChartStatsProps;
 };
 
 export default function AdminDashboard({
@@ -77,6 +79,7 @@ export default function AdminDashboard({
     usage_stats,
     maintenance_stats,
     account_stats,
+    chart_stats,
 }: Props) {
     return (
         <AdminLayout>
@@ -169,6 +172,11 @@ export default function AdminDashboard({
                         </div>
                     </div>
                 </div>
+
+                {/* Visualisasi Data & Analitik Kampus (Matplotlib Engine) */}
+                {chart_stats && (
+                    <AdminDataVisualization stats={chart_stats} monthLabel={month_label} />
+                )}
 
                 {/* Pantauan Pemeliharaan Fasilitas */}
                 <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">

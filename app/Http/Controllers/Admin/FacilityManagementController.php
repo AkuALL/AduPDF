@@ -182,5 +182,4 @@ class FacilityManagementController extends Controller
 
         return back()->with('success', "Fasilitas {$facility->name} telah berhasil diaktifkan kembali.");
     }
-
 }
