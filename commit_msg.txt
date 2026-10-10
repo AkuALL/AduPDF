@@ -1,8 +1,0 @@
-Penyempurnaan alur UI/UX, perbaikan logika cookie redirect, dan implementasi kustom dialog konfirmasi
-
-- **Backend / Auth Redirect**: Memperbaiki bug pada `AuthenticatedSessionController` dan `ProfileController` di mana pengguna langsung ter-redirect otomatis ke halaman reservasi saat login walau cookie `pending_reservation` kosong/rusak. Sistem kini memvalidasi kelengkapan data (url, facility_id, schedules) secara ketat sebelum melakukan pengalihan, dan akan membersihkan sisa cookie jika data tidak valid.
-- **Dialog Konfirmasi UI**: Mengganti seluruh `window.confirm()` bawaan browser di area pengguna (logout di navbar, reset pilihan slot fasilitas, pengajuan akhir reservasi, dan pembatalan reservasi) menjadi komponen kustom `ConfirmDialog` berbasis Tailwind untuk menjaga konsistensi UI/UX.
-- **Logika Pembatalan Reservasi**: Memperluas aturan pembatalan reservasi pada `ReservationController`. Batas waktu 48 jam telah dihapus, memungkinkan pengguna membatalkan semua riwayat fasilitas kapan pun selama statusnya masih "Menunggu" atau "Disetujui". Dilengkapi dengan pengujian baru di `ReservationCancellationTest.php`.
-- **UI Riwayat Reservasi**: Memperbarui antarmuka halaman riwayat reservasi (index & show) untuk mendukung pembatalan parsial per *card*.
-- **Pembaruan Navbar & Tombol Lapor**: Menghilangkan tautan ganda "Lapor" dan "Laporan" di navbar. Merapikan form pelaporan dan styling input tipe *file* agar terlihat konsisten sebagai tombol interaktif.
-- **Branding & Favicon**: Menghapus logo default `favicon.ico` Laravel, memperbarui desain `favicon.svg` AduPDF, dan memperbarui *cache buster* parameter di `app.blade.php` (`?v=3`) agar perubahan tab logo langsung terganti saat di-deploy (contoh: Railway).
