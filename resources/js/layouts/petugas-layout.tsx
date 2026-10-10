@@ -30,11 +30,10 @@ export default function PetugasLayout({ activePage, children }: Props) {
 
     return (
         <div className="min-h-screen bg-[#F7F8FA] text-[#111827]">
-            <header className="sticky top-0 z-40 bg-[#2D4C79] text-white shadow-sm">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="flex min-h-16 items-center justify-between gap-4">
-                        <div className="flex min-w-0 items-center gap-6">
-                            <Link
+            <header className="sticky top-0 z-40 bg-[#2D4C79] text-white shadow-md border-b border-[#243E63]">
+                <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center gap-6">
+                        <Link
                                 href={petugas.dashboard()}
                                 className="flex items-center gap-2 group cursor-pointer"
                             >
@@ -131,7 +130,6 @@ export default function PetugasLayout({ activePage, children }: Props) {
                             </div>
                         </details>
                     </div>
-                </div>
             </header>
             {children}
         </div>
