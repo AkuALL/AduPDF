@@ -14,7 +14,7 @@ Di lokal directory, via terminal, run these sequentially:
 7. composer run dev
 8. open http://127.0.0.1:8000/
 
-
-	-user@com pw:12345678
-	-admin@com pw:12345678
-	-petugas@com pw:12345678
+Demo accounts:
+1. user@com pw:12345678
+2. admin@com pw:12345678
+3. petugas@com pw:12345678
