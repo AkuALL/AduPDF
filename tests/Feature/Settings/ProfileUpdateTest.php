@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -66,7 +67,7 @@ test('profile update validates identity_type and institutional_id consistency', 
     $response2->assertSessionHasErrors(['institutional_id']);
 });
 
-test('email verification status is unchanged when the email address is unchanged', function () {
+test('profile update with unchanged email keeps the account approved', function () {
     $user = User::factory()->create();
 
     $response = $this
@@ -80,59 +81,78 @@ test('email verification status is unchanged when the email address is unchanged
         ->assertSessionHasNoErrors()
         ->assertRedirect(route('profile.edit'));
 
-    expect($user->refresh()->email_verified_at)->not->toBeNull();
+    expect($user->refresh()->isApproved())->toBeTrue();
 });
 
-test('user can delete their account', function () {
+test('changing email does not require verification or revoke account approval', function () {
+    Notification::fake();
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->patch(route('profile.update'), [
+        'name' => $user->name,
+        'email' => 'alamat.baru@kampus.ac.id',
+    ]);
+
+    $response->assertSessionHasNoErrors()->assertRedirect(route('profile.edit'));
+    expect($user->refresh()->email)->toBe('alamat.baru@kampus.ac.id')
+        ->and($user->isApproved())->toBeTrue();
+    Notification::assertNothingSent();
+});
+
+test('admin and petugas can update email without verification notifications', function () {
+    Notification::fake();
+
+    foreach (['admin', 'petugas'] as $role) {
+        $user = User::factory()->state(['role' => $role])->create();
+
+        $this->actingAs($user)
+            ->patch(route('profile.update'), [
+                'name' => $user->name,
+                'email' => $role.'.updated@kampus.ac.id',
+            ])
+            ->assertSessionHasNoErrors();
+
+        expect($user->fresh()->email)->toBe($role.'.updated@kampus.ac.id');
+    }
+
+    Notification::assertNothingSent();
+});
+
+test('user cannot deactivate their own account from the profile page', function () {
     $user = User::factory()->create();
 
     $response = $this
         ->actingAs($user)
-        ->delete(route('profile.destroy'), [
-            'password' => 'password',
-        ]);
+        ->delete('/profile');
 
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect(route('home'));
+    $response->assertNotFound();
 
-    $this->assertGuest();
-    $this->assertSoftDeleted('users', [
-        'id' => $user->id,
-    ]);
+    expect($user->fresh()?->trashed())->toBeFalse();
 });
 
-test('correct password must be provided to delete account', function () {
+test('profile settings do not expose an account deactivation endpoint', function () {
     $user = User::factory()->create();
 
     $response = $this
         ->actingAs($user)
         ->from(route('profile.edit'))
-        ->delete(route('profile.destroy'), [
-            'password' => 'wrong-password',
-        ]);
+        ->delete('/settings/profile');
 
-    $response
-        ->assertSessionHasErrors('password')
-        ->assertRedirect(route('profile.edit'));
+    $response->assertNotFound();
 
-    expect($user->fresh())->not->toBeNull();
+    expect($user->fresh()?->trashed())->toBeFalse();
 });
 
-test('system prevents deletion of the last admin account via profile settings (BR-26, FR-16, SRS 7.1)', function () {
+test('admin cannot deactivate their own account from profile settings', function () {
     $admin = User::factory()->admin()->create();
 
     $response = $this
         ->actingAs($admin)
         ->from(route('profile.edit'))
-        ->delete(route('profile.destroy'), [
-            'password' => 'password',
-        ]);
+        ->delete('/settings/profile');
 
-    $response->assertSessionHas('error', 'Admin terakhir tidak dapat dihapus.');
-    $this->assertNotSoftDeleted('users', [
-        'id' => $admin->id,
-    ]);
+    $response->assertNotFound();
+    expect($admin->fresh()?->trashed())->toBeFalse();
 });
 
 test('profile page is directly accessible via GET /profile (FR-17, SRS 12.5)', function () {

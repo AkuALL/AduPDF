@@ -32,10 +32,8 @@ Route::middleware('auth')->group(function () {
     Route::redirect('/profiles', '/profile');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
     Route::patch('/profile', [ProfileController::class, 'update']);
-    Route::delete('/profile', [ProfileController::class, 'destroy']);
     Route::get('/settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/settings/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 if (file_exists(__DIR__.'/settings.php')) {

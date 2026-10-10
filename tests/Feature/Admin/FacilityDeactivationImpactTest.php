@@ -7,6 +7,7 @@ use App\Models\Facility;
 use App\Models\Reservation;
 use App\Models\User;
 use App\Services\FacilityConditionService;
+use App\Services\ReservationImpactService;
 
 test('deactivating a facility via deactivate endpoint automatically rejects pending and cancels approved reservations (AG-06, FR-18)', function () {
     $admin = User::factory()->admin()->create();
@@ -196,4 +197,52 @@ test('deactivating a child tool only affects that tool and does not cancel sibli
         // Room and Tool B reservations remain Approved!
         ->and($roomReservation->refresh()->status)->toBe(ReservationStatus::Approved)
         ->and($toolBReservation->refresh()->status)->toBe(ReservationStatus::Approved);
+});
+
+test('facility deactivation and reservation impact are atomic and rollback on failure (AG-06, R-12)', function () {
+    $admin = User::factory()->admin()->create();
+    $facility = Facility::factory()->create(['condition' => FacilityCondition::Active]);
+
+    $this->mock(ReservationImpactService::class, function ($mock) {
+        $mock->shouldReceive('applyDeactivation')
+            ->andThrow(new RuntimeException('Simulated database failure during reservation impact'));
+    });
+
+    try {
+        $this->actingAs($admin)->patch(route('admin.facilities.deactivate', $facility));
+    } catch (RuntimeException $e) {
+        // Expected
+    }
+
+    expect($facility->refresh()->condition)->toBe(FacilityCondition::Active);
+});
+
+test('facility update condition to nonaktif and reservation impact are atomic and rollback on failure (AG-06, R-12)', function () {
+    $admin = User::factory()->admin()->create();
+    $facility = Facility::factory()->create([
+        'name' => 'Ruang Teater',
+        'condition' => FacilityCondition::Active,
+    ]);
+
+    $this->mock(ReservationImpactService::class, function ($mock) {
+        $mock->shouldReceive('applyDeactivation')
+            ->andThrow(new RuntimeException('Simulated database failure during reservation impact'));
+    });
+
+    try {
+        $this->actingAs($admin)->put(route('admin.facilities.update', $facility), [
+            'name' => 'Ruang Teater Baru',
+            'type' => $facility->type->value,
+            'location' => $facility->location,
+            'capacity' => $facility->capacity,
+            'condition' => FacilityCondition::Inactive->value,
+            'parent_facility_id' => null,
+        ]);
+    } catch (RuntimeException $e) {
+        // Expected
+    }
+
+    $facility->refresh();
+    expect($facility->condition)->toBe(FacilityCondition::Active)
+        ->and($facility->name)->toBe('Ruang Teater');
 });

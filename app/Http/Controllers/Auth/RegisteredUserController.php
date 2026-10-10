@@ -41,16 +41,14 @@ class RegisteredUserController extends Controller
 
         User::create([
             'nama' => $validated['nama'],
-            'name' => $validated['nama'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'pengguna',
         ]);
 
-        // Per SRS V2 (BR-05, BR-06, FR-17, GAL-02): Akun baru langsung aktif dan dapat login
         return redirect()->route('login')->with(
             'status',
-            'Pendaftaran berhasil! Akun Anda sudah aktif dan dapat langsung digunakan untuk masuk.'
+            'Pendaftaran berhasil. Akun Anda menunggu persetujuan Admin sebelum dapat digunakan.'
         );
     }
 }

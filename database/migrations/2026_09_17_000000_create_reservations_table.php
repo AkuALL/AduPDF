@@ -19,6 +19,8 @@ return new class extends Migration
             $table->dateTime('start_time');
             $table->dateTime('end_time');
             $table->enum('status', ['menunggu', 'disetujui', 'ditolak', 'dibatalkan'])->default('menunggu');
+            $table->text('alasan_penolakan')->nullable();
+            $table->timestamp('ditolak_pada')->nullable();
             $table->text('alasan_pembatalan')->nullable();
             $table->timestamps();
         });

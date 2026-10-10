@@ -1,4 +1,9 @@
 import { Form, Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
+import ConfirmationDialog, {
+    type ConfirmationRequest,
+} from '@/components/confirmation-dialog';
+import { UserNavbar } from '@/components/user-navbar';
 
 type Reservation = {
     id: number;
@@ -15,13 +20,25 @@ type Reservation = {
 type Props = { reservation: Reservation; can_cancel: boolean; success: string | null };
 
 export default function ReservationShow({ reservation, can_cancel, success }: Props) {
+    const [confirmation, setConfirmation] = useState<ConfirmationRequest | null>(null);
+
     return (
         <>
             <Head title="Detail Reservasi" />
-            <main className="min-h-screen bg-[#F7F8FA] px-4 py-10 text-[#111827]">
-                <div className="w-full">
-                    <Link href="/reservations" className="text-sm font-medium text-[#2D4C79] hover:underline">Kembali ke riwayat</Link>
-                    {success && <p role="status" className="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
+            <div className="min-h-screen bg-[#F7F8FA] text-[#111827] font-sans antialiased">
+                <UserNavbar current="reservations" />
+
+                <main className="w-full px-4 py-8 sm:px-6 lg:px-8">
+                    <div className="w-full">
+                        <div className="mb-6">
+                            <Link
+                                href="/reservations"
+                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
+                            >
+                                <span aria-hidden="true">←</span> Kembali ke riwayat
+                            </Link>
+                        </div>
+                        {success && <p role="status" className="mb-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
                     <article className="mt-6 rounded-lg border border-[#E5E7EB] bg-white p-6">
                         <div className="flex items-start justify-between gap-4">
                             <div>
@@ -37,11 +54,15 @@ export default function ReservationShow({ reservation, can_cancel, success }: Pr
                             {reservation.alasan_pembatalan && <div><dt className="text-[#667085]">Alasan pembatalan</dt><dd className="mt-1">{reservation.alasan_pembatalan}</dd></div>}
                         </dl>
                         {can_cancel && (
-                            <Form action={`/reservations/${reservation.id}/cancel`} method="patch" className="mt-6">
-                                {({ processing, errors }) => (
+                            <Form
+                                action={`/reservations/${reservation.id}/cancel`}
+                                method="patch"
+                                className="mt-6"
+                            >
+                                {({ processing, errors, submit }) => (
                                     <>
                                         {errors.reservation && <p role="alert" className="mb-3 text-sm text-red-700">{errors.reservation}</p>}
-                                        <button type="submit" disabled={processing} className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">{processing ? 'Membatalkan...' : 'Batalkan reservasi'}</button>
+                                        <button type="button" onClick={(event) => { if (!event.currentTarget.form?.reportValidity()) return; setConfirmation({ title: 'Batalkan Reservasi', description: 'Batalkan reservasi ini? Status reservasi akan berubah menjadi Dibatalkan.', confirmLabel: 'Ya, Batalkan Reservasi', destructive: true, onConfirm: submit }); }} disabled={processing} className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">{processing ? 'Membatalkan...' : 'Batalkan reservasi'}</button>
                                     </>
                                 )}
                             </Form>
@@ -49,6 +70,13 @@ export default function ReservationShow({ reservation, can_cancel, success }: Pr
                     </article>
                 </div>
             </main>
-        </>
+            <ConfirmationDialog
+                confirmation={confirmation}
+                onOpenChange={(open) => {
+                    if (!open) setConfirmation(null);
+                }}
+            />
+        </div>
+    </>
     );
 }

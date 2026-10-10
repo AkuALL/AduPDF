@@ -1,19 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import {
     AlertTriangle,
-    BarChart3,
     Building2,
     CalendarCheck,
     CheckCircle2,
-    Clock,
-    FileSpreadsheet,
-    KeyRound,
-    PlusCircle,
-    Shield,
-    UserCheck,
-    UserPlus,
     Users,
-    Wrench,
 } from 'lucide-react';
 import AdminLayout from '@/layouts/admin-layout';
 
@@ -95,44 +86,9 @@ export default function AdminDashboard({
                 {/* Header Section */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">
-                                Pusat Kendali & Tata Kelola
-                            </span>
-                            <span className="text-xs text-[#667085]">·</span>
-                            <span className="text-xs text-[#667085]">Role: Administrator</span>
-                            <span className="text-xs text-[#667085]">·</span>
-                            <span className="text-xs text-[#667085]">{month_label}</span>
-                        </div>
                         <h1 className="text-2xl sm:text-3xl font-bold text-[#111827] tracking-tight">
                             Dashboard Administrasi
                         </h1>
-                        <p className="text-sm text-[#667085] mt-1">
-                            Ringkasan eksekutif tata kelola fasilitas, rekapitulasi okupansi pemakaian (BR-21), dan pengawasan akun civitas.
-                        </p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2.5">
-                        <Link
-                            href="/admin/recap"
-                            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-md bg-[#2D4C79] text-white hover:bg-[#243E63] shadow-xs transition"
-                        >
-                            <BarChart3 className="w-4 h-4" />
-                            Rekap & Ekspor
-                        </Link>
-                        <Link
-                            href="/admin/facilities"
-                            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-md border border-[#D0D5DD] bg-white text-[#2D4C79] hover:bg-[#F3F5F7] transition"
-                        >
-                            <Building2 className="w-4 h-4 text-[#667085]" />
-                            Kelola Fasilitas
-                        </Link>
-                        <Link
-                            href="/admin/users"
-                            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-md border border-[#D0D5DD] bg-white text-[#2D4C79] hover:bg-[#F3F5F7] transition"
-                        >
-                            <Users className="w-4 h-4 text-[#667085]" />
-                            Kelola Akun
-                        </Link>
                     </div>
                 </div>
 
@@ -171,9 +127,8 @@ export default function AdminDashboard({
                             <span className="text-3xl font-bold text-[#111827]">{usage_stats.total_reservations}</span>
                             <span className="text-xs text-[#667085]">reservasi disetujui</span>
                         </div>
-                        <div className="mt-3 pt-3 border-t border-[#F3F4F6] flex items-center justify-between text-xs text-[#667085]">
+                        <div className="mt-3 pt-3 border-t border-[#F3F4F6] text-xs text-[#667085]">
                             <span>Total: <strong className="text-[#111827]">{usage_stats.total_hours} Jam</strong></span>
-                            <span className="text-[11px] text-[#2D4C79] font-medium" title="BR-21: Reservasi penuh ruangan dihitung untuk ruangan; alat hanya dihitung jika dipesan eksplisit">Aturan BR-21 ✓</span>
                         </div>
                     </div>
 
@@ -211,8 +166,6 @@ export default function AdminDashboard({
                             <span>{account_stats.pengguna_count} Pengguna</span>
                             <span>·</span>
                             <span>{account_stats.petugas_count} Petugas</span>
-                            <span>·</span>
-                            <span className="text-amber-800 font-semibold">1 Admin</span>
                         </div>
                     </div>
                 </div>
@@ -226,9 +179,6 @@ export default function AdminDashboard({
                                 Pantauan Pemeliharaan Fasilitas
                             </h2>
                         </div>
-                        <span className="text-xs text-[#667085]">
-                            {maintenance_stats.under_repair_list.length} fasilitas sedang dalam perbaikan
-                        </span>
                     </div>
 
                     {maintenance_stats.under_repair_list.length > 0 ? (
@@ -290,9 +240,6 @@ export default function AdminDashboard({
                                 <CheckCircle2 className="w-6 h-6" />
                             </div>
                             <h3 className="text-sm font-semibold text-[#111827]">Semua Fasilitas Beroperasi Normal</h3>
-                            <p className="text-xs text-[#667085] mt-1 max-w-md mx-auto">
-                                Saat ini tidak ada fasilitas yang berstatus dalam perbaikan. Semua ruangan dan alat siap digunakan untuk operasional kampus.
-                            </p>
                         </div>
                     )}
                 </div>
@@ -307,9 +254,6 @@ export default function AdminDashboard({
                                     <h2 className="text-base font-bold text-[#111827]">
                                         Fasilitas Terpopuler (Bulan Ini)
                                     </h2>
-                                    <p className="text-xs text-[#667085] mt-0.5">
-                                        Dihitung berdasarkan reservasi disetujui sesuai aturan BR-21
-                                    </p>
                                 </div>
                                 <Link href="/admin/recap" className="text-xs text-[#2D4C79] hover:underline font-semibold">
                                     Lihat Semua →
@@ -351,13 +295,12 @@ export default function AdminDashboard({
                                 </div>
                             ) : (
                                 <div className="px-6 py-10 text-center text-xs text-[#667085]">
-                                    Belum ada aktivitas reservasi yang disetujui pada bulan {month_label}.
+                                    Belum ada reservasi pada bulan {month_label}.
                                 </div>
                             )}
                         </div>
 
-                        <div className="px-6 py-3 bg-[#F9FAFB] border-t border-[#E5E7EB] text-xs text-[#667085] flex items-center justify-between">
-                            <span>Aturan BR-21: Penggunaan alat hanya dihitung jika dipesan individual</span>
+                        <div className="px-6 py-3 bg-[#F9FAFB] border-t border-[#E5E7EB] text-xs text-[#667085] flex justify-end">
                             <Link href="/admin/recap" className="font-medium text-[#2D4C79] hover:underline">
                                 Buka Rekapitulasi Lengkap
                             </Link>
@@ -372,9 +315,6 @@ export default function AdminDashboard({
                                     <h2 className="text-base font-bold text-[#111827]">
                                         Laporan Gangguan & Kerusakan
                                     </h2>
-                                    <p className="text-xs text-[#667085] mt-0.5">
-                                        Fasilitas dan lokasi paling sering dilaporkan civitas
-                                    </p>
                                 </div>
                                 <Link href="/admin/recap?period=this_month" className="text-xs text-[#2D4C79] hover:underline font-semibold">
                                     Rekap Kerusakan →
@@ -425,13 +365,12 @@ export default function AdminDashboard({
                                 </div>
                             ) : (
                                 <div className="px-6 py-10 text-center text-xs text-[#667085]">
-                                    Belum ada laporan kerusakan baru pada bulan {month_label}.
+                                    Belum ada laporan kerusakan bulan ini.
                                 </div>
                             )}
                         </div>
 
-                        <div className="px-6 py-3 bg-[#F9FAFB] border-t border-[#E5E7EB] text-xs text-[#667085] flex items-center justify-between">
-                            <span>Data dihimpun dari laporan civitas kampus</span>
+                        <div className="px-6 py-3 bg-[#F9FAFB] border-t border-[#E5E7EB] text-xs text-[#667085] flex justify-end">
                             <Link href="/admin/recap" className="font-medium text-[#2D4C79] hover:underline">
                                 Analitik Lokasi Lengkap
                             </Link>
@@ -439,89 +378,6 @@ export default function AdminDashboard({
                     </div>
                 </div>
 
-                {/* Pintasan Cepat Akses Administrasi */}
-                <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 shadow-xs">
-                    <h2 className="text-base font-bold text-[#111827] mb-1">
-                        Pintasan Cepat Tata Kelola Kampus
-                    </h2>
-                    <p className="text-xs text-[#667085] mb-4">
-                        Akses instan modul administrasi tanpa tumpang tindih dengan antrean operasional harian Petugas.
-                    </p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-                        <Link
-                            href="/admin/recap"
-                            className="group p-4 rounded-lg border border-[#E5E7EB] hover:border-[#2D4C79] hover:bg-[#F9FAFC] transition block"
-                        >
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="w-8 h-8 rounded-md bg-[#2D4C79]/10 text-[#2D4C79] flex items-center justify-center group-hover:bg-[#2D4C79] group-hover:text-white transition">
-                                    <BarChart3 className="w-4 h-4" />
-                                </span>
-                                <span className="text-xs text-[#667085] group-hover:text-[#2D4C79] font-medium">Buka →</span>
-                            </div>
-                            <div className="text-sm font-bold text-[#111827] group-hover:text-[#2D4C79]">
-                                Rekapitulasi Okupansi
-                            </div>
-                            <p className="text-xs text-[#667085] mt-1">
-                                Analisis frekuensi pemakaian, durasi, dan ekspor data CSV.
-                            </p>
-                        </Link>
-
-                        <Link
-                            href="/admin/facilities/create"
-                            className="group p-4 rounded-lg border border-[#E5E7EB] hover:border-[#2D4C79] hover:bg-[#F9FAFC] transition block"
-                        >
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition">
-                                    <PlusCircle className="w-4 h-4" />
-                                </span>
-                                <span className="text-xs text-[#667085] group-hover:text-emerald-700 font-medium">Tambah →</span>
-                            </div>
-                            <div className="text-sm font-bold text-[#111827] group-hover:text-emerald-700">
-                                Tambah Fasilitas Baru
-                            </div>
-                            <p className="text-xs text-[#667085] mt-1">
-                                Daftarkan ruangan kelas, aula, laboratorium, atau alat baru.
-                            </p>
-                        </Link>
-
-                        <Link
-                            href="/admin/users/petugas/create"
-                            className="group p-4 rounded-lg border border-[#E5E7EB] hover:border-[#2D4C79] hover:bg-[#F9FAFC] transition block"
-                        >
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="w-8 h-8 rounded-md bg-sky-50 text-sky-700 flex items-center justify-center group-hover:bg-sky-600 group-hover:text-white transition">
-                                    <UserCheck className="w-4 h-4" />
-                                </span>
-                                <span className="text-xs text-[#667085] group-hover:text-sky-700 font-medium">Buat →</span>
-                            </div>
-                            <div className="text-sm font-bold text-[#111827] group-hover:text-sky-700">
-                                Buat Akun Petugas
-                            </div>
-                            <p className="text-xs text-[#667085] mt-1">
-                                Provisioning staf operasional untuk memproses antrean reservasi.
-                            </p>
-                        </Link>
-
-                        <Link
-                            href="/admin/change-password"
-                            className="group p-4 rounded-lg border border-[#E5E7EB] hover:border-[#2D4C79] hover:bg-[#F9FAFC] transition block"
-                        >
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="w-8 h-8 rounded-md bg-amber-50 text-amber-700 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition">
-                                    <KeyRound className="w-4 h-4" />
-                                </span>
-                                <span className="text-xs text-[#667085] group-hover:text-amber-700 font-medium">Ubah →</span>
-                            </div>
-                            <div className="text-sm font-bold text-[#111827] group-hover:text-amber-700">
-                                Keamanan & Sandi
-                            </div>
-                            <p className="text-xs text-[#667085] mt-1">
-                                Kelola kredensial akun Administrator tunggal (BR-18).
-                            </p>
-                        </Link>
-                    </div>
-                </div>
             </div>
         </AdminLayout>
     );

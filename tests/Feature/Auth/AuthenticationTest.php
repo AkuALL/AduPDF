@@ -27,7 +27,7 @@ test('pengguna can authenticate successfully', function () {
     $response->assertRedirect(url('/facilities'));
 });
 
-test('soft-deleted account CANNOT authenticate (BR-26, SRS 7.1)', function () {
+test('nonaktif account cannot authenticate (BR-26, SRS 7.1)', function () {
     $user = User::factory()->pengguna()->create([
         'email' => 'deleted@kampus.ac.id',
         'password' => bcrypt('password123'),
@@ -47,6 +47,7 @@ test('petugas can authenticate successfully', function () {
     $petugas = User::factory()->petugas()->create([
         'email' => 'petugas@kampus.ac.id',
         'password' => bcrypt('password123'),
+        'approved_at' => null,
     ]);
 
     $response = $this->post(route('login'), [
@@ -62,6 +63,7 @@ test('admin can authenticate successfully and redirects to user list', function 
     $admin = User::factory()->admin()->create([
         'email' => 'admin@kampus.ac.id',
         'password' => bcrypt('password123'),
+        'approved_at' => null,
     ]);
 
     $response = $this->post(route('login'), [

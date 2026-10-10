@@ -12,6 +12,7 @@ use App\Services\ReservationImpactService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -60,14 +61,16 @@ class FacilityManagementController extends Controller
     /**
      * Show form to create a new facility (AG-05, FR-18).
      */
-    public function create(): Response
+    public function create(Request $request): Response
     {
         $parentRooms = Facility::query()
             ->whereIn('type', [FacilityType::Classroom, FacilityType::Hall, FacilityType::Laboratory])
             ->orderBy('name')
             ->get();
 
-        return Inertia::render('admin/facilities/create', compact('parentRooms'));
+        $parentFacilityId = $parentRooms->firstWhere('id', $request->query('parent_facility_id'))?->id;
+
+        return Inertia::render('admin/facilities/create', compact('parentRooms', 'parentFacilityId'));
     }
 
     /**
@@ -128,10 +131,17 @@ class FacilityManagementController extends Controller
         $wasInactive = $facility->condition === FacilityCondition::Inactive;
         $isNowInactive = $validated['condition'] === FacilityCondition::Inactive->value;
 
-        $facility->update($validated);
+        $impact = DB::transaction(function () use ($facility, $validated, $wasInactive, $isNowInactive, $impactService): ?array {
+            $facility->update($validated);
 
-        if (! $wasInactive && $isNowInactive) {
-            $impact = $impactService->applyDeactivation($facility);
+            if (! $wasInactive && $isNowInactive) {
+                return $impactService->applyDeactivation($facility);
+            }
+
+            return null;
+        });
+
+        if ($impact !== null) {
             $message = "Data fasilitas {$facility->name} berhasil diperbarui dan dinonaktifkan.";
             if ($impact['rejected'] > 0 || $impact['cancelled'] > 0) {
                 $message .= " Dampak reservasi: {$impact['rejected']} reservasi menunggu otomatis ditolak, dan {$impact['cancelled']} reservasi disetujui otomatis dibatalkan.";
@@ -149,9 +159,11 @@ class FacilityManagementController extends Controller
      */
     public function deactivate(Facility $facility, ReservationImpactService $impactService): RedirectResponse
     {
-        $facility->update(['condition' => FacilityCondition::Inactive]);
+        $impact = DB::transaction(function () use ($facility, $impactService): array {
+            $facility->update(['condition' => FacilityCondition::Inactive]);
 
-        $impact = $impactService->applyDeactivation($facility);
+            return $impactService->applyDeactivation($facility);
+        });
 
         $message = "Fasilitas {$facility->name} telah berhasil dinonaktifkan.";
         if ($impact['rejected'] > 0 || $impact['cancelled'] > 0) {
@@ -171,23 +183,4 @@ class FacilityManagementController extends Controller
         return back()->with('success', "Fasilitas {$facility->name} telah berhasil diaktifkan kembali.");
     }
 
-    /**
-     * Delete facility with history guard (AG-05, FR-18).
-     */
-    public function destroy(Facility $facility): RedirectResponse
-    {
-        if ($facility->hasHistory()) {
-            return back()->with('error', 'Fasilitas tidak dapat dihapus permanen karena memiliki riwayat reservasi. Silakan gunakan tombol Nonaktifkan.');
-        }
-
-        if ($facility->childTools()->exists()) {
-            return back()->with('error', 'Fasilitas tidak dapat dihapus karena masih memiliki peralatan yang terikat di ruangan ini. Hapus atau pindahkan peralatan terlebih dahulu.');
-        }
-
-        $name = $facility->name;
-        $facility->delete();
-
-        return redirect()->route('admin.facilities.index')
-            ->with('success', "Fasilitas {$name} berhasil dihapus permanen dari sistem.");
-    }
 }

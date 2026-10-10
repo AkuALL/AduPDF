@@ -5,7 +5,7 @@ namespace App\Services\Export;
 class CsvRecapExporter
 {
     /**
-     * Generate CSV content for the analytical recap (DA-04, FR-19).
+     * Generate CSV content for the analytical recap.
      *
      * @param  array<string, mixed>  $recapData
      */
@@ -41,8 +41,8 @@ class CsvRecapExporter
         fputcsv($handle, ['Total Laporan Kerusakan', (string) ($summary['total_damage_reports'] ?? 0)]);
         fputcsv($handle, []);
 
-        // Section 2: Rule BR-21 Note
-        fputcsv($handle, ['=== CATATAN ATURAN BISNIS BR-21 ===']);
+        // Section 2: Calculation Note
+        fputcsv($handle, ['=== DASAR PENGHITUNGAN REKAPITULASI ===']);
         fputcsv($handle, ['Reservasi penuh ruangan dihitung sebagai penggunaan ruangan.']);
         fputcsv($handle, ['Penggunaan individual alat hanya dihitung dari reservasi alat yang dilakukan secara eksplisit.']);
         fputcsv($handle, []);

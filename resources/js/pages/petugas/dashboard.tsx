@@ -1,5 +1,8 @@
-import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { Form, Head, Link, usePage, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import ConfirmationDialog, {
+    type ConfirmationRequest,
+} from '@/components/confirmation-dialog';
 import { FlashAlert } from '@/components/flash-alert';
 import PetugasLayout from '@/layouts/petugas-layout';
 
@@ -82,6 +85,24 @@ export default function PetugasDashboard({
 
     const [activeTab, setActiveTab] = useState<'all' | 'reservations' | 'reports' | 'today' | 'repair'>('all');
     const [searchQuery, setSearchQuery] = useState('');
+    const [confirmation, setConfirmation] = useState<ConfirmationRequest | null>(null);
+    const [reservationToReject, setReservationToReject] = useState<ReservationItem | null>(null);
+    const [rejectionReason, setRejectionReason] = useState('');
+
+    const rejectionConfirmation: ConfirmationRequest | null = reservationToReject
+        ? {
+              title: 'Tolak Reservasi',
+              description: `Tolak reservasi ${reservationToReject.facility_name}? Statusnya akan menjadi Ditolak.`,
+              confirmLabel: 'Ya, Tolak Reservasi',
+              destructive: true,
+              onConfirm: () => {
+                  const reason = rejectionReason.trim();
+                  if (reason) {
+                      router.patch(`/petugas/reservations/${reservationToReject.id}/reject`, { alasan_penolakan: reason });
+                  }
+              },
+          }
+        : null;
 
     // Filter reservation segments by search query
     const filteredSegments = useMemo(() => {
@@ -192,12 +213,12 @@ export default function PetugasDashboard({
                     </div>
                 </div>
 
-                {/* 4 Operational Metric Cards (DA-02, FR-09) */}
+                {/* Kartu metrik operasional */}
                 <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {/* Metric 1: Antrean Reservasi */}
                     <button
                         type="button"
-                        onClick={() => setActiveTab('reservations')}
+                        onClick={() => setActiveTab(activeTab === 'reservations' ? 'all' : 'reservations')}
                         className={`flex items-center justify-between rounded-lg border p-5 text-left transition shadow-2xs ${
                             activeTab === 'reservations' ? 'border-[#2D4C79] bg-white ring-2 ring-[#2D4C79]/20' : 'border-[#E5E7EB] bg-white hover:border-[#D0D5DD]'
                         }`}
@@ -217,7 +238,7 @@ export default function PetugasDashboard({
                     {/* Metric 2: Agenda Pemakaian Hari Ini */}
                     <button
                         type="button"
-                        onClick={() => setActiveTab('today')}
+                        onClick={() => setActiveTab(activeTab === 'today' ? 'all' : 'today')}
                         className={`flex items-center justify-between rounded-lg border p-5 text-left transition shadow-2xs ${
                             activeTab === 'today' ? 'border-[#2D4C79] bg-white ring-2 ring-[#2D4C79]/20' : 'border-[#E5E7EB] bg-white hover:border-[#D0D5DD]'
                         }`}
@@ -237,7 +258,7 @@ export default function PetugasDashboard({
                     {/* Metric 3: Laporan Kerusakan Baru */}
                     <button
                         type="button"
-                        onClick={() => setActiveTab('reports')}
+                        onClick={() => setActiveTab(activeTab === 'reports' ? 'all' : 'reports')}
                         className={`flex items-center justify-between rounded-lg border p-5 text-left transition shadow-2xs ${
                             activeTab === 'reports' ? 'border-[#2D4C79] bg-white ring-2 ring-[#2D4C79]/20' : 'border-[#E5E7EB] bg-white hover:border-[#D0D5DD]'
                         }`}
@@ -257,7 +278,7 @@ export default function PetugasDashboard({
                     {/* Metric 4: Fasilitas Dalam Perbaikan */}
                     <button
                         type="button"
-                        onClick={() => setActiveTab('repair')}
+                        onClick={() => setActiveTab(activeTab === 'repair' ? 'all' : 'repair')}
                         className={`flex items-center justify-between rounded-lg border p-5 text-left transition shadow-2xs ${
                             activeTab === 'repair' ? 'border-[#2D4C79] bg-white ring-2 ring-[#2D4C79]/20' : 'border-[#E5E7EB] bg-white hover:border-[#D0D5DD]'
                         }`}
@@ -277,52 +298,8 @@ export default function PetugasDashboard({
 
                 {/* Filter Bar & Tabs Navigation */}
                 <div className="mb-6 flex flex-col gap-3 rounded-lg border border-[#E5E7EB] bg-white p-3 shadow-2xs md:flex-row md:items-center md:justify-between">
-                    <div className="flex flex-wrap items-center gap-1">
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('all')}
-                            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-                                activeTab === 'all' ? 'bg-[#2D4C79] text-white' : 'text-[#667085] hover:bg-[#F3F5F7] hover:text-[#111827]'
-                            }`}
-                        >
-                            Semua Tampilan
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('reservations')}
-                            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-                                activeTab === 'reservations' ? 'bg-[#2D4C79] text-white' : 'text-[#667085] hover:bg-[#F3F5F7] hover:text-[#111827]'
-                            }`}
-                        >
-                            Antrean Reservasi ({pending_reservations_count})
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('today')}
-                            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-                                activeTab === 'today' ? 'bg-[#2D4C79] text-white' : 'text-[#667085] hover:bg-[#F3F5F7] hover:text-[#111827]'
-                            }`}
-                        >
-                            Agenda Hari Ini ({today_reservations_count})
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('reports')}
-                            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-                                activeTab === 'reports' ? 'bg-[#2D4C79] text-white' : 'text-[#667085] hover:bg-[#F3F5F7] hover:text-[#111827]'
-                            }`}
-                        >
-                            Laporan Baru ({new_reports_count})
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('repair')}
-                            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-                                activeTab === 'repair' ? 'bg-[#2D4C79] text-white' : 'text-[#667085] hover:bg-[#F3F5F7] hover:text-[#111827]'
-                            }`}
-                        >
-                            Fasilitas Perbaikan ({under_repair_facilities_count})
-                        </button>
+                    <div className="text-xs font-medium text-[#667085] px-1">
+                        {activeTab !== 'all' ? 'Tampilan difilter berdasarkan kartu. Klik kartu lagi untuk mereset.' : 'Klik salah satu kartu di atas untuk memfilter tampilan.'}
                     </div>
 
                     <div className="relative w-full md:w-72">
@@ -417,10 +394,19 @@ export default function PetugasDashboard({
                                                             </td>
                                                             <td className="whitespace-nowrap px-4 py-3 text-right">
                                                                 <div className="inline-flex items-start gap-2">
-                                                                    <Form action={`/petugas/reservations/${res.id}/approve`} method="patch">
-                                                                        {({ processing }) => (
+                                                                    <Form
+                                                                        action={`/petugas/reservations/${res.id}/approve`}
+                                                                        method="patch"
+                                                                    >
+                                                                        {({ processing, submit }) => (
                                                                             <button
-                                                                                type="submit"
+                                                                                type="button"
+                                                                                onClick={() => setConfirmation({
+                                                                                    title: 'Setujui Reservasi',
+                                                                                    description: 'Setujui reservasi ini? Pengajuan menunggu lain yang berbenturan dapat otomatis ditolak.',
+                                                                                    confirmLabel: 'Ya, Setujui Reservasi',
+                                                                                    onConfirm: submit,
+                                                                                })}
                                                                                 disabled={processing}
                                                                                 className="rounded bg-[#16794A] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#12633c] disabled:opacity-50"
                                                                             >
@@ -428,33 +414,17 @@ export default function PetugasDashboard({
                                                                             </button>
                                                                         )}
                                                                     </Form>
-                                                                    <Form action={`/petugas/reservations/${res.id}/reject`} method="patch" className="w-48 text-left">
-                                                                        {({ errors, processing }) => (
-                                                                            <>
-                                                                                <label htmlFor={`dashboard-rejection-reason-${res.id}`} className="sr-only">Alasan penolakan</label>
-                                                                                <textarea
-                                                                                    id={`dashboard-rejection-reason-${res.id}`}
-                                                                                    name="alasan_penolakan"
-                                                                                    required
-                                                                                    maxLength={5000}
-                                                                                    rows={2}
-                                                                                    placeholder="Alasan penolakan"
-                                                                                    aria-invalid={!!errors.alasan_penolakan}
-                                                                                    className="w-full rounded border border-[#D0D5DD] px-2 py-1.5 text-xs"
-                                                                                />
-                                                                                {(errors.alasan_penolakan || errors.reservation) && (
-                                                                                    <p role="alert" className="mt-1 text-xs text-[#B42318]">{errors.alasan_penolakan || errors.reservation}</p>
-                                                                                )}
-                                                                                <button
-                                                                                    type="submit"
-                                                                                    disabled={processing}
-                                                                                    className="mt-1.5 rounded border border-[#F2B8B5] bg-[#FDECEC] px-3 py-1.5 text-xs font-semibold text-[#B42318] hover:bg-[#FCD8D8] disabled:opacity-50"
-                                                                                >
-                                                                                    {processing ? 'Menolak...' : 'Tolak'}
-                                                                                </button>
-                                                                            </>
-                                                                        )}
-                                                                    </Form>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            setConfirmation(null);
+                                                                            setRejectionReason('');
+                                                                            setReservationToReject(res);
+                                                                        }}
+                                                                        className="rounded border border-[#F2B8B5] bg-[#FDECEC] px-3 py-1.5 text-xs font-semibold text-[#B42318] hover:bg-[#FCD8D8] transition"
+                                                                    >
+                                                                        Tolak
+                                                                    </button>
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -689,6 +659,34 @@ export default function PetugasDashboard({
                     </section>
                 )}
             </main>
+            <ConfirmationDialog
+                confirmation={rejectionConfirmation ?? confirmation}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setConfirmation(null);
+                        setReservationToReject(null);
+                        setRejectionReason('');
+                    }
+                }}
+                confirmDisabled={Boolean(reservationToReject && !rejectionReason.trim())}
+            >
+                {reservationToReject && (
+                    <div className="mt-2 space-y-1">
+                        <label htmlFor="reservation-rejection-reason" className="text-sm font-medium text-slate-700">
+                            Alasan penolakan
+                        </label>
+                        <textarea
+                            id="reservation-rejection-reason"
+                            required
+                            maxLength={5000}
+                            rows={3}
+                            value={rejectionReason}
+                            onChange={(event) => setRejectionReason(event.target.value)}
+                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                        />
+                    </div>
+                )}
+            </ConfirmationDialog>
         </PetugasLayout>
     );
 }

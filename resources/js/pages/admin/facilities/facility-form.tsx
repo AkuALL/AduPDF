@@ -1,18 +1,59 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import AdminBackLink from '@/components/admin-back-link';
+import ConfirmationDialog, {
+    type ConfirmationRequest,
+} from '@/components/confirmation-dialog';
 import AdminLayout from '@/layouts/admin-layout';
+import { useState } from 'react';
 
 type Room = { id: number; name: string; type: string; location: string };
 type Facility = { id: number; name: string; type: string; location: string; capacity: number; description: string | null; condition: string; parent_facility_id: number | null };
-type Props = { parentRooms: Room[]; facility?: Facility };
+type Props = { parentRooms: Room[]; facility?: Facility; parentFacilityId?: number | null };
 const types = [['ruang_kelas', 'Ruang Kelas'], ['aula', 'Aula'], ['laboratorium', 'Laboratorium'], ['alat', 'Alat (Peralatan Ruangan)'], ['lapangan', 'Lapangan']] as const;
 const conditions = [['aktif', 'Aktif'], ['dalam_perbaikan', 'Dalam Perbaikan'], ['nonaktif', 'Nonaktif']] as const;
 
-export default function FacilityForm({ parentRooms, facility }: Props) {
+export default function FacilityForm({ parentRooms, facility, parentFacilityId }: Props) {
     const editing = Boolean(facility);
-    const form = useForm({ name: facility?.name ?? '', type: facility?.type ?? '', parent_facility_id: facility?.parent_facility_id?.toString() ?? '', location: facility?.location ?? '', capacity: facility?.capacity ?? 0, condition: facility?.condition ?? 'aktif', description: facility?.description ?? '' });
+    const form = useForm({ name: facility?.name ?? '', type: facility?.type ?? (parentFacilityId ? 'alat' : ''), parent_facility_id: facility?.parent_facility_id?.toString() ?? parentFacilityId?.toString() ?? '', location: facility?.location ?? '', capacity: facility?.capacity ?? 0, condition: facility?.condition ?? 'aktif', description: facility?.description ?? '' });
     const errors = Object.values(form.errors);
     const isTool = form.data.type === 'alat';
-    function submit() { if (editing) form.put(`/admin/facilities/${facility.id}`); else form.post('/admin/facilities'); }
-    return <AdminLayout><Head title={editing ? `Edit Fasilitas — ${facility.name}` : 'Tambah Fasilitas Baru'} /><div className="w-full space-y-6"><div><Link href="/admin/facilities" className="text-xs font-semibold text-[#2D4C79] hover:underline">← Kembali ke Daftar Fasilitas</Link><h1 className="mt-2 text-xl font-bold">{editing ? 'Edit Fasilitas' : 'Tambah Fasilitas Baru'}</h1><p className="mt-1 text-xs text-slate-500">Daftarkan atau perbarui ruangan, aula, laboratorium, peralatan, atau lapangan.</p></div><div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">{errors.length > 0 && <div role="alert" className="mb-5 rounded border-l-4 border-rose-500 bg-rose-50 p-4 text-sm text-rose-800">{errors.map((error) => <div key={error}>{error}</div>)}</div>}<form onSubmit={(event) => { event.preventDefault(); submit(); }} className="space-y-6"><Field label="Nama Fasilitas"><input required value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} placeholder="Contoh: Ruang Kelas B.301" className="input" /></Field><Field label="Tipe Fasilitas"><select required value={form.data.type} onChange={(event) => form.setData('type', event.target.value)} className="input"><option value="">-- Pilih Tipe Fasilitas --</option>{types.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field>{isTool && <div className="rounded-lg border border-amber-200 bg-amber-50 p-4"><Field label="Ruangan Induk (Wajib untuk Alat)"><select required value={form.data.parent_facility_id} onChange={(event) => form.setData('parent_facility_id', event.target.value)} className="input"><option value="">-- Pilih Ruangan Induk --</option>{parentRooms.map((room) => <option key={room.id} value={room.id}>{room.name} ({room.type.replaceAll('_', ' ')} - {room.location})</option>)}</select></Field></div>}<div className="grid gap-4 sm:grid-cols-2"><Field label="Lokasi / Gedung"><input required value={form.data.location} onChange={(event) => form.setData('location', event.target.value)} className="input" /></Field><Field label="Kapasitas Orang"><input required type="number" min="0" value={form.data.capacity} onChange={(event) => form.setData('capacity', Number(event.target.value))} className="input" /></Field></div><Field label="Status Kondisi"><select required value={form.data.condition} onChange={(event) => form.setData('condition', event.target.value)} className="input">{conditions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field><Field label="Deskripsi Fasilitas"><textarea value={form.data.description} onChange={(event) => form.setData('description', event.target.value)} rows={4} className="input" /></Field><div className="flex justify-end gap-3"><Link href="/admin/facilities" className="px-4 py-2 text-xs text-slate-600">Batal</Link><button disabled={form.processing} className="rounded-md bg-[#2D4C79] px-5 py-2 text-sm font-medium text-white disabled:opacity-60">{editing ? 'Simpan Perubahan' : 'Simpan Fasilitas'}</button></div></form></div></div></AdminLayout>;
+    const [confirmation, setConfirmation] = useState<ConfirmationRequest | null>(null);
+
+    function saveFacility() {
+        if (editing) form.put(`/admin/facilities/${facility.id}`); else form.post('/admin/facilities');
+    }
+
+    function submit() {
+        if (!editing && form.data.condition === 'aktif') {
+            setConfirmation({
+                title: 'Buat Fasilitas',
+                description: `Buat fasilitas ${form.data.name}? Fasilitas akan langsung tersedia untuk reservasi baru.`,
+                confirmLabel: 'Ya, Buat Fasilitas',
+                onConfirm: saveFacility,
+            });
+            return;
+        }
+
+        if (editing && form.data.condition !== facility.condition) {
+            const conditionLabel = conditions.find(([value]) => value === form.data.condition)?.[1] ?? form.data.condition;
+            const impact = form.data.condition === 'nonaktif'
+                ? 'Reservasi menunggu akan ditolak dan reservasi disetujui yang belum selesai akan dibatalkan.'
+                : form.data.condition === 'aktif'
+                  ? 'Fasilitas akan tersedia untuk reservasi baru.'
+                  : 'Fasilitas tidak dapat digunakan untuk reservasi baru sampai kondisinya dipulihkan.';
+
+            setConfirmation({
+                title: 'Ubah Kondisi Fasilitas',
+                description: `Ubah kondisi fasilitas menjadi ${conditionLabel}? ${impact}`,
+                confirmLabel: 'Ya, Simpan Perubahan',
+                destructive: form.data.condition === 'nonaktif',
+                onConfirm: saveFacility,
+            });
+            return;
+        }
+
+        saveFacility();
+    }
+    return <AdminLayout><Head title={editing ? `Edit Fasilitas — ${facility.name}` : 'Tambah Fasilitas Baru'} /><div className="w-full space-y-6"><div><AdminBackLink href="/admin/facilities">Kembali ke Daftar Fasilitas</AdminBackLink><h1 className="mt-2 text-xl font-bold">{editing ? 'Edit Fasilitas' : 'Tambah Fasilitas Baru'}</h1><p className="mt-1 text-xs text-slate-500">Daftarkan atau perbarui ruangan, aula, laboratorium, peralatan, atau lapangan.</p>{editing && facility && ['ruang_kelas', 'aula', 'laboratorium'].includes(facility.type) && <Link href={"/admin/facilities/create?parent_facility_id=" + facility.id} className="mt-3 inline-flex rounded-md border border-[#2D4C79] px-3 py-1.5 text-xs font-semibold text-[#2D4C79] hover:bg-slate-50">+ Tambah Alat ke Ruangan Ini</Link>}</div><div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">{errors.length > 0 && <div role="alert" className="mb-5 rounded border-l-4 border-rose-500 bg-rose-50 p-4 text-sm text-rose-800">{errors.map((error) => <div key={error}>{error}</div>)}</div>}<form onSubmit={(event) => { event.preventDefault(); submit(); }} className="space-y-6"><Field label="Nama Fasilitas"><input required value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} placeholder="Contoh: Ruang Kelas B.301" className="input" /></Field><Field label="Tipe Fasilitas"><select required value={form.data.type} onChange={(event) => form.setData('type', event.target.value)} className="input"><option value="">-- Pilih Tipe Fasilitas --</option>{types.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field>{isTool && <div className="rounded-lg border border-amber-200 bg-amber-50 p-4"><Field label="Ruangan Induk (Wajib untuk Alat)"><select required value={form.data.parent_facility_id} onChange={(event) => form.setData('parent_facility_id', event.target.value)} className="input"><option value="">-- Pilih Ruangan Induk --</option>{parentRooms.map((room) => <option key={room.id} value={room.id}>{room.name} ({room.type.replaceAll('_', ' ')} - {room.location})</option>)}</select></Field></div>}<div className="grid gap-4 sm:grid-cols-2"><Field label="Lokasi / Gedung"><input required value={form.data.location} onChange={(event) => form.setData('location', event.target.value)} className="input" /></Field><Field label="Kapasitas Orang"><input required type="number" min="0" value={form.data.capacity} onChange={(event) => form.setData('capacity', Number(event.target.value))} className="input" /></Field></div><Field label="Status Kondisi"><select required value={form.data.condition} onChange={(event) => form.setData('condition', event.target.value)} className="input">{conditions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field><Field label="Deskripsi Fasilitas"><textarea value={form.data.description} onChange={(event) => form.setData('description', event.target.value)} rows={4} className="input" /></Field><div className="flex justify-end gap-3"><AdminBackLink href="/admin/facilities">Batal</AdminBackLink><button disabled={form.processing} className="rounded-md bg-[#2D4C79] px-5 py-2 text-sm font-medium text-white disabled:opacity-60">{editing ? 'Simpan Perubahan' : 'Simpan Fasilitas'}</button></div></form></div></div><ConfirmationDialog confirmation={confirmation} onOpenChange={(open) => { if (!open) setConfirmation(null); }} confirmDisabled={form.processing} /></AdminLayout>;
 }
 function Field({ label, children }: { label: string; children: React.ReactNode }) { return <div><label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-700">{label} <span className="text-rose-600">*</span></label>{children}</div>; }

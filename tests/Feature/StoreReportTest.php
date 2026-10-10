@@ -8,7 +8,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 
-test('Pengguna can view the report form without legacy account approval', function () {
+test('approved Pengguna can view the report form', function () {
     $this->withoutVite();
     $user = User::factory()->pengguna()->create();
     $facility = Facility::factory()->create(['name' => 'Laboratorium Komputer']);
@@ -37,7 +37,7 @@ test('Petugas cannot create a report', function () {
     $response->assertForbidden();
 });
 
-test('Pengguna can create a damage report with supporting photos without legacy account approval', function () {
+test('approved Pengguna can create a damage report with supporting photos', function () {
     Storage::fake('local');
     $user = User::factory()->pengguna()->create();
     $facility = Facility::factory()->create();
@@ -66,6 +66,24 @@ test('Pengguna can create a damage report with supporting photos without legacy 
     expect($report->attachments)->toHaveCount(2);
 
     $report->attachments->each(fn ($attachment) => Storage::disk('local')->assertExists($attachment->file_path));
+});
+
+test('unapproved Pengguna cannot submit a report even with an authenticated session', function () {
+    $user = User::factory()->pengguna()->create([
+        'approved_at' => null,
+        'approved_by' => null,
+    ]);
+    $facility = Facility::factory()->create();
+
+    $response = $this->actingAs($user)->post(route('reports.store'), [
+        'facility_id' => $facility->id,
+        'kategori' => 'Kerusakan perangkat',
+        'deskripsi' => 'Proyektor tidak dapat menyala.',
+        'attachments' => [UploadedFile::fake()->create('proyektor.jpg', 100, 'image/jpeg')],
+    ]);
+
+    $response->assertForbidden();
+    $this->assertDatabaseCount('reports', 0);
 });
 
 test('a report requires its facility, category, description, and supporting photo', function () {

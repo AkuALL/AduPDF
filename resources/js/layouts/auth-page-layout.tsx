@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
+import campusPhoto from '../../images/Widya_puraya_undip.jpg';
 
 export default function AuthPageLayout({ children }: PropsWithChildren) {
     return (
@@ -13,7 +14,9 @@ export default function AuthPageLayout({ children }: PropsWithChildren) {
                     <span className="text-xs text-slate-200">Sistem Reservasi & Pelaporan Fasilitas</span>
                 </div>
             </header>
-            <main className="flex flex-1 items-center justify-center p-4">
+            <main className="relative flex flex-1 items-center justify-center overflow-hidden bg-slate-900 p-4 lg:justify-end lg:pr-36">
+                <img src={campusPhoto} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-black/40" />
                 {children}
             </main>
             <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">

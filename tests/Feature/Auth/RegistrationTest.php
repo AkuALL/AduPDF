@@ -2,9 +2,20 @@
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
+
+test('user name is stored once and the framework name alias stays available', function () {
+    expect(Schema::hasColumn('users', 'nama'))->toBeTrue()
+        ->and(Schema::hasColumn('users', 'name'))->toBeFalse();
+
+    $user = User::factory()->create(['nama' => 'Dewi Sartika']);
+
+    expect($user->name)->toBe('Dewi Sartika')
+        ->and($user->fresh()->toArray()['name'])->toBe('Dewi Sartika');
+});
 
 test('registration screen can be rendered', function () {
     $response = $this->get(route('register'));
@@ -12,16 +23,23 @@ test('registration screen can be rendered', function () {
     $response->assertOk()->assertInertia(fn (Assert $page) => $page->component('auth/register'));
 });
 
-test('new Pengguna can self-register and account is immediately active (GAL-02, BR-05, BR-06)', function () {
+test('email verification endpoint is not registered', function () {
+    $this->get('/email/verify')->assertNotFound();
+});
+
+test('new Pengguna must wait for Admin approval before login (GAL-02, BR-05, BR-06, FR-20)', function () {
     $response = $this->post(route('register'), [
         'nama' => 'Ahmad Dahlan',
         'email' => 'ahmad@kampus.ac.id',
         'password' => 'Password123!',
         'password_confirmation' => 'Password123!',
+        'role' => 'petugas',
+        'approved_at' => now()->toDateTimeString(),
+        'approved_by' => 1,
     ]);
 
     $response->assertRedirect(route('login'));
-    $response->assertSessionHas('status');
+    $response->assertSessionHas('status', 'Pendaftaran berhasil. Akun Anda menunggu persetujuan Admin sebelum dapat digunakan.');
 
     $this->assertGuest();
 
@@ -29,15 +47,19 @@ test('new Pengguna can self-register and account is immediately active (GAL-02, 
         'nama' => 'Ahmad Dahlan',
         'email' => 'ahmad@kampus.ac.id',
         'role' => 'pengguna',
+        'approved_at' => null,
+        'approved_by' => null,
     ]);
 
-    // Per SRS V2 & GAL-02: Akun baru langsung aktif dan dapat login
     $loginResponse = $this->post(route('login'), [
         'email' => 'ahmad@kampus.ac.id',
         'password' => 'Password123!',
     ]);
 
-    $this->assertAuthenticated();
+    $loginResponse->assertSessionHasErrors([
+        'email' => 'Akun Anda masih menunggu persetujuan Admin.',
+    ]);
+    $this->assertGuest();
 });
 
 test('registration fails when email is already registered', function () {

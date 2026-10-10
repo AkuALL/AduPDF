@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { UserNavbar } from '@/components/user-navbar';
 
 type ReportStatus = 'baru' | 'diproses' | 'selesai' | 'ditolak';
 
@@ -32,9 +33,19 @@ export default function ReportShow({ report }: Props) {
     return (
         <>
             <Head title="Detail Laporan" />
-            <main className="min-h-screen bg-[#F7F8FA] px-4 py-10 text-[#111827]">
-                <div className="w-full">
-                    <Link href="/reports" className="text-sm font-medium text-[#2D4C79] hover:underline">Kembali ke laporan saya</Link>
+            <div className="min-h-screen bg-[#F7F8FA] text-[#111827] font-sans antialiased">
+                <UserNavbar current="reports" />
+
+                <main className="w-full px-4 py-8 sm:px-6 lg:px-8">
+                    <div className="w-full">
+                        <div className="mb-6">
+                            <Link
+                                href="/reports"
+                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
+                            >
+                                <span aria-hidden="true">←</span> Kembali ke laporan saya
+                            </Link>
+                        </div>
                     <article className="mt-6 rounded-lg border border-[#E5E7EB] bg-white p-6">
                         <div className="flex items-start justify-between gap-4">
                             <div>
@@ -66,6 +77,7 @@ export default function ReportShow({ report }: Props) {
                     </article>
                 </div>
             </main>
-        </>
+        </div>
+    </>
     );
 }

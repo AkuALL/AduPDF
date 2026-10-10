@@ -8,5 +8,4 @@ enum ReservationStatus: string
     case Approved = 'disetujui';
     case Rejected = 'ditolak';
     case Cancelled = 'dibatalkan';
-    case Expired = 'kedaluwarsa';
 }

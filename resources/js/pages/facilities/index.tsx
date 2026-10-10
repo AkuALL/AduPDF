@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import { UserNavbar } from '@/components/user-navbar';
+import { facilityImages } from '@/lib/facility-images';
 
 type Facility = {
     id: number;
@@ -94,10 +95,10 @@ export default function FacilityIndex({
                 <main className="w-full px-4 py-8 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="mb-6">
-                        <h1 className="text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl text-center">
+                        <h1 className="text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl">
                             Fasilitas Kampus
                         </h1>
-                        <p className="mt-1 text-lg text-[#667085] text-center">
+                        <p className="mt-1 text-lg text-[#667085]">
                             Temukan ruangan dan peralatan untuk kegiatan akademik dan organisasi.
                         </p>
                     </div>
@@ -109,7 +110,7 @@ export default function FacilityIndex({
                     >
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             <div className="group sm:col-span-2 lg:col-span-1">
-                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
+                                <label className="mb-1.5 block text-base font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Cari
                                 </label>
                                 <input
@@ -122,7 +123,7 @@ export default function FacilityIndex({
                             </div>
 
                             <div className="group">
-                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
+                                <label className="mb-1.5 block text-base font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Tipe
                                 </label>
                                 <select
@@ -140,7 +141,7 @@ export default function FacilityIndex({
                             </div>
 
                             <div className="group">
-                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
+                                <label className="mb-1.5 block text-base font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Lokasi
                                 </label>
                                 <select
@@ -158,7 +159,7 @@ export default function FacilityIndex({
                             </div>
 
                             <div className="group">
-                                <label className="mb-1.5 block text-base text-center font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
+                                <label className="mb-1.5 block text-base font-semibold text-[#111827] group-hover:text-[#2D4C79] transition-colors">
                                     Kapasitas
                                 </label>
                                 <input
@@ -228,8 +229,17 @@ export default function FacilityIndex({
                                     <Link
                                         key={fac.id}
                                         href={`/facilities/${fac.id}`}
-                                        className="group flex flex-col justify-between rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#2D4C79] hover:shadow-md transition"
+                                        className="group flex flex-col justify-between overflow-hidden rounded-lg border border-[#E5E7EB] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#2D4C79] hover:shadow-md transition"
                                     >
+                                        {facilityImages[fac.type]?.[0] && (
+                                            <img
+                                                src={facilityImages[fac.type][0]}
+                                                alt={fac.name}
+                                                loading="lazy"
+                                                className="h-40 w-full object-cover"
+                                            />
+                                        )}
+                                        <div className="flex flex-1 flex-col justify-between p-5">
                                         <div>
                                             <div className="flex items-center justify-between gap-2">
                                                 <span className="text-sm font-semibold text-[#2D4C79]">
@@ -281,6 +291,7 @@ export default function FacilityIndex({
                                             <div className="inline-flex h-10 w-full items-center justify-center rounded-md border border-[#D0D5DD] bg-white text-sm font-semibold text-[#2D4C79] group-hover:bg-[#E9EEF5] group-hover:border-[#2D4C79] transition">
                                                 Lihat Detail & Jadwal →
                                             </div>
+                                        </div>
                                         </div>
                                     </Link>
                                 );
