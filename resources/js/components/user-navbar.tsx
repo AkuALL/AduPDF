@@ -46,12 +46,14 @@ export function UserNavbar({ current }: { current?: 'facilities' | 'reservations
                 </div>
 
                 <nav className="hidden sm:flex sm:items-center sm:gap-6 text-base absolute left-1/2 -translate-x-1/2">
-                    <Link
-                        href="/facilities"
-                        className={navLinkClass(current === 'facilities')}
-                    >
-                        Fasilitas
-                    </Link>
+                    {user && (
+                        <Link
+                            href="/facilities"
+                            className={navLinkClass(current === 'facilities')}
+                        >
+                            Fasilitas
+                        </Link>
+                    )}
                     {user?.role === 'pengguna' && (
                         <>
                             <Link

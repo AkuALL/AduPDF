@@ -1,6 +1,12 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Download, FileSpreadsheet, FileText, Info } from 'lucide-react';
+import { ChevronDown, Download, FileSpreadsheet, FileText } from 'lucide-react';
 import { useState } from 'react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import AdminLayout from '@/layouts/admin-layout';
 
 type FacilityRecapItem = {
@@ -78,7 +84,6 @@ export default function RecapIndex({
     summary,
     facilities,
     damage_by_facility,
-    damage_by_location,
     available_locations,
     facility_types,
 }: Props) {
@@ -112,6 +117,7 @@ export default function RecapIndex({
     const exportCsvUrl = `/admin/recap/export?${baseExportParams}&format=csv`;
     const exportExcelUrl = `/admin/recap/export?${baseExportParams}&format=excel`;
     const exportPdfUrl = `/admin/recap/export?${baseExportParams}&format=pdf`;
+    const sortedDamageByFacility = [...damage_by_facility].sort((a, b) => b.report_count - a.report_count);
 
     return (
         <AdminLayout>
@@ -121,59 +127,43 @@ export default function RecapIndex({
                 {/* Header Section */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#2D4C79]/10 text-[#2D4C79]">
-                                Analitik & Pelaporan
-                            </span>
-                            <span className="text-xs text-[#667085]">·</span>
-                            <span className="text-xs text-[#667085]">Rekap dan ekspor data</span>
-                            <span className="text-xs text-[#667085]">·</span>
-                            <span className="text-xs text-[#667085]">Aturan rekap diterapkan</span>
-                        </div>
                         <h1 className="text-2xl sm:text-3xl font-bold text-[#111827] tracking-tight">
                             Rekapitulasi Okupansi & Kerusakan
                         </h1>
-                        <p className="text-sm text-[#667085] mt-1">
-                            Okupansi penggunaan fasilitas dan frekuensi laporan kerusakan per fasilitas serta lokasi kampus.
-                        </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                        {/* CSV Export */}
-                        <a
-                            href={exportCsvUrl}
-                            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-md border border-[#D0D5DD] bg-white text-[#111827] hover:bg-[#F3F5F7] shadow-2xs transition"
-                            title="Unduh rekap dalam format CSV mentah"
-                        >
-                            <Download className="w-3.5 h-3.5 text-[#667085]" />
-                            CSV
-                        </a>
-
-                        {/* Excel Export */}
-                        <a
-                            href={exportExcelUrl}
-                            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-md border border-[#16794A]/30 bg-[#EAF7F0] text-[#16794A] hover:bg-[#D4EFE0] shadow-2xs transition"
-                            title="Unduh rekap spreadsheet Excel terformat"
-                        >
-                            <FileSpreadsheet className="w-3.5 h-3.5 text-[#16794A]" />
-                            Excel (.xls)
-                        </a>
-
-                        {/* PDF Export */}
-                        <a
-                            href={exportPdfUrl}
-                            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-md bg-[#2D4C79] text-white hover:bg-[#243E63] shadow-xs transition"
-                            title="Unduh rekap dokumen PDF siap cetak"
-                        >
-                            <FileText className="w-3.5 h-3.5" />
-                            Dokumen PDF
-                        </a>
-
-                        <Link
-                            href="/admin/dashboard"
-                            className="inline-flex items-center px-3.5 py-2 text-xs font-medium rounded-md border border-[#D0D5DD] bg-white text-[#2D4C79] hover:bg-[#F3F5F7] transition"
-                        >
-                            Dashboard
-                        </Link>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button
+                                    type="button"
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-md bg-[#2D4C79] text-white hover:bg-[#243E63] shadow-xs transition"
+                                >
+                                    <Download className="size-3.5" />
+                                    Export
+                                    <ChevronDown className="size-3.5" />
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-44 rounded-xl border border-[#E5E7EB] bg-white p-1.5 text-[#111827] shadow-lg">
+                                <DropdownMenuItem asChild>
+                                    <a href={exportCsvUrl} title="Unduh rekap dalam format CSV mentah">
+                                        <Download className="size-4 text-[#667085]" />
+                                        CSV
+                                    </a>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <a href={exportExcelUrl} title="Unduh rekap spreadsheet Excel terformat">
+                                        <FileSpreadsheet className="size-4 text-[#16794A]" />
+                                        Excel (.xls)
+                                    </a>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <a href={exportPdfUrl} title="Unduh rekap dokumen PDF siap cetak">
+                                        <FileText className="size-4 text-[#2D4C79]" />
+                                        PDF
+                                    </a>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
 
@@ -336,103 +326,52 @@ export default function RecapIndex({
                     </div>
                 </div>
 
-                {/* Penjelasan dasar penghitungan rekapitulasi */}
-                <div className="rounded-lg bg-blue-50/70 border border-blue-200 p-4 text-xs text-[#2D4C79] flex items-start gap-3">
-                    <Info className="w-5 h-5 text-[#2D4C79] shrink-0 mt-0.5" />
-                    <div>
-                        <strong className="font-semibold block text-sm mb-0.5">Dasar penghitungan rekapitulasi:</strong>
-                        Reservasi penuh ruangan dihitung secara tepat sebagai penggunaan ruangan tersebut. Alat di dalam ruangan dinonaktifkan dari pemesanan selama reservasi berlangsung, namun <em>tidak menambah frekuensi penggunaan individual alat</em>. Frekuensi penggunaan alat hanya dihitung dari reservasi alat yang diajukan dan disetujui secara eksplisit.
+                {/* Bagian 2: Frekuensi Kerusakan per Fasilitas */}
+                <div className="bg-white border border-[#E5E7EB] rounded-lg shadow-xs overflow-hidden">
+                    <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#FBFBFC]">
+                        <h2 className="text-base font-bold text-[#111827]">
+                            Frekuensi Kerusakan per Fasilitas
+                        </h2>
                     </div>
-                </div>
 
-                {/* Bagian 2 & 3: Frekuensi Kerusakan per Fasilitas & Lokasi */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Tabel Kerusakan per Fasilitas */}
-                    <div className="lg:col-span-2 bg-white border border-[#E5E7EB] rounded-lg shadow-xs overflow-hidden">
-                        <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#FBFBFC]">
-                            <h2 className="text-base font-bold text-[#111827]">
-                                Frekuensi Kerusakan per Fasilitas
-                            </h2>
-                            <p className="text-xs text-[#667085] mt-0.5">
-                                Jumlah insiden gangguan atau kerusakan yang dilaporkan civitas
-                            </p>
-                        </div>
-
-                        {damage_by_facility.length > 0 ? (
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left text-sm">
-                                    <thead className="bg-[#F9FAFB] text-xs font-semibold text-[#4B5563] uppercase border-b border-[#E5E7EB]">
-                                        <tr>
-                                            <th className="px-6 py-3">Fasilitas</th>
-                                            <th className="px-6 py-3">Lokasi</th>
-                                            <th className="px-6 py-3">Kondisi</th>
-                                            <th className="px-6 py-3 text-right">Laporan Masuk</th>
+                    {sortedDamageByFacility.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-[#F9FAFB] text-xs font-semibold text-[#4B5563] uppercase border-b border-[#E5E7EB]">
+                                    <tr>
+                                        <th className="px-6 py-3">Fasilitas</th>
+                                        <th className="px-6 py-3">Lokasi</th>
+                                        <th className="px-6 py-3">Kondisi</th>
+                                        <th className="px-6 py-3 text-right">Laporan Masuk</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-[#E5E7EB]">
+                                    {sortedDamageByFacility.map((df) => (
+                                        <tr key={df.id} className="hover:bg-[#F9FAFB] transition">
+                                            <td className="px-6 py-3.5 font-semibold text-[#111827]">
+                                                {df.name}
+                                            </td>
+                                            <td className="px-6 py-3.5 text-xs text-[#4B5563]">
+                                                {df.location}
+                                            </td>
+                                            <td className="px-6 py-3.5">
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-800">
+                                                    {df.condition_label}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-3.5 text-right font-bold text-rose-700">
+                                                {df.report_count} kali
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-[#E5E7EB]">
-                                        {damage_by_facility.map((df) => (
-                                            <tr key={df.id} className="hover:bg-[#F9FAFB] transition">
-                                                <td className="px-6 py-3.5 font-semibold text-[#111827]">
-                                                    {df.name}
-                                                </td>
-                                                <td className="px-6 py-3.5 text-xs text-[#4B5563]">
-                                                    {df.location}
-                                                </td>
-                                                <td className="px-6 py-3.5">
-                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-800">
-                                                        {df.condition_label}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-3.5 text-right font-bold text-rose-700">
-                                                    {df.report_count} kali
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        ) : (
-                            <div className="px-6 py-10 text-center text-xs text-[#667085]">
-                                Tidak ada laporan kerusakan pada periode filter terpilih.
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Tabel Kerusakan per Lokasi */}
-                    <div className="bg-white border border-[#E5E7EB] rounded-lg shadow-xs overflow-hidden">
-                        <div className="px-6 py-4 border-b border-[#E5E7EB] bg-[#FBFBFC]">
-                            <h2 className="text-base font-bold text-[#111827]">
-                                Frekuensi per Lokasi
-                            </h2>
-                            <p className="text-xs text-[#667085] mt-0.5">
-                                Titik konsentrasi insiden per gedung
-                            </p>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-
-                        {damage_by_location.length > 0 ? (
-                            <div className="divide-y divide-[#E5E7EB]">
-                                {damage_by_location.map((locStat) => (
-                                    <div key={locStat.location} className="px-6 py-3.5 flex items-center justify-between hover:bg-[#F9FAFB] transition">
-                                        <div>
-                                            <div className="text-sm font-semibold text-[#111827]">
-                                                {locStat.location}
-                                            </div>
-                                            <div className="text-xs text-[#667085] mt-0.5">
-                                                {locStat.facilities_count} fasilitas terdata
-                                            </div>
-                                        </div>
-                                        <span className="font-bold text-xs text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded">
-                                            {locStat.total_reports} insiden
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="px-6 py-10 text-center text-xs text-[#667085]">
-                                Belum ada laporan kerusakan di lokasi mana pun pada periode ini.
-                            </div>
-                        )}
-                    </div>
+                    ) : (
+                        <div className="px-6 py-10 text-center text-xs text-[#667085]">
+                            Tidak ada laporan kerusakan pada periode filter terpilih.
+                        </div>
+                    )}
                 </div>
 
                 {/* Bagian 1: Tabel Okupansi & Penggunaan Fasilitas */}
@@ -442,9 +381,6 @@ export default function RecapIndex({
                             <h2 className="text-base font-bold text-[#111827]">
                                 Rekapitulasi Okupansi & Penggunaan Fasilitas
                             </h2>
-                            <p className="text-xs text-[#667085] mt-0.5">
-                                Menampilkan seluruh ruangan dan alat terdaftar beserta jam terbang pemakaian pada periode terpilih
-                            </p>
                         </div>
                         <span className="text-xs font-semibold text-[#667085] bg-white border border-[#D0D5DD] px-2.5 py-1 rounded">
                             {facilities.length} fasilitas terdata

@@ -213,9 +213,10 @@ test('admin can export recap to CSV (DA-04, FR-19)', function () {
 
     $content = $response->streamedContent();
     expect($content)->toContain('REKAPITULASI OKUPANSI & KERUSAKAN FASILITAS')
-        ->and($content)->toContain('BR-21')
         ->and($content)->toContain('Ruang Teater')
         ->and($content)->toContain('Gedung Rektorat Lt. 3');
+    expect($content)->toContain('DASAR PENGHITUNGAN REKAPITULASI');
+    expect($content)->not->toContain('BR-21');
 });
 
 test('admin can export recap to Excel with worksheets, styling, and BR-21 note (DA-04, FR-19)', function () {
@@ -236,8 +237,9 @@ test('admin can export recap to Excel with worksheets, styling, and BR-21 note (
         ->and($content)->toContain('Worksheet ss:Name="Okupansi Fasilitas"')
         ->and($content)->toContain('Worksheet ss:Name="Kerusakan per Fasilitas"')
         ->and($content)->toContain('Worksheet ss:Name="Kerusakan per Lokasi"')
-        ->and($content)->toContain('Aturan BR-21')
+        ->and($content)->toContain('Dasar penghitungan:')
         ->and($content)->toContain('Auditorium Utama');
+    expect($content)->not->toContain('BR-21');
 });
 
 test('admin can export recap to PDF with valid PDF binary format (DA-04, FR-19)', function () {
@@ -258,6 +260,9 @@ test('admin can export recap to PDF with valid PDF binary format (DA-04, FR-19)'
         ->and(str_contains($content, '%%EOF'))->toBeTrue()
         ->and($content)->toContain('ADUPDF')
         ->and($content)->toContain('Ruang Rapat Senat');
+    expect($content)->not->toContain('BR-21');
+    expect($content)->not->toContain('DA-04');
+    expect($content)->not->toContain('FR-19');
 });
 
 test('export respects filters like facility_type and location (DA-04, FR-19)', function () {

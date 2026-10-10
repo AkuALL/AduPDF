@@ -26,7 +26,7 @@ class PdfRecapExporter
     private int $currentPageNumber = 0;
 
     /**
-     * Generate PDF content for analytical recap (DA-04, FR-19).
+     * Generate PDF content for the analytical recap.
      *
      * @param  array<string, mixed>  $recapData
      */
@@ -62,8 +62,8 @@ class PdfRecapExporter
         // 2. Summary KPI Cards
         $this->drawSummaryCards($summary, count($facilities));
 
-        // 3. BR-21 Note Box
-        $this->drawBr21Box();
+        // 3. Calculation Note Box
+        $this->drawCalculationNote();
 
         // 4. Section 1: Okupansi & Penggunaan Fasilitas Table
         $this->drawSectionTitle('1. Rekapitulasi Okupansi & Penggunaan Fasilitas');
@@ -266,7 +266,7 @@ class PdfRecapExporter
         $this->currentY = $y - 12;
     }
 
-    private function drawBr21Box(): void
+    private function drawCalculationNote(): void
     {
         $width = $this->pageWidth - ($this->marginLeft + $this->marginRight);
         $height = 20.0;
@@ -276,7 +276,7 @@ class PdfRecapExporter
         $this->fillRect($this->marginLeft, $y, 3, $height, [0.176, 0.298, 0.475]); // Left indicator bar
         $this->drawRect($this->marginLeft, $y, $width, $height, [0.75, 0.84, 0.93]);
 
-        $note = 'Aturan BR-21: Reservasi penuh ruangan dihitung sebagai penggunaan ruangan. Penggunaan alat hanya dihitung dari reservasi alat secara eksplisit.';
+        $note = 'Dasar penghitungan: Reservasi penuh ruangan dihitung sebagai penggunaan ruangan. Penggunaan alat hanya dihitung dari reservasi alat secara eksplisit.';
         $this->drawText($this->marginLeft + 8, $y + 6, $note, 8, true, [0.14, 0.26, 0.43]);
 
         $this->currentY = $y - 14;
@@ -492,7 +492,7 @@ class PdfRecapExporter
         // Append footers to each page stream
         for ($p = 0; $p < $totalPages; $p++) {
             $footerY = $this->marginBottom - 16;
-            $footerLine = sprintf('Dokumen Resmi AduPDF (DA-04 / FR-19) — Halaman %d dari %d', $p + 1, $totalPages);
+            $footerLine = sprintf('Dokumen Resmi AduPDF — Halaman %d dari %d', $p + 1, $totalPages);
             $timestampLine = sprintf('Dicetak pada %s', $printDate);
 
             // Footer separator line

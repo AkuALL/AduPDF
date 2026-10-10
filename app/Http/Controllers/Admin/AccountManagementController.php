@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -93,12 +94,17 @@ class AccountManagementController extends Controller
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:100'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:100', 'unique:users,email'],
+            'identity_type' => ['required', 'string', Rule::in(['nim', 'nip', 'no_pegawai'])],
+            'institutional_id' => ['required', 'string', 'max:100'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
             'nama.required' => 'Nama Pengguna wajib diisi.',
             'email.required' => 'Alamat email wajib diisi.',
             'email.email' => 'Format alamat email tidak valid.',
             'email.unique' => 'Alamat email ini sudah terdaftar di sistem.',
+            'identity_type.required' => 'Pilih jenis identitas institusional.',
+            'identity_type.in' => 'Jenis identitas institusional tidak valid.',
+            'institutional_id.required' => 'Nomor identitas institusional wajib diisi.',
             'password.required' => 'Kata sandi wajib diisi.',
             'password.min' => 'Kata sandi minimal harus 8 karakter.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
@@ -107,6 +113,8 @@ class AccountManagementController extends Controller
         $pengguna = new User([
             'nama' => $validated['nama'],
             'email' => $validated['email'],
+            'identity_type' => $validated['identity_type'],
+            'institutional_id' => $validated['institutional_id'],
             'password' => Hash::make($validated['password']),
             'role' => 'pengguna',
         ]);

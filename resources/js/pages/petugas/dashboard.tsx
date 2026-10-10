@@ -1,5 +1,8 @@
 import { Form, Head, Link, usePage, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import ConfirmationDialog, {
+    type ConfirmationRequest,
+} from '@/components/confirmation-dialog';
 import { FlashAlert } from '@/components/flash-alert';
 import PetugasLayout from '@/layouts/petugas-layout';
 
@@ -82,6 +85,24 @@ export default function PetugasDashboard({
 
     const [activeTab, setActiveTab] = useState<'all' | 'reservations' | 'reports' | 'today' | 'repair'>('all');
     const [searchQuery, setSearchQuery] = useState('');
+    const [confirmation, setConfirmation] = useState<ConfirmationRequest | null>(null);
+    const [reservationToReject, setReservationToReject] = useState<ReservationItem | null>(null);
+    const [rejectionReason, setRejectionReason] = useState('');
+
+    const rejectionConfirmation: ConfirmationRequest | null = reservationToReject
+        ? {
+              title: 'Tolak Reservasi',
+              description: `Tolak reservasi ${reservationToReject.facility_name}? Statusnya akan menjadi Ditolak.`,
+              confirmLabel: 'Ya, Tolak Reservasi',
+              destructive: true,
+              onConfirm: () => {
+                  const reason = rejectionReason.trim();
+                  if (reason) {
+                      router.patch(`/petugas/reservations/${reservationToReject.id}/reject`, { alasan_penolakan: reason });
+                  }
+              },
+          }
+        : null;
 
     // Filter reservation segments by search query
     const filteredSegments = useMemo(() => {
@@ -376,15 +397,16 @@ export default function PetugasDashboard({
                                                                     <Form
                                                                         action={`/petugas/reservations/${res.id}/approve`}
                                                                         method="patch"
-                                                                        onSubmit={(event) => {
-                                                                            if (!window.confirm('Setujui reservasi ini? Pengajuan menunggu lain yang berbenturan dapat otomatis ditolak.')) {
-                                                                                event.preventDefault();
-                                                                            }
-                                                                        }}
                                                                     >
-                                                                        {({ processing }) => (
+                                                                        {({ processing, submit }) => (
                                                                             <button
-                                                                                type="submit"
+                                                                                type="button"
+                                                                                onClick={() => setConfirmation({
+                                                                                    title: 'Setujui Reservasi',
+                                                                                    description: 'Setujui reservasi ini? Pengajuan menunggu lain yang berbenturan dapat otomatis ditolak.',
+                                                                                    confirmLabel: 'Ya, Setujui Reservasi',
+                                                                                    onConfirm: submit,
+                                                                                })}
                                                                                 disabled={processing}
                                                                                 className="rounded bg-[#16794A] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#12633c] disabled:opacity-50"
                                                                             >
@@ -395,10 +417,9 @@ export default function PetugasDashboard({
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => {
-                                                                            const reason = window.prompt('Alasan penolakan (wajib diisi):');
-                                                                            if (reason) {
-                                                                                router.patch(`/petugas/reservations/${res.id}/reject`, { alasan_penolakan: reason });
-                                                                            }
+                                                                            setConfirmation(null);
+                                                                            setRejectionReason('');
+                                                                            setReservationToReject(res);
                                                                         }}
                                                                         className="rounded border border-[#F2B8B5] bg-[#FDECEC] px-3 py-1.5 text-xs font-semibold text-[#B42318] hover:bg-[#FCD8D8] transition"
                                                                     >
@@ -638,6 +659,34 @@ export default function PetugasDashboard({
                     </section>
                 )}
             </main>
+            <ConfirmationDialog
+                confirmation={rejectionConfirmation ?? confirmation}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setConfirmation(null);
+                        setReservationToReject(null);
+                        setRejectionReason('');
+                    }
+                }}
+                confirmDisabled={Boolean(reservationToReject && !rejectionReason.trim())}
+            >
+                {reservationToReject && (
+                    <div className="mt-2 space-y-1">
+                        <label htmlFor="reservation-rejection-reason" className="text-sm font-medium text-slate-700">
+                            Alasan penolakan
+                        </label>
+                        <textarea
+                            id="reservation-rejection-reason"
+                            required
+                            maxLength={5000}
+                            rows={3}
+                            value={rejectionReason}
+                            onChange={(event) => setRejectionReason(event.target.value)}
+                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                        />
+                    </div>
+                )}
+            </ConfirmationDialog>
         </PetugasLayout>
     );
 }

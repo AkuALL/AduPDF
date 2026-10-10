@@ -5,7 +5,7 @@ namespace App\Services\Export;
 class ExcelRecapExporter
 {
     /**
-     * Generate Excel XML Spreadsheet (2003) content for the analytical recap (DA-04, FR-19).
+     * Generate Excel XML Spreadsheet (2003) content for the analytical recap.
      *
      * @param  array<string, mixed>  $recapData
      */
@@ -170,9 +170,9 @@ class ExcelRecapExporter
         $xml[] = '   </Row>';
         $xml[] = '   <Row/>';
 
-        // BR-21 Note Box
+        // Calculation Note Box
         $xml[] = '   <Row ss:Height="22">';
-        $xml[] = '    <Cell ss:MergeAcross="10" ss:StyleID="RuleBox"><Data ss:Type="String">Aturan BR-21: Reservasi penuh ruangan dihitung sebagai penggunaan ruangan. Penggunaan alat hanya dihitung dari reservasi alat secara eksplisit.</Data></Cell>';
+        $xml[] = '    <Cell ss:MergeAcross="10" ss:StyleID="RuleBox"><Data ss:Type="String">Dasar penghitungan: Reservasi penuh ruangan dihitung sebagai penggunaan ruangan. Penggunaan alat hanya dihitung dari reservasi alat secara eksplisit.</Data></Cell>';
         $xml[] = '   </Row>';
         $xml[] = '   <Row/>';
 

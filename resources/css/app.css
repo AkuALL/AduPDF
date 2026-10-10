@@ -4,6 +4,37 @@
     .input {
         @apply w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-[#2D4C79] focus:outline-none focus:ring-2 focus:ring-[#2D4C79];
     }
+
+    body:has(.admin-interactions)
+        :is(
+            a[href],
+            button:not(:disabled),
+            summary,
+            select:not(:disabled),
+            input[type='checkbox']:not(:disabled),
+            input[type='radio']:not(:disabled),
+            input[type='range']:not(:disabled),
+            input[type='file']:not(:disabled),
+            input[type='button']:not(:disabled),
+            input[type='submit']:not(:disabled),
+            input[type='reset']:not(:disabled),
+            [role='button'],
+            [role='link'],
+            [role='tab'],
+            [role='menuitem'],
+            [role='option'],
+            [role='switch'],
+            [role='checkbox'],
+            [role='radio'],
+            label:has(input[type='checkbox'], input[type='radio'])
+        ):not([aria-disabled='true']) {
+        cursor: pointer;
+        transition: filter 150ms ease;
+
+        &:hover {
+            filter: brightness(0.96);
+        }
+    }
 }
 
 @import 'tw-animate-css';

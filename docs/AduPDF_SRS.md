@@ -141,7 +141,7 @@ Keterangan: Akun hasil registrasi mandiri baru dapat login setelah disetujui Adm
 | BR-11 | Pembatalan Pengguna H-2 | Pengguna hanya boleh membatalkan reservasi miliknya paling lambat tepat 48 jam sebelum start_time. Setelah melewati batas tersebut, pembatalan oleh Pengguna ditolak. |
 | BR-12 | Pembatalan Darurat | Petugas boleh membatalkan reservasi yang telah disetujui dalam kondisi darurat dan wajib mengisi alasan. |
 | BR-13 | Status Laporan | Status laporan hanya: baru, diproses, selesai, ditolak. “dalam_perbaikan” adalah status kondisi fasilitas, bukan status laporan. |
-| BR-14 | Penonaktifan dan Penghapusan Fasilitas | Admin dapat menonaktifkan fasilitas; jika fasilitas berupa ruangan, dampak reservasi juga mencakup semua alat turunannya. Reservasi menunggu yang belum selesai otomatis ditolak dan reservasi disetujui yang belum selesai dibatalkan. Tidak diperlukan tindakan/alasan Petugas dan tidak ada pesan pembatalan khusus; status akhir tetap terlihat di riwayat. Kode controller memblokir penghapusan permanen jika fasilitas memiliki reservasi atau alat turunan. Foreign key laporan juga mencegah penghapusan fasilitas yang masih direferensikan laporan, tetapi kode controller tidak menangani kondisi ini sebagai pesan validasi khusus. |
+| BR-14 | Penonaktifan Fasilitas tanpa Penghapusan Permanen | Admin dapat menonaktifkan fasilitas; jika fasilitas berupa ruangan, dampak reservasi juga mencakup semua alat turunannya. Reservasi menunggu yang belum selesai otomatis ditolak dan reservasi disetujui yang belum selesai dibatalkan. Tidak diperlukan tindakan/alasan Petugas dan tidak ada pesan pembatalan khusus; status akhir tetap terlihat di riwayat. Fasilitas yang sudah terdaftar tidak dapat dihapus permanen; Admin menonaktifkannya agar data, relasi, dan riwayat tetap terpelihara. |
 | BR-15 | Relasi Ruangan–Alat | Fasilitas bertipe alat wajib terkait ke satu ruangan induk. Ruangan yang dapat memiliki alat adalah ruang kelas, aula, dan laboratorium. Lapangan tidak memiliki alat. |
 | BR-16 | Availability Ruangan–Alat | Jika ruangan direservasi penuh pada slot tertentu, seluruh alat di dalamnya menjadi tidak tersedia untuk reservasi terpisah pada slot overlap. Jika satu atau lebih alat dalam ruangan telah direservasi/disetujui, ruangan induknya tidak dapat direservasi penuh pada slot overlap, tetapi alat lain yang masih tersedia di ruangan tersebut tetap dapat dipesan oleh Pengguna lain. |
 | BR-17 | Batas Overlap Pengguna | Reservasi berstatus menunggu boleh saling overlap sampai Petugas memutuskan approval. Saat pengajuan dan approval diperiksa terhadap reservasi disetujui milik Pengguna: Pengguna yang memiliki reservasi alat di Ruang A hanya boleh menambah reservasi alat lain yang tersedia di Ruang A pada waktu overlap; ia tidak boleh mengajukan reservasi penuh Ruang A pada waktu overlap atau reservasi pada ruangan lain. Di waktu yang tidak overlap, Pengguna boleh memesan fasilitas pada ruangan lain. |
@@ -470,16 +470,16 @@ Admin dapat menambah, melihat, mengubah, dan menonaktifkan fasilitas.
 
 Perilaku/Aturan
 
-- Penonaktifan fasilitas mengubah kondisi menjadi `nonaktif`; tindakan ini berbeda dari penghapusan permanen.
+- Penonaktifan fasilitas mengubah kondisi menjadi `nonaktif` dan digunakan untuk menghentikan penggunaan tanpa menghapus data fasilitas atau riwayatnya; sistem tidak menyediakan penghapusan permanen fasilitas.
 - Ketika Admin menonaktifkan fasilitas, sistem langsung menolak seluruh reservasi menunggu dan membatalkan seluruh reservasi disetujui yang belum selesai pada fasilitas tersebut; bila berupa ruangan, dampak juga berlaku pada semua alat turunannya.
 - Penonaktifan Admin tidak membutuhkan alasan Petugas dan tidak menghasilkan pesan pembatalan khusus; status akhir tetap terlihat pada riwayat pengguna.
-- Penghapusan permanen dibolehkan hanya jika fasilitas tidak memiliki riwayat reservasi dan tidak memiliki alat turunan; jika salah satu kondisi tersebut tidak terpenuhi, penghapusan diblokir.
+- Penghapusan permanen fasilitas dilarang untuk semua kondisi, termasuk ketika fasilitas tidak memiliki riwayat reservasi atau alat turunan.
 
 Acceptance Criteria
 
 - Fasilitas nonaktif tidak tersedia untuk reservasi baru.
-- Penghapusan permanen diblokir oleh controller jika fasilitas memiliki riwayat reservasi atau alat turunan.
-- Jika laporan masih mereferensikan fasilitas, foreign key mencegah penghapusan; kode saat ini belum memberi pesan validasi khusus untuk kondisi tersebut.
+- Setiap permintaan penghapusan permanen ditolak dan seluruh data serta relasi fasilitas dipertahankan; gunakan penonaktifan jika fasilitas tidak lagi digunakan.
+
 ### FR-19 — Rekap dan Export
 
 Admin dapat melihat rekap okupansi dan frekuensi kerusakan per fasilitas/lokasi dan mengekspornya ke CSV/Excel/PDF.
@@ -565,9 +565,7 @@ Acceptance Criteria
 
 - Kapasitas negatif → validation error.
 - Nama/tipe/lokasi wajib sesuai field yang ditetapkan.
-- Admin mencoba menghapus permanen fasilitas yang memiliki riwayat atau alat turunan → blokir penghapusan; fasilitas dapat dinonaktifkan.
-- Admin menghapus fasilitas tanpa riwayat dan tanpa alat turunan → hapus permanen.
-- Jika laporan masih mereferensikan fasilitas yang hendak dihapus, foreign key menolak penghapusan; kode saat ini belum mengubah kegagalan itu menjadi pesan validasi khusus.
+- Admin mencoba menghapus permanen fasilitas, dengan atau tanpa riwayat reservasi atau alat turunan → request ditolak; fasilitas dan seluruh relasi tetap tersimpan. Gunakan penonaktifan jika fasilitas tidak lagi digunakan.
 - Admin menonaktifkan fasilitas dengan reservasi menunggu/disetujui yang belum selesai → sistem otomatis mengubah menunggu→ditolak dan disetujui→dibatalkan; bila fasilitas berupa ruangan, reservasi alat turunannya ikut terdampak. Tidak memerlukan alasan Petugas.
 - Fasilitas bertipe Alat tidak memiliki ruangan induk yang valid → validation error pada data master.
 - Lapangan ditetapkan memiliki child Alat → tolak karena domain rule menyatakan lapangan tidak memiliki alat. Jika ruangan menjadi dalam_perbaikan/nonaktif, child tools tidak reservable tanpa harus mengubah status masing-masing tool; jika hanya tool dalam_perbaikan, parent room tetap dapat direservasi.
@@ -681,7 +679,7 @@ Catatan: Target kuantitatif seperti response time <500 ms, uptime 99.9%, atau ju
 | R-04 | Akun atau hak akses tidak sah | Tinggi | Akun nonaktif masih digunakan, akun Petugas dibuat di luar alur Admin, atau Pengguna mengajukan reservasi tanpa identitas institusional. | Blokir login/transaksi akun nonaktif, buat akun Petugas hanya melalui Admin, wajibkan identitas sebelum reservasi, dan terapkan RBAC server-side. |
 | R-05 | Kebocoran informasi reservasi | Tinggi | Pengunjung melihat nama/tujuan pemesan. | Pisahkan response/view publik dari data reservasi internal. |
 | R-06 | Upload file berbahaya | Sedang | Security/storage issue dari foto laporan. | Maksimal 8 file, masing-masing 2 MB; hanya JPG/JPEG/PNG; validasi MIME/type, nama file aman, dan storage non-executable. |
-| R-07 | Penghapusan permanen fasilitas | Tinggi | Penghapusan dapat memutus referensi reservasi, laporan, atau alat turunan. | Controller memblokir fasilitas bereservasi dan fasilitas yang masih memiliki alat turunan; foreign key melindungi relasi laporan, tetapi belum ditangani dengan pesan validasi khusus. |
+| R-07 | Penghapusan permanen fasilitas | Tinggi | Penghapusan dapat memutus referensi reservasi, laporan, atau alat turunan. | Sistem tidak menyediakan penghapusan permanen; gunakan penonaktifan untuk menghentikan penggunaan sambil mempertahankan relasi dan riwayat. |
 | R-08 | Inkonsistensi status laporan/fasilitas | Sedang | Laporan selesai tetapi fasilitas tetap dalam_perbaikan atau sebaliknya. | Service/transaction terpusat untuk update terkait dan validasi transisi. |
 | R-09 | Export berat | Sedang | Timeout/memory tinggi. | Query efisien, filter periode bila dibutuhkan, streaming/chunking jika implementasi memerlukan. |
 | R-10 | Requirement drift atau interpretasi berbeda | Tinggi | Anggota tim menerapkan rule yang tidak konsisten meski OD utama sudah ditutup. | Gunakan SRS final, traceability, dan change control; perubahan rule harus disetujui sebelum coding. |
@@ -929,11 +927,12 @@ Laravel menyediakan route dan mengirimkan data halaman melalui Inertia; React me
 | GET | /admin/facilities/{facility} | Admin | Detail fasilitas |
 | GET | /admin/facilities/{facility}/edit | Admin | Form ubah fasilitas |
 | PUT/PATCH | /admin/facilities/{facility} | Admin | Update fasilitas |
-| DELETE | /admin/facilities/{facility} | Admin | Hapus permanen dengan pemeriksaan riwayat reservasi dan alat turunan |
 | PATCH | /admin/facilities/{facility}/deactivate | Admin | Nonaktifkan absolut; pending→ditolak dan approved→dibatalkan otomatis |
 | PATCH | /admin/facilities/{facility}/activate | Admin | Aktifkan kembali fasilitas |
 | GET | /admin/recap | Admin | Rekap |
 | GET | /admin/recap/export | Admin | Export |
+
+Penghapusan permanen fasilitas tidak tersedia melalui route. Admin menghentikan penggunaan fasilitas melalui `PATCH /admin/facilities/{facility}/deactivate`.
 
 # 13. Ringkasan Perubahan dan Alasan
 
@@ -951,7 +950,7 @@ Laravel menyediakan route dan mengirimkan data halaman melalui Inertia; React me
 | Petugas tidak self-register | User Story 13 menyatakan akun Petugas dibuat Admin. |
 | Status laporan tidak memiliki “dalam_perbaikan” | “dalam_perbaikan” adalah kondisi fasilitas; status laporan mengikuti baru/diproses/selesai/ditolak. |
 | Dashboard Petugas memakai reservasi menunggu + laporan baru | Menyelaraskan state awal masing-masing domain. |
-| Penghapusan fasilitas dibatasi | Penghapusan permanen diblokir jika ada reservasi atau alat turunan; foreign key melindungi laporan terkait. Penonaktifan tetap menjadi cara menghentikan penggunaan tanpa menghapus riwayat. |
+| Penghapusan permanen fasilitas dilarang | Admin tidak dapat menghapus fasilitas dalam kondisi apa pun; gunakan penonaktifan untuk menghentikan penggunaan sambil mempertahankan data, riwayat, dan relasi fasilitas. |
 | Availability dihitung, tidak disimpan statis | Mencegah data ketersediaan tidak sinkron dengan status fasilitas/reservasi approved. |
 | API Specification diganti Route & Interaction Specification | Laravel + Inertia.js + React menggunakan route Laravel dan interaksi halaman Inertia; REST API terpisah hanya diperlukan jika ada kebutuhan integrasi khusus. |
 | Edge cases dan Risiko ditambahkan | Mencegah requirement hanya menjelaskan happy path, terutama concurrency, otorisasi, dan state transition. |

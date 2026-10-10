@@ -2,9 +2,7 @@
 
 use App\Enums\FacilityCondition;
 use App\Enums\FacilityType;
-use App\Enums\ReservationStatus;
 use App\Models\Facility;
-use App\Models\Reservation;
 use App\Models\User;
 
 test('unauthenticated users and non-admin users cannot access admin facility management', function () {
@@ -203,36 +201,12 @@ test('admin can activate and deactivate a facility', function () {
     expect($facility->refresh()->condition)->toBe(FacilityCondition::Active);
 });
 
-test('admin cannot hard delete facility that has reservation history or child tools per FR-18', function () {
+test('admin cannot delete a facility', function () {
     $admin = User::factory()->admin()->create();
-    $user = User::factory()->pengguna()->create();
+    $facility = Facility::factory()->create();
 
-    // 1. Facility with reservation history
-    $facilityWithHistory = Facility::factory()->create();
-    Reservation::create([
-        'user_id' => $user->id,
-        'facility_id' => $facilityWithHistory->id,
-        'tujuan' => 'Rapat Tahunan',
-        'start_time' => now()->addDays(2),
-        'end_time' => now()->addDays(2)->addHours(2),
-        'status' => ReservationStatus::Approved,
-    ]);
+    $response = $this->actingAs($admin)->delete("/admin/facilities/{$facility->id}");
 
-    $responseHistory = $this->actingAs($admin)->delete(route('admin.facilities.destroy', $facilityWithHistory));
-    $responseHistory->assertSessionHas('error');
-    $this->assertDatabaseHas('facilities', ['id' => $facilityWithHistory->id]);
-
-    // 2. Room with child tools
-    $roomWithTools = Facility::factory()->create(['type' => FacilityType::Laboratory]);
-    $tool = Facility::factory()->tool($roomWithTools)->create();
-
-    $responseRoom = $this->actingAs($admin)->delete(route('admin.facilities.destroy', $roomWithTools));
-    $responseRoom->assertSessionHas('error');
-    $this->assertDatabaseHas('facilities', ['id' => $roomWithTools->id]);
-
-    // 3. Facility without history or child tools can be deleted
-    $unusedFacility = Facility::factory()->create();
-    $responseSuccess = $this->actingAs($admin)->delete(route('admin.facilities.destroy', $unusedFacility));
-    $responseSuccess->assertRedirect(route('admin.facilities.index'));
-    $this->assertDatabaseMissing('facilities', ['id' => $unusedFacility->id]);
+    $response->assertStatus(405);
+    $this->assertDatabaseHas('facilities', ['id' => $facility->id]);
 });
