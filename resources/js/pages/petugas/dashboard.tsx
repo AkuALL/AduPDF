@@ -315,7 +315,7 @@ export default function PetugasDashboard({
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-200 pb-3">
                             <div>
                                 <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
-                                    <span>Antrean Reservasi Menunggu (Segmen Slot Waktu)</span>
+                                    <span>Antrean Reservasi Menunggu</span>
                                     <span className="rounded-full bg-[#2D4C79]/10 px-2 py-0.5 text-xs font-semibold text-[#2D4C79]">
                                         {pending_reservations_count}
                                     </span>

@@ -94,7 +94,7 @@ export function UserNavbar({ current }: { current?: 'facilities' | 'reservations
                             <DropdownMenuTrigger asChild>
                                 <button
                                     type="button"
-                                    className="flex items-center gap-3 rounded-full border border-[#E5E7EB] bg-white py-1.5 pl-2 pr-3.5 text-left transition hover:bg-[#F7F8FA] focus:outline-none focus:ring-2 focus:ring-[#2D4C79]/20 cursor-pointer shadow-xs"
+                                    className="group flex items-center gap-3 rounded-full border border-[#E5E7EB] bg-white py-1.5 pl-2 pr-3.5 text-left transition hover:bg-[#F7F8FA] focus:outline-none focus:ring-2 focus:ring-[#2D4C79]/20 cursor-pointer shadow-xs"
                                 >
                                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E9EEF5] text-sm font-bold text-[#2D4C79]">
                                         {(user.nama || user.name || 'U').charAt(0).toUpperCase()}
@@ -107,7 +107,7 @@ export function UserNavbar({ current }: { current?: 'facilities' | 'reservations
                                             {user.role}
                                         </span>
                                     </div>
-                                    <ChevronDown className="h-4 w-4 text-[#667085]" />
+                                    <ChevronDown className="h-4 w-4 text-[#667085] transition-transform duration-200 group-data-[state=open]:rotate-180" />
                                 </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56 rounded-xl border border-[#E5E7EB] bg-white p-1.5 text-[#111827] shadow-lg">

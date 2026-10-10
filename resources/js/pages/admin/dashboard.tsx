@@ -189,7 +189,7 @@ export default function AdminDashboard({
                                         <th className="px-6 py-3">Nama Fasilitas</th>
                                         <th className="px-6 py-3">Tipe / Ruangan Induk</th>
                                         <th className="px-6 py-3">Lokasi</th>
-                                        <th className="px-6 py-3">Status Kondisi</th>
+                                        <th className="px-6 py-3 text-center">Status Kondisi</th>
                                         <th className="px-6 py-3 text-right">Aksi</th>
                                     </tr>
                                 </thead>
@@ -216,8 +216,8 @@ export default function AdminDashboard({
                                             <td className="px-6 py-3.5 text-xs text-slate-600">
                                                 {item.location}
                                             </td>
-                                            <td className="px-6 py-3.5">
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                                            <td className="px-6 py-3.5 text-center align-middle">
+                                                <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap">
                                                     Dalam Perbaikan
                                                 </span>
                                             </td>

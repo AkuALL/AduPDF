@@ -136,11 +136,11 @@ export default function RecapIndex({
                             <DropdownMenuTrigger asChild>
                                 <button
                                     type="button"
-                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-md bg-[#2D4C79] text-white hover:bg-[#243E63] shadow-sm transition cursor-pointer"
+                                    className="group inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-md bg-[#2D4C79] text-white hover:bg-[#243E63] shadow-sm transition cursor-pointer"
                                 >
                                     <Download className="size-3.5" />
                                     Export
-                                    <ChevronDown className="size-3.5" />
+                                    <ChevronDown className="size-3.5 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                                 </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-44 rounded-xl border border-slate-200 bg-white p-1.5 text-slate-900 shadow-lg">
@@ -395,7 +395,7 @@ export default function RecapIndex({
                                         <th className="px-6 py-3">Nama Fasilitas</th>
                                         <th className="px-6 py-3">Tipe / Ruangan Induk</th>
                                         <th className="px-6 py-3">Lokasi</th>
-                                        <th className="px-6 py-3">Kondisi</th>
+                                        <th className="px-6 py-3 text-center">Kondisi</th>
                                         <th className="px-6 py-3 text-center">Reservasi Disetujui</th>
                                         <th className="px-6 py-3 text-center">Total Durasi</th>
                                         <th className="px-6 py-3 text-center">Pengguna Unik</th>
@@ -434,9 +434,9 @@ export default function RecapIndex({
                                             <td className="px-6 py-3.5 text-xs text-slate-600">
                                                 {facility.location}
                                             </td>
-                                            <td className="px-6 py-3.5">
+                                            <td className="px-6 py-3.5 text-center align-middle">
                                                 <span
-                                                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                                    className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap ${
                                                         facility.condition === 'aktif'
                                                             ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                                                             : facility.condition === 'dalam_perbaikan'

@@ -90,7 +90,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                             <DropdownMenuTrigger asChild>
                                 <button
                                     type="button"
-                                    className="flex items-center gap-2.5 rounded-lg p-1.5 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40 cursor-pointer"
+                                    className="group flex items-center gap-2.5 rounded-lg p-1.5 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40 cursor-pointer"
                                 >
                                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-400/20 border border-amber-300/40 text-amber-200 font-bold text-sm">
                                         {initial}
@@ -98,7 +98,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                                     <div className="hidden text-left sm:block">
                                         <div className="flex items-center gap-1 text-sm font-semibold leading-tight text-white">
                                             <span>{displayName}</span>
-                                            <ChevronDown className="h-3.5 w-3.5 text-slate-300 opacity-80" />
+                                            <ChevronDown className="h-3.5 w-3.5 text-slate-300 opacity-80 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                                         </div>
                                         <div className="text-[11px] text-slate-300">Administrator</div>
                                     </div>

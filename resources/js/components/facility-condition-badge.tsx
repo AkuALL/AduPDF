@@ -22,7 +22,7 @@ export default function FacilityConditionBadge({
 
     return (
         <span
-            className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${presentation.className}`}
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium text-center ${presentation.className}`}
         >
             {presentation.label}
         </span>
