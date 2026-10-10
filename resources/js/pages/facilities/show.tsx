@@ -202,7 +202,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                     <div className="mb-6">
                         <Link
                             href="/facilities"
-                            className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
+                            className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-sm font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
                         >
                             <span aria-hidden="true">←</span> Kembali
                         </Link>
@@ -217,15 +217,15 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                         <div className="min-w-0">
                         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                             <div>
-                                <span className="text-xs font-semibold text-[#2D4C79]">
+                                <span className="text-sm font-semibold text-[#2D4C79]">
                                     {typeLabels[facility.type] || facility.type}
                                 </span>
-                                <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl">
+                                <h1 className="mt-1 text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">
                                     {facility.name}
                                 </h1>
                             </div>
                             <span
-                                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${status.classes}`}
+                                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-semibold ${status.classes}`}
                             >
                                 <span>{status.icon}</span>
                                 <span>{status.label}</span>
@@ -235,21 +235,21 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                         {/* Metadata Grid */}
                         <dl className="mt-6 grid grid-cols-2 gap-4 border-y border-[#E5E7EB] py-5 sm:grid-cols-3">
                             <div>
-                                <dt className="text-xs font-medium text-[#667085]">Lokasi</dt>
-                                <dd className="mt-1 text-sm font-semibold text-[#111827]">
+                                <dt className="text-sm font-medium text-[#667085]">Lokasi</dt>
+                                <dd className="mt-1 text-base font-semibold text-[#111827]">
                                     {facility.location}
                                 </dd>
                             </div>
                             <div>
-                                <dt className="text-xs font-medium text-[#667085]">Kapasitas</dt>
-                                <dd className="mt-1 text-sm font-semibold text-[#111827]">
+                                <dt className="text-sm font-medium text-[#667085]">Kapasitas</dt>
+                                <dd className="mt-1 text-base font-semibold text-[#111827]">
                                     {facility.capacity} orang
                                 </dd>
                             </div>
                             {facility.parent_facility && (
                                 <div className="col-span-2 sm:col-span-1">
-                                    <dt className="text-xs font-medium text-[#667085]">Ruangan Induk</dt>
-                                    <dd className="mt-1 text-sm font-semibold">
+                                    <dt className="text-sm font-medium text-[#667085]">Ruangan Induk</dt>
+                                    <dd className="mt-1 text-base font-semibold">
                                         <Link
                                             href={`/facilities/${facility.parent_facility.id}`}
                                             className="text-[#2D4C79] hover:underline"
@@ -263,8 +263,8 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
 
                         {/* Description */}
                         <div className="mt-6">
-                            <h2 className="text-sm font-semibold text-[#111827]">Deskripsi</h2>
-                            <p className="mt-2 text-sm leading-relaxed text-[#667085]">
+                            <h2 className="text-base font-semibold text-[#111827]">Deskripsi</h2>
+                            <p className="mt-2 text-base leading-relaxed text-[#667085]">
                                 {facility.description || 'Tidak ada deskripsi tambahan untuk fasilitas ini.'}
                             </p>
                         </div>
@@ -275,13 +275,13 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                         {isRoom && (
                             <div className="mt-8 border-t border-[#E5E7EB] pt-6">
                                 <div className="flex items-center justify-between">
-                                    <h2 className="text-sm font-semibold text-[#111827]">
+                                    <h2 className="text-base font-semibold text-[#111827]">
                                         Peralatan di Ruangan Ini ({facility.child_tools.length})
                                     </h2>
                                 </div>
 
                                 {facility.child_tools.length === 0 ? (
-                                    <p className="mt-3 text-xs text-[#667085]">
+                                    <p className="mt-3 text-sm text-[#667085]">
                                         Tidak ada peralatan terpisah yang terdaftar di ruangan ini.
                                     </p>
                                 ) : (
@@ -300,16 +300,16 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                                         <div>
                                                             <Link
                                                                 href={`/facilities/${tool.id}`}
-                                                                className="text-sm font-medium text-[#2D4C79] hover:underline"
+                                                                className="text-base font-medium text-[#2D4C79] hover:underline"
                                                             >
                                                                 {tool.name}
                                                             </Link>
-                                                            <p className="text-xs text-[#667085]">
+                                                            <p className="text-sm text-[#667085]">
                                                                 {typeLabels[tool.type] || tool.type}
                                                             </p>
                                                         </div>
                                                         <span
-                                                            className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${toolStatus.classes}`}
+                                                            className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${toolStatus.classes}`}
                                                         >
                                                             <span>{toolStatus.icon}</span>
                                                             <span>{toolStatus.label}</span>
@@ -320,7 +320,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                         </div>
 
                                         {/* Informasi pemesanan saat ada alat dalam perbaikan */}
-                                        <div className="mt-3 rounded-md bg-[#FFF5E6] border border-[#F5D6A6] p-3 text-xs text-[#A15C00]">
+                                        <div className="mt-3 rounded-md bg-[#FFF5E6] border border-[#F5D6A6] p-3 text-sm text-[#A15C00]">
                                             <strong>Ketentuan Kampus:</strong> Apabila salah satu peralatan di atas sedang dalam perbaikan, ruangan induk ini tetap dapat diajukan untuk reservasi penuh.
                                         </div>
                                     </>
@@ -334,20 +334,20 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                     <section className="mt-8 rounded-lg border border-[#E5E7EB] bg-white p-6 shadow-[0_1px_2px_rgba(16,24,40,0.03)] sm:p-8">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <span className="text-xs font-semibold uppercase tracking-wider text-[#2D4C79]">
+                                <span className="text-sm font-semibold uppercase tracking-wider text-[#2D4C79]">
                                     Informasi Jadwal
                                 </span>
-                                <h2 className="mt-1 text-xl font-bold tracking-tight text-[#111827]">
+                                <h2 className="mt-1 text-2xl font-bold tracking-tight text-[#111827]">
                                     Cek Ketersediaan Waktu
                                 </h2>
-                                <p className="mt-1 text-xs text-[#667085]">
+                                <p className="mt-1 text-sm text-[#667085]">
                                     Pilih waktu antara 07.00 – 20.00 WIB (slot 30 menit).
                                 </p>
                             </div>
 
                             {/* Date Picker Control */}
                             <div className="relative flex items-center gap-2">
-                                <span id="availability-date-label" className="text-xs font-medium text-[#667085] whitespace-nowrap">
+                                <span id="availability-date-label" className="text-sm font-medium text-[#667085] whitespace-nowrap">
                                     Pilih Tanggal:
                                 </span>
                                 <button
@@ -356,7 +356,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                     aria-expanded={isCalendarOpen}
                                     aria-labelledby="availability-date-label availability-date-value"
                                     onClick={() => setIsCalendarOpen((open) => !open)}
-                                    className="inline-flex min-w-44 items-center justify-between gap-3 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#111827] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/30"
+                                    className="inline-flex min-w-44 items-center justify-between gap-3 rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm font-semibold text-[#111827] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/30"
                                 >
                                     <span id="availability-date-value">{displayDateFormatter.format(new Date(`${currentDate}T00:00:00Z`))}</span>
                                     <span aria-hidden="true" className="text-[#667085]">▾</span>
@@ -385,7 +385,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
 
                         {/* Availability Summary Stats */}
                         {availability && (
-                            <div className="mt-5 flex flex-wrap items-center gap-3 border-y border-[#E5E7EB] py-3 text-xs">
+                            <div className="mt-5 flex flex-wrap items-center gap-3 border-y border-[#E5E7EB] py-3 text-sm">
                                 <div className="flex items-center gap-1.5 font-medium text-[#16794A]">
                                     <span className="inline-block h-2 w-2 rounded-full bg-[#16794A]" />
                                     <span>{availability.available_slots_count} Slot Tersedia</span>
@@ -399,7 +399,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                 <span className="text-[#667085]">Total {availability.total_slots} slot (30 mnt/slot)</span>
 
                                 {!availability.is_reservable && (
-                                    <span className="ml-auto rounded bg-[#FFF0E8] border border-[#F5C6A7] px-2 py-0.5 text-[11px] font-semibold text-[#B54708]">
+                                    <span className="ml-auto rounded bg-[#FFF0E8] border border-[#F5C6A7] px-2 py-0.5 text-xs font-semibold text-[#B54708]">
                                         Fasilitas Saat Ini Tidak Dapat Direservasi
                                     </span>
                                 )}
@@ -453,10 +453,10 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                                             : `${slotStyle} hover:bg-[#D4EFE0] hover:border-[#16794A] hover:shadow-sm hover:scale-[1.02]`
                                                     }`}
                                                 >
-                                                    <span className="text-xs font-bold tracking-tight">
+                                                    <span className="text-sm font-bold tracking-tight">
                                                         {slot.start_time} - {slot.end_time}
                                                     </span>
-                                                    <span className={`mt-1 inline-flex items-center text-[10px] font-semibold uppercase tracking-wider ${isSelected ? 'text-white/90' : ''}`}>
+                                                    <span className={`mt-1 inline-flex items-center text-xs font-semibold uppercase tracking-wider ${isSelected ? 'text-white/90' : ''}`}>
                                                         {statusBadge}
                                                     </span>
                                                 </button>
@@ -470,10 +470,10 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                                 title={`Slot ${slot.start_time} - ${slot.end_time} (${statusBadge})`}
                                                 className={`flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all cursor-not-allowed select-none ${slotStyle}`}
                                             >
-                                                <span className="text-xs font-bold tracking-tight">
+                                                <span className="text-sm font-bold tracking-tight">
                                                     {slot.start_time} - {slot.end_time}
                                                 </span>
-                                                <span className="mt-1 inline-flex items-center text-[10px] font-semibold uppercase tracking-wider">
+                                                <span className="mt-1 inline-flex items-center text-xs font-semibold uppercase tracking-wider">
                                                     {statusBadge}
                                                 </span>
                                             </div>
@@ -481,7 +481,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                     })}
                                 </div>
                             ) : (
-                                <p className="text-center text-xs text-[#667085] py-8">
+                                <p className="text-center text-sm text-[#667085] py-8">
                                     Memuat informasi slot ketersediaan...
                                 </p>
                             )}
@@ -492,23 +492,23 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                             <div>
                                 {selectedRange !== null && availability ? (
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <span className="text-xs font-semibold text-[#111827]">
+                                        <span className="text-sm font-semibold text-[#111827]">
                                             Slot dipilih: {availability.slots[selectedRange.start].start_time} - {availability.slots[selectedRange.end].end_time} (WIB)
                                         </span>
-                                        <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-[10px] font-semibold text-[#2D4C79]">
+                                        <span className="rounded bg-[#E9EEF5] px-1.5 py-0.5 text-xs font-semibold text-[#2D4C79]">
                                             {selectedRange.end - selectedRange.start + 1} slot
                                         </span>
                                         <button
                                             type="button"
                                             onClick={() => setSelectedRange(null)}
-                                            className="text-xs text-[#B54708] hover:underline"
+                                            className="text-sm text-[#B54708] hover:underline"
                                         >
                                             Reset pilihan
                                         </button>
                                     </div>
                                 ) : (
                                     !availability?.is_reservable && (
-                                        <span className="text-xs text-[#B54708]">
+                                        <span className="text-sm text-[#B54708]">
                                             Fasilitas ini sedang tidak menerima pengajuan reservasi baru.
                                         </span>
                                     )
@@ -522,7 +522,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                                 ? `/reservations/create?facility_id=${facility.id}&start_time=${currentDate}T${availability.slots[selectedRange.start].start_time}&end_time=${currentDate}T${availability.slots[selectedRange.end].end_time}`
                                                 : '/login'
                                         }
-                                        className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
+                                        className="inline-flex h-9 items-center justify-center rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
                                     >
                                         Ajukan Reservasi ({availability.slots[selectedRange.start].start_time} - {availability.slots[selectedRange.end].end_time})
                                     </Link>
@@ -530,7 +530,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                     <button
                                         type="button"
                                         disabled
-                                        className="inline-flex h-9 cursor-not-allowed items-center justify-center rounded-md bg-[#E5E7EB] px-4 text-xs font-semibold text-[#98A2B3]"
+                                        className="inline-flex h-9 cursor-not-allowed items-center justify-center rounded-md bg-[#E5E7EB] px-4 text-sm font-semibold text-[#98A2B3]"
                                     >
                                         {!availability?.is_reservable ? 'Tidak Tersedia untuk Reservasi' : 'Pilih Slot Waktu'}
                                     </button>
