@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BarChart3, Building2, ChevronDown, KeyRound, LayoutDashboard, LogOut, Menu, UserCheck, UserPlus, Users } from 'lucide-react';
+import { BarChart3, Building2, ChevronDown, KeyRound, LogOut, Menu, UserCheck, UserPlus, Users } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { FlashAlert } from '@/components/flash-alert';
 import {
@@ -14,12 +14,6 @@ import {
 type AuthUser = { name?: string; nama?: string; email?: string };
 
 const navigation = [
-    {
-        label: 'Dashboard',
-        href: '/admin/dashboard',
-        icon: LayoutDashboard,
-        isActive: (currentPath: string) => currentPath === '/admin/dashboard' || currentPath === '/admin',
-    },
     {
         label: 'Rekap & Analitik',
         href: '/admin/recap',
