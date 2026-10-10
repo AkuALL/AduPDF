@@ -89,7 +89,7 @@ export default function ReservationIndex({ reservations, success }: Props) {
                         </div>
                         <Link
                             href="/facilities"
-                            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-[#2D4C79] px-5 text-sm font-semibold text-white shadow-xs hover:bg-[#243E63] active:bg-[#1C3150] transition shrink-0"
+                            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-[#2D4C79] px-5 text-sm font-semibold text-white shadow-xs hover:bg-[#243E63] active:bg-[#1C3150] transition shrink-0 cursor-pointer"
                         >
                             <span>+</span>
                             <span>Ajukan Reservasi</span>
@@ -115,7 +115,7 @@ export default function ReservationIndex({ reservations, success }: Props) {
                             </p>
                             <Link
                                 href="/facilities"
-                                className="mt-4 inline-flex h-9 items-center justify-center rounded-md border border-[#D0D5DD] bg-white px-4 text-xs font-semibold text-[#2D4C79] hover:bg-[#E9EEF5] transition"
+                                className="mt-4 inline-flex h-9 items-center justify-center rounded-md border border-[#D0D5DD] bg-white px-4 text-xs font-semibold text-[#2D4C79] hover:bg-[#E9EEF5] transition cursor-pointer"
                             >
                                 Lihat Fasilitas
                             </Link>
@@ -145,7 +145,7 @@ export default function ReservationIndex({ reservations, success }: Props) {
 
                                             <Link
                                                 href={`/reservations/${reservation.id}`}
-                                                className="mt-3 block text-lg font-semibold text-[#111827] hover:text-[#2D4C79] transition-colors"
+                                                className="mt-3 block text-lg font-semibold text-[#111827] hover:text-[#2D4C79] transition-colors cursor-pointer"
                                             >
                                                 {reservation.facility.name}
                                             </Link>
@@ -183,7 +183,7 @@ export default function ReservationIndex({ reservations, success }: Props) {
                                         <div className="mt-5 pt-4 border-t border-[#E5E7EB] flex items-center gap-2">
                                             <Link
                                                 href={`/reservations/${reservation.id}`}
-                                                className="inline-flex h-9 flex-1 items-center justify-center rounded-md border border-[#D0D5DD] bg-white text-xs font-semibold text-[#2D4C79] hover:bg-[#E9EEF5] hover:border-[#2D4C79] transition"
+                                                className="inline-flex h-9 flex-1 items-center justify-center rounded-md border border-[#D0D5DD] bg-white text-xs font-semibold text-[#2D4C79] hover:bg-[#E9EEF5] hover:border-[#2D4C79] transition cursor-pointer"
                                             >
                                                 Lihat Detail →
                                             </Link>
@@ -194,7 +194,7 @@ export default function ReservationIndex({ reservations, success }: Props) {
                                                         setCancelError(null);
                                                         setReservationToCancel(reservation);
                                                     }}
-                                                    className="inline-flex h-9 items-center justify-center rounded-md border border-red-200 bg-white px-3 text-xs font-semibold text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition shrink-0"
+                                                    className="inline-flex h-9 items-center justify-center rounded-md border border-red-200 bg-white px-3 text-xs font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition shrink-0"
                                                 >
                                                     Batalkan
                                                 </button>

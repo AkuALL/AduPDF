@@ -302,7 +302,7 @@ export default function Profile({
                                     <Button
                                         disabled={processing}
                                         data-test="update-profile-button"
-                                        className="bg-[#2D4C79] text-white hover:bg-[#243E63] active:bg-[#1C3150] transition"
+                                        className="bg-[#2D4C79] text-white hover:bg-[#243E63] active:bg-[#1C3150] transition cursor-pointer"
                                     >
                                         Simpan Perubahan
                                     </Button>

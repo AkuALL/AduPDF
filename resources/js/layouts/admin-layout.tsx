@@ -52,7 +52,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
             <header className="sticky top-0 z-40 bg-[#2D4C79] text-white shadow-md border-b border-[#243E63]">
                 <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-6">
-                        <Link href="/admin/dashboard" className="flex items-center gap-2 group">
+                        <Link href="/admin/dashboard" className="flex items-center gap-2 group cursor-pointer">
                             <span className="text-2xl font-bold tracking-wider group-hover:text-amber-200 transition">AduPDF</span>
                             <span className="rounded-md border border-amber-400/40 bg-amber-500/30 px-2 py-0.5 text-xs font-semibold text-amber-200 shadow-xs">
                                 ADMIN

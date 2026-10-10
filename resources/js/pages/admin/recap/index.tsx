@@ -136,7 +136,7 @@ export default function RecapIndex({
                             <DropdownMenuTrigger asChild>
                                 <button
                                     type="button"
-                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-md bg-[#2D4C79] text-white hover:bg-[#243E63] shadow-sm transition"
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-md bg-[#2D4C79] text-white hover:bg-[#243E63] shadow-sm transition cursor-pointer"
                                 >
                                     <Download className="size-3.5" />
                                     Export
@@ -265,13 +265,13 @@ export default function RecapIndex({
                             <div className="flex items-center gap-2">
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 text-xs font-semibold rounded-md bg-[#2D4C79] text-white hover:bg-[#243E63] transition"
+                                    className="px-4 py-2 text-xs font-semibold rounded-md bg-[#2D4C79] text-white hover:bg-[#243E63] transition cursor-pointer"
                                 >
                                     Terapkan Filter
                                 </button>
                                 <Link
                                     href="/admin/recap"
-                                    className="px-3.5 py-2 text-xs font-medium rounded-md border border-[#D0D5DD] bg-white text-slate-500 hover:bg-[#F3F5F7] transition"
+                                    className="px-3.5 py-2 text-xs font-medium rounded-md border border-[#D0D5DD] bg-white text-slate-500 hover:bg-[#F3F5F7] transition cursor-pointer"
                                 >
                                     Reset
                                 </Link>

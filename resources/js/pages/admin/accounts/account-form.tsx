@@ -187,7 +187,7 @@ export default function AccountForm({
                         <div className="flex justify-end pt-4">
                             <button
                                 disabled={form.processing}
-                                className="rounded-md bg-[#2D4C79] px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1e3454] disabled:opacity-60"
+                                className="rounded-md bg-[#2D4C79] px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1e3454] disabled:opacity-60 cursor-pointer"
                             >
                                 Simpan Akun {role}
                             </button>

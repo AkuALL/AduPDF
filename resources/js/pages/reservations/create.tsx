@@ -181,7 +181,7 @@ export default function CreateReservation({ facility, reservable, success, serve
                         <div className="mb-6">
                             <Link
                                 href={`/facilities/${facility.id}`}
-                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
+                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition cursor-pointer"
                             >
                                 <span aria-hidden="true">←</span> Kembali ke detail fasilitas
                             </Link>
@@ -206,13 +206,13 @@ export default function CreateReservation({ facility, reservable, success, serve
                                 <div className="flex flex-wrap items-center gap-3 border-t border-emerald-200/60 pt-4">
                                     <Link
                                         href="/reservations"
-                                        className="inline-flex items-center gap-1.5 rounded-md bg-[#2D4C79] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] transition"
+                                        className="inline-flex items-center gap-1.5 rounded-md bg-[#2D4C79] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] transition cursor-pointer"
                                     >
                                         Lihat Riwayat Reservasi →
                                     </Link>
                                     <Link
                                         href={`/facilities/${facility.id}`}
-                                        className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-4 py-2 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] transition"
+                                        className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-4 py-2 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] transition cursor-pointer"
                                     >
                                         Kembali ke Detail Fasilitas
                                     </Link>
@@ -418,7 +418,7 @@ export default function CreateReservation({ facility, reservable, success, serve
                                     <button
                                         ref={submitButtonRef}
                                         type="submit"
-                                        className="hidden"
+                                        className="hidden cursor-pointer"
                                         aria-hidden="true"
                                         tabIndex={-1}
                                     />

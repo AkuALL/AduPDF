@@ -35,7 +35,7 @@ export function UserNavbar({ current }: { current?: 'facilities' | 'reservations
         <header className="sticky top-0 z-30 border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm">
             <div className="relative flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center">
-                    <Link href="/" className="flex items-center gap-2">
+                    <Link href="/" className="flex items-center gap-2 cursor-pointer">
                         <span className="text-xl font-bold tracking-tight text-[#2D4C79]">
                             AduPDF
                         </span>
@@ -73,7 +73,7 @@ export function UserNavbar({ current }: { current?: 'facilities' | 'reservations
                     {user?.role === 'petugas' && (
                         <Link
                             href="/petugas/reservations"
-                            className="relative py-4 font-medium text-[#667085] hover:text-[#2D4C79] transition-colors after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#2D4C79] after:origin-center after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200"
+                            className="relative py-4 font-medium text-[#667085] hover:text-[#2D4C79] transition-colors after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#2D4C79] after:origin-center after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200 cursor-pointer"
                         >
                             Panel Petugas
                         </Link>

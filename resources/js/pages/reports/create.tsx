@@ -24,7 +24,7 @@ export default function CreateReport({ facilities, success }: Props) {
                         <div className="mb-6">
                             <Link
                                 href="/facilities"
-                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
+                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition cursor-pointer"
                             >
                                 <span aria-hidden="true">←</span> Kembali ke fasilitas
                             </Link>
@@ -73,7 +73,7 @@ export default function CreateReport({ facilities, success }: Props) {
                                     {errors['attachments.0'] && <p role="alert" className="mt-1 text-sm text-red-700">{errors['attachments.0']}</p>}
                                 </div>
                                 {progress && <progress value={progress.percentage} max="100" className="w-full">{progress.percentage}%</progress>}
-                                <button type="submit" disabled={processing} className="rounded-md bg-[#2D4C79] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                                <button type="submit" disabled={processing} className="rounded-md bg-[#2D4C79] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 cursor-pointer">
                                     {processing ? 'Mengirim...' : 'Kirim laporan'}
                                 </button>
                             </>

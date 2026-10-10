@@ -83,14 +83,14 @@ export default function Login({ status }: { status?: string }) {
                         </label>
                         <button
                             disabled={form.processing}
-                            className="h-10 w-full rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition disabled:opacity-60"
+                            className="h-10 w-full rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition disabled:opacity-60 cursor-pointer"
                         >
                             Masuk
                         </button>
                     </form>
                     <div className="mt-6 border-t border-slate-200 pt-6 text-center text-xs text-slate-600">
                         Belum memiliki akun Pengguna?{' '}
-                        <Link href="/register" className="ml-1 font-semibold text-[#2D4C79] hover:underline">
+                        <Link href="/register" className="ml-1 font-semibold text-[#2D4C79] hover:underline cursor-pointer">
                             Daftar sekarang
                         </Link>
                     </div>

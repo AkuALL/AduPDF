@@ -146,7 +146,7 @@ export default function AdminDashboard({
                         </div>
                         <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                             <span>Laporan Masuk: <strong className="text-slate-900">{maintenance_stats.month_reports_count}</strong></span>
-                            <Link href="/admin/recap" className="text-[#2D4C79] hover:underline font-medium">Detail →</Link>
+                            <Link href="/admin/recap" className="text-[#2D4C79] hover:underline font-medium cursor-pointer">Detail →</Link>
                         </div>
                     </div>
 
@@ -224,7 +224,7 @@ export default function AdminDashboard({
                                             <td className="px-6 py-3.5 text-right">
                                                 <Link
                                                     href={`/admin/facilities/${item.id}/edit`}
-                                                    className="text-xs font-medium text-[#2D4C79] hover:underline"
+                                                    className="text-xs font-medium text-[#2D4C79] hover:underline cursor-pointer"
                                                 >
                                                     Kelola Fasilitas →
                                                 </Link>
@@ -255,7 +255,7 @@ export default function AdminDashboard({
                                         Fasilitas Terpopuler (Bulan Ini)
                                     </h2>
                                 </div>
-                                <Link href="/admin/recap" className="text-xs text-[#2D4C79] hover:underline font-semibold">
+                                <Link href="/admin/recap" className="text-xs text-[#2D4C79] hover:underline font-semibold cursor-pointer">
                                     Lihat Semua →
                                 </Link>
                             </div>
@@ -301,7 +301,7 @@ export default function AdminDashboard({
                         </div>
 
                         <div className="px-6 py-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex justify-end">
-                            <Link href="/admin/recap" className="font-medium text-[#2D4C79] hover:underline">
+                            <Link href="/admin/recap" className="font-medium text-[#2D4C79] hover:underline cursor-pointer">
                                 Buka Rekapitulasi Lengkap
                             </Link>
                         </div>
@@ -316,7 +316,7 @@ export default function AdminDashboard({
                                         Laporan Gangguan & Kerusakan
                                     </h2>
                                 </div>
-                                <Link href="/admin/recap?period=this_month" className="text-xs text-[#2D4C79] hover:underline font-semibold">
+                                <Link href="/admin/recap?period=this_month" className="text-xs text-[#2D4C79] hover:underline font-semibold cursor-pointer">
                                     Rekap Kerusakan →
                                 </Link>
                             </div>
@@ -371,7 +371,7 @@ export default function AdminDashboard({
                         </div>
 
                         <div className="px-6 py-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex justify-end">
-                            <Link href="/admin/recap" className="font-medium text-[#2D4C79] hover:underline">
+                            <Link href="/admin/recap" className="font-medium text-[#2D4C79] hover:underline cursor-pointer">
                                 Analitik Lokasi Lengkap
                             </Link>
                         </div>

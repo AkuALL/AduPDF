@@ -391,7 +391,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                     <div className="mb-6">
                         <Link
                             href="/facilities"
-                            className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
+                            className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition cursor-pointer"
                         >
                             <span aria-hidden="true">←</span> Kembali
                         </Link>
@@ -441,7 +441,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                     <dd className="mt-1 text-base font-semibold">
                                         <Link
                                             href={`/facilities/${facility.parent_facility.id}`}
-                                            className="text-[#2D4C79] hover:underline"
+                                            className="text-[#2D4C79] hover:underline cursor-pointer"
                                         >
                                             {facility.parent_facility.name} →
                                         </Link>
@@ -489,7 +489,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                                         <div>
                                                             <Link
                                                                 href={`/facilities/${tool.id}`}
-                                                                className="text-base font-medium text-[#2D4C79] hover:underline"
+                                                                className="text-base font-medium text-[#2D4C79] hover:underline cursor-pointer"
                                                             >
                                                                 {tool.name}
                                                             </Link>

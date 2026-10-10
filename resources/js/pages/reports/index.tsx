@@ -57,7 +57,7 @@ export default function ReportIndex({ reports, success }: Props) {
                         </div>
                         <Link
                             href="/reports/create"
-                            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-[#2D4C79] px-5 text-sm font-semibold text-white shadow-xs hover:bg-[#243E63] active:bg-[#1C3150] transition shrink-0"
+                            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-[#2D4C79] px-5 text-sm font-semibold text-white shadow-xs hover:bg-[#243E63] active:bg-[#1C3150] transition shrink-0 cursor-pointer"
                         >
                             <span>+</span>
                             <span>Laporkan Kerusakan</span>
@@ -91,7 +91,7 @@ export default function ReportIndex({ reports, success }: Props) {
                                     <Link
                                         key={report.id}
                                         href={`/reports/${report.id}`}
-                                        className="group flex flex-col justify-between rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#2D4C79] hover:shadow-md transition"
+                                        className="group flex flex-col justify-between rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#2D4C79] hover:shadow-md transition cursor-pointer"
                                     >
                                         <div>
                                             <div className="flex items-center justify-between gap-2">

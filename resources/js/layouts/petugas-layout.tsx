@@ -27,7 +27,7 @@ export default function PetugasLayout({ activePage, children }: Props) {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex min-h-16 items-center justify-between gap-4">
                         <div className="flex min-w-0 items-center gap-6">
-                            <Link href={home()} className="flex shrink-0 items-center gap-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-white/40">
+                            <Link href={home()} className="flex shrink-0 items-center gap-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-white/40 cursor-pointer">
                                 <span className="text-2xl font-bold tracking-wider">AduPDF</span>
                                 <span className="rounded border border-white/20 bg-white/15 px-2 py-0.5 text-[11px] font-medium tracking-wide text-white/90">KAMPUS</span>
                             </Link>
@@ -49,7 +49,7 @@ export default function PetugasLayout({ activePage, children }: Props) {
                                     <span className="max-w-[150px] truncate text-xs text-slate-300" title={auth.user.email}>{auth.user.email}</span>
                                 </div>
                             </div>
-                            <Link href={logout()} method="post" as="button" className="inline-flex items-center gap-1.5 rounded-md border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40">
+                            <Link href={logout()} method="post" as="button" className="inline-flex items-center gap-1.5 rounded-md border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 cursor-pointer">
                                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
                                 </svg>
@@ -78,7 +78,7 @@ export default function PetugasLayout({ activePage, children }: Props) {
                                         </Link>
                                     ))}
                                 </nav>
-                                <Link href={logout()} method="post" as="button" className="mt-2 flex w-full items-center rounded-md px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10 hover:text-white">
+                                <Link href={logout()} method="post" as="button" className="mt-2 flex w-full items-center rounded-md px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10 hover:text-white cursor-pointer">
                                     Keluar
                                 </Link>
                             </div>

@@ -142,7 +142,7 @@ export default function Register() {
                         />
                         <button
                             disabled={form.processing}
-                            className="h-10 w-full rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition disabled:opacity-60"
+                            className="h-10 w-full rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition disabled:opacity-60 cursor-pointer"
                         >
                             Daftar Sekarang
                         </button>
@@ -151,7 +151,7 @@ export default function Register() {
                         Sudah memiliki akun?{' '}
                         <Link
                             href="/login"
-                            className="ml-1 font-semibold text-[#2D4C79] hover:underline"
+                            className="ml-1 font-semibold text-[#2D4C79] hover:underline cursor-pointer"
                         >
                             Masuk di sini
                         </Link>
