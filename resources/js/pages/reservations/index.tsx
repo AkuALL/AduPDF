@@ -194,7 +194,7 @@ export default function ReservationIndex({ reservations, success }: Props) {
                                                         setCancelError(null);
                                                         setReservationToCancel(reservation);
                                                     }}
-                                                    className="inline-flex h-9 items-center justify-center rounded-md border border-red-200 bg-white px-3 text-xs font-semibold text-red-600 hover:bg-red-50 hover:border-red-300 transition shrink-0"
+                                                    className="inline-flex h-9 items-center justify-center rounded-md border border-red-200 bg-white px-3 text-xs font-semibold text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition shrink-0"
                                                 >
                                                     Batalkan
                                                 </button>

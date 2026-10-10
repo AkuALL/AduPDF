@@ -125,7 +125,7 @@ test('user cannot deactivate their own account from the profile page', function 
         ->actingAs($user)
         ->delete('/profile');
 
-    $response->assertNotFound();
+    $response->assertStatus(405);
 
     expect($user->fresh()?->trashed())->toBeFalse();
 });
@@ -138,7 +138,7 @@ test('profile settings do not expose an account deactivation endpoint', function
         ->from(route('profile.edit'))
         ->delete('/settings/profile');
 
-    $response->assertNotFound();
+    $response->assertStatus(405);
 
     expect($user->fresh()?->trashed())->toBeFalse();
 });
@@ -151,7 +151,7 @@ test('admin cannot deactivate their own account from profile settings', function
         ->from(route('profile.edit'))
         ->delete('/settings/profile');
 
-    $response->assertNotFound();
+    $response->assertStatus(405);
     expect($admin->fresh()?->trashed())->toBeFalse();
 });
 

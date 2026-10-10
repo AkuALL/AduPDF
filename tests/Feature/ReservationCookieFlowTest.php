@@ -18,6 +18,9 @@ test('user with pending_reservation cookie is redirected to profile when logging
     $pendingData = [
         'facility_id' => 1,
         'facility_name' => 'Ruang Kelas A',
+        'schedules' => [
+            ['date' => '2026-10-15', 'start_time' => '08:00', 'end_time' => '10:00'],
+        ],
         'url' => '/reservations/create?facility_id=1&start_time=2026-10-15T08:00&end_time=2026-10-15T10:00',
     ];
 
@@ -42,6 +45,9 @@ test('user with pending_reservation cookie and complete identity is redirected d
     $targetUrl = '/reservations/create?facility_id=1&start_time=2026-10-15T08:00&end_time=2026-10-15T10:00';
     $pendingData = [
         'facility_id' => 1,
+        'schedules' => [
+            ['date' => '2026-10-15', 'start_time' => '08:00', 'end_time' => '10:00'],
+        ],
         'url' => $targetUrl,
     ];
 
@@ -64,6 +70,9 @@ test('completing profile with from reservation auto-redirects to the pending res
     $targetUrl = '/reservations/create?facility_id=2&start_time=2026-10-15T08:00&end_time=2026-10-15T10:00';
     $pendingData = [
         'facility_id' => 2,
+        'schedules' => [
+            ['date' => '2026-10-15', 'start_time' => '08:00', 'end_time' => '10:00'],
+        ],
         'url' => $targetUrl,
     ];
 
