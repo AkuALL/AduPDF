@@ -5,5 +5,8 @@
     },
     "deploy": {
         "releaseCommand": "php artisan migrate --force"
+    },
+    "env": {
+        "NIXPACKS_PHP_VERSION": "8.5"
     }
 }
