@@ -226,9 +226,14 @@ class RecapController extends Controller
             ];
         })->values();
 
-        // Damage summary by facility
-        $damageByFacility = $damageStatsRaw->map(function ($item): array {
-            $facility = Facility::find($item->id);
+        $filteredFacilityIds = $facilities->pluck('id')->all();
+        $filteredApprovedReservations = $approvedReservations->whereIn('facility_id', $filteredFacilityIds);
+        $filteredDamageStats = $damageStatsRaw->whereIn('id', $filteredFacilityIds);
+        $facilitiesById = $facilities->keyBy('id');
+
+        // Damage summary by facility (respecting active filters)
+        $damageByFacility = $filteredDamageStats->map(function ($item) use ($facilitiesById): array {
+            $facility = $facilitiesById->get($item->id);
 
             return [
                 'id' => (int) $item->id,
@@ -241,8 +246,8 @@ class RecapController extends Controller
             ];
         })->values();
 
-        // Damage summary grouped by location
-        $damageByLocation = $damageStatsRaw
+        // Damage summary grouped by location (respecting active filters)
+        $damageByLocation = $filteredDamageStats
             ->groupBy('location')
             ->map(function ($items, string $location): array {
                 return [
@@ -254,13 +259,13 @@ class RecapController extends Controller
             ->sortByDesc('total_reports')
             ->values();
 
-        // Summary KPIs
-        $totalReservations = $approvedReservations->count();
-        $totalMinutesUsed = $approvedReservations->sum(function (Reservation $res): int {
+        // Summary KPIs (respecting active filters)
+        $totalReservations = $filteredApprovedReservations->count();
+        $totalMinutesUsed = $filteredApprovedReservations->sum(function (Reservation $res): int {
             return (int) $res->start_time->diffInMinutes($res->end_time);
         });
         $totalHoursUsed = round($totalMinutesUsed / 60, 1);
-        $totalDamageReports = (int) $damageStatsRaw->sum('report_count');
+        $totalDamageReports = (int) $filteredDamageStats->sum('report_count');
 
         $mostUsedFacility = $formattedFacilities->sortByDesc('usage_count')->first();
         $mostDamagedFacility = $damageByFacility->sortByDesc('report_count')->first();

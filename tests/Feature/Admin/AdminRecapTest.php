@@ -367,3 +367,111 @@ test('unauthorized users cannot export recap (DA-04, RBAC)', function () {
         ->get(route('admin.recap.export', ['format' => 'csv']))
         ->assertForbidden();
 });
+
+test('recap filters apply consistently to KPIs, facilities table, and damage summaries (DA-03, FR-19)', function () {
+    $admin = User::factory()->admin()->create();
+    $user = User::factory()->pengguna()->create();
+
+    $facilityA = Facility::factory()->create([
+        'name' => 'Lab Komputer A',
+        'type' => FacilityType::Laboratory,
+        'location' => 'Gedung A',
+    ]);
+
+    $facilityB = Facility::factory()->create([
+        'name' => 'Aula Utama B',
+        'type' => FacilityType::Hall,
+        'location' => 'Gedung B',
+    ]);
+
+    Reservation::create([
+        'user_id' => $user->id,
+        'facility_id' => $facilityA->id,
+        'tujuan' => 'Praktikum A',
+        'start_time' => now()->startOfMonth()->addDays(2)->setTime(8, 0, 0),
+        'end_time' => now()->startOfMonth()->addDays(2)->setTime(10, 0, 0),
+        'status' => ReservationStatus::Approved,
+    ]);
+
+    Reservation::create([
+        'user_id' => $user->id,
+        'facility_id' => $facilityB->id,
+        'tujuan' => 'Seminar B',
+        'start_time' => now()->startOfMonth()->addDays(2)->setTime(13, 0, 0),
+        'end_time' => now()->startOfMonth()->addDays(2)->setTime(16, 0, 0),
+        'status' => ReservationStatus::Approved,
+    ]);
+
+    Report::create([
+        'user_id' => $user->id,
+        'facility_id' => $facilityA->id,
+        'kategori' => 'kerusakan_sedang',
+        'deskripsi' => 'Kerusakan PC Lab A',
+        'status_laporan' => ReportStatus::Processing,
+    ]);
+
+    Report::create([
+        'user_id' => $user->id,
+        'facility_id' => $facilityB->id,
+        'kategori' => 'kerusakan_ringan',
+        'deskripsi' => 'Kerusakan AC Aula B 1',
+        'status_laporan' => ReportStatus::Processing,
+    ]);
+
+    $response = $this->actingAs($admin)->get(route('admin.recap.index', [
+        'period' => 'this_month',
+        'facility_type' => FacilityType::Laboratory->value,
+    ]));
+
+    $response->assertOk()->assertInertia(function (Assert $page) use ($facilityA, $facilityB) {
+        $props = $page->toArray()['props'];
+        $summary = $props['summary'];
+        $facilities = collect($props['facilities']);
+        $damageByFacility = collect($props['damage_by_facility']);
+        $damageByLocation = collect($props['damage_by_location']);
+
+        expect($summary['total_reservations'])->toBe(1)
+            ->and($summary['total_hours_used'])->toEqual(2)
+            ->and($summary['total_damage_reports'])->toBe(1)
+            ->and($facilities->pluck('id'))->toContain($facilityA->id)
+            ->and($facilities->pluck('id'))->not->toContain($facilityB->id)
+            ->and($damageByFacility->pluck('id'))->toContain($facilityA->id)
+            ->and($damageByFacility->pluck('id'))->not->toContain($facilityB->id)
+            ->and($damageByLocation->pluck('location'))->toContain('Gedung A')
+            ->and($damageByLocation->pluck('location'))->not->toContain('Gedung B');
+    });
+});
+
+test('pdf export renders complete damage report list beyond 15 rows with pagination (DA-04, FR-19)', function () {
+    $admin = User::factory()->admin()->create();
+    $user = User::factory()->pengguna()->create();
+
+    for ($i = 1; $i <= 18; $i++) {
+        $fac = Facility::factory()->create([
+            'name' => "Fasilitas Rusak {$i}",
+            'location' => "Gedung {$i}",
+        ]);
+
+        Report::create([
+            'user_id' => $user->id,
+            'facility_id' => $fac->id,
+            'kategori' => 'kerusakan_ringan',
+            'deskripsi' => "Laporan kerusakan {$i}",
+            'status_laporan' => ReportStatus::New,
+        ]);
+    }
+
+    $response = $this->actingAs($admin)->get(route('admin.recap.export', [
+        'format' => 'pdf',
+        'period' => 'this_month',
+    ]));
+
+    $response->assertOk();
+    $content = $response->streamedContent();
+
+    expect($content)->toContain('Fasilitas Rusak 1')
+        ->and($content)->toContain('Fasilitas Rusak 16')
+        ->and($content)->toContain('Fasilitas Rusak 18')
+        ->and($content)->toContain('Gedung 16')
+        ->and($content)->toContain('Gedung 18');
+});
