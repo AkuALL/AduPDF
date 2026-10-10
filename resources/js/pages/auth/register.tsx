@@ -6,6 +6,8 @@ export default function Register() {
     const form = useForm({
         nama: '',
         email: '',
+        identity_type: '',
+        institutional_id: '',
         password: '',
         password_confirmation: '',
     });
@@ -47,7 +49,7 @@ export default function Register() {
                                 htmlFor="nama"
                                 className="mb-1 block text-sm font-medium text-slate-700"
                             >
-                                Nama Lengkap
+                                Nama Lengkap <span className="text-red-500">*</span>
                             </label>
                             <input
                                 id="nama"
@@ -66,7 +68,7 @@ export default function Register() {
                                 htmlFor="email"
                                 className="mb-1 block text-sm font-medium text-slate-700"
                             >
-                                Alamat Email Kampus
+                                Alamat Email Kampus <span className="text-red-500">*</span>
                             </label>
                             <input
                                 id="email"
@@ -80,8 +82,48 @@ export default function Register() {
                                 className="w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
                             />
                         </div>
+                        <div>
+                            <label
+                                htmlFor="identity_type"
+                                className="mb-1 block text-sm font-medium text-slate-700"
+                            >
+                                Jenis Identitas Kampus <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                id="identity_type"
+                                required
+                                value={form.data.identity_type}
+                                onChange={(event) =>
+                                    form.setData('identity_type', event.target.value)
+                                }
+                                className="w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm text-[#111827] outline-none transition hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                            >
+                                <option value="">-- Pilih Jenis Identitas --</option>
+                                <option value="nim">NIM (Mahasiswa)</option>
+                                <option value="nip">NIP (Dosen / Tenaga Pendidik)</option>
+                                <option value="no_pegawai">No. Pegawai (Tenaga Kependidikan atau Staf)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label
+                                htmlFor="institutional_id"
+                                className="mb-1 block text-sm font-medium text-slate-700"
+                            >
+                                Nomor Identitas Kampus <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                id="institutional_id"
+                                required
+                                value={form.data.institutional_id}
+                                onChange={(event) =>
+                                    form.setData('institutional_id', event.target.value)
+                                }
+                                placeholder="Contoh: 24060121140001 (NIM) atau 198501012010121001 (NIP)"
+                                className="w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
+                            />
+                        </div>
                         <PasswordField
-                            label="Kata Sandi"
+                            label={<>Kata Sandi <span className="text-red-500">*</span></>}
                             name="password"
                             placeholder="Minimal 8 karakter"
                             value={form.data.password}
@@ -90,7 +132,7 @@ export default function Register() {
                             }
                         />
                         <PasswordField
-                            label="Konfirmasi Kata Sandi"
+                            label={<>Konfirmasi Kata Sandi <span className="text-red-500">*</span></>}
                             name="password_confirmation"
                             placeholder="Ulangi kata sandi"
                             value={form.data.password_confirmation}

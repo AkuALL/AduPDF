@@ -30,6 +30,7 @@ class StoreReservationRequest extends FormRequest
             'tujuan' => ['required', 'string', 'max:5000'],
             'start_time' => ['required', 'date_format:Y-m-d\TH:i'],
             'end_time' => ['required', 'date_format:Y-m-d\TH:i'],
+            'schedules' => ['nullable', 'string'],
         ];
     }
 
@@ -52,38 +53,75 @@ class StoreReservationRequest extends FormRequest
                     return;
                 }
 
-                $startTime = CarbonImmutable::parse($this->string('start_time')->toString(), 'Asia/Jakarta');
-                $endTime = CarbonImmutable::parse($this->string('end_time')->toString(), 'Asia/Jakarta');
-
-                if ($startTime->lessThanOrEqualTo(CarbonImmutable::now('Asia/Jakarta')) || $endTime->lessThanOrEqualTo($startTime)) {
-                    $validator->errors()->add('start_time', 'Waktu reservasi harus di masa depan dan waktu selesai harus setelah waktu mulai.');
-
-                    return;
+                $rawSchedules = $this->string('schedules')->toString();
+                $schedulesList = [];
+                if (! empty($rawSchedules)) {
+                    $decoded = json_decode($rawSchedules, true);
+                    if (is_array($decoded) && count($decoded) > 0) {
+                        $schedulesList = $decoded;
+                    }
                 }
 
-                if ($startTime->greaterThan(CarbonImmutable::now('Asia/Jakarta')->addDays(90))) {
-                    $validator->errors()->add('start_time', 'Reservasi hanya dapat diajukan maksimal 90 hari ke depan.');
-
-                    return;
+                if (empty($schedulesList)) {
+                    $schedulesList = [
+                        [
+                            'date' => CarbonImmutable::parse($this->string('start_time')->toString(), 'Asia/Jakarta')->format('Y-m-d'),
+                            'start_time' => CarbonImmutable::parse($this->string('start_time')->toString(), 'Asia/Jakarta')->format('H:i'),
+                            'end_time' => CarbonImmutable::parse($this->string('end_time')->toString(), 'Asia/Jakarta')->format('H:i'),
+                        ],
+                    ];
                 }
 
-                if (! $startTime->isSameDay($endTime)
-                    || $startTime->format('H:i') < '07:00'
-                    || $endTime->format('H:i') > '20:00'
-                    || ! in_array($startTime->minute, [0, 30], true)
-                    || ! in_array($endTime->minute, [0, 30], true)) {
-                    $validator->errors()->add('start_time', 'Pilih slot 30 menit pada hari yang sama antara 07:00 dan 20:00 WIB.');
+                $conflictService = app(ReservationConflictService::class);
+                $now = CarbonImmutable::now('Asia/Jakarta');
+                $maxDate = $now->addDays(90);
 
-                    return;
-                }
+                foreach ($schedulesList as $sched) {
+                    $date = $sched['date'] ?? null;
+                    $startStr = $sched['start_time'] ?? null;
+                    $endStr = $sched['end_time'] ?? null;
 
-                if (app(ReservationConflictService::class)->hasConflict(
-                    $this->user(),
-                    $facility,
-                    $startTime->utc(),
-                    $endTime->utc(),
-                )) {
-                    $validator->errors()->add('start_time', 'Waktu tersebut bentrok dengan reservasi yang sudah disetujui.');
+                    if (! $date || ! $startStr || ! $endStr) {
+                        $validator->errors()->add('start_time', 'Format jadwal tidak valid.');
+
+                        return;
+                    }
+
+                    $startTime = CarbonImmutable::parse("{$date}T{$startStr}", 'Asia/Jakarta');
+                    $endTime = CarbonImmutable::parse("{$date}T{$endStr}", 'Asia/Jakarta');
+
+                    if ($startTime->lessThanOrEqualTo($now) || $endTime->lessThanOrEqualTo($startTime)) {
+                        $validator->errors()->add('start_time', 'Waktu reservasi harus di masa depan dan waktu selesai harus setelah waktu mulai.');
+
+                        return;
+                    }
+
+                    if ($startTime->greaterThan($maxDate)) {
+                        $validator->errors()->add('start_time', 'Reservasi hanya dapat diajukan maksimal 90 hari ke depan.');
+
+                        return;
+                    }
+
+                    if (! $startTime->isSameDay($endTime)
+                        || $startTime->format('H:i') < '07:00'
+                        || $endTime->format('H:i') > '20:00'
+                        || ! in_array($startTime->minute, [0, 30], true)
+                        || ! in_array($endTime->minute, [0, 30], true)) {
+                        $validator->errors()->add('start_time', 'Pilih slot 30 menit pada hari yang sama antara 07:00 dan 20:00 WIB.');
+
+                        return;
+                    }
+
+                    if ($conflictService->hasConflict(
+                        $this->user(),
+                        $facility,
+                        $startTime->utc(),
+                        $endTime->utc(),
+                    )) {
+                        $validator->errors()->add('start_time', "Waktu {$date} ({$startStr}–{$endStr} WIB) bentrok dengan reservasi yang sudah disetujui.");
+
+                        return;
+                    }
                 }
             },
         ];

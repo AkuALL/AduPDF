@@ -1,9 +1,7 @@
-import { Form, Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import ConfirmationDialog, {
-    type ConfirmationRequest,
-} from '@/components/confirmation-dialog';
 import { UserNavbar } from '@/components/user-navbar';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 type Reservation = {
     id: number;
@@ -20,8 +18,31 @@ type Reservation = {
 type Props = { reservation: Reservation; can_cancel: boolean; success: string | null };
 
 export default function ReservationShow({ reservation, can_cancel, success }: Props) {
-    const [confirmation, setConfirmation] = useState<ConfirmationRequest | null>(null);
+    const [isCancelOpen, setIsCancelOpen] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
+    const [cancelError, setCancelError] = useState<string | null>(null);
 
+    function handleCancel() {
+        setCancelError(null);
+        router.patch(
+            `/reservations/${reservation.id}/cancel`,
+            {},
+            {
+                preserveScroll: true,
+                onStart: () => setIsCancelling(true),
+                onSuccess: () => {
+                    setIsCancelling(false);
+                    setIsCancelOpen(false);
+                },
+                onError: (errors) => {
+                    setIsCancelling(false);
+                    if (errors.reservation) {
+                        setCancelError(errors.reservation);
+                    }
+                },
+            }
+        );
+    }
     return (
         <>
             <Head title="Detail Reservasi" />
@@ -54,28 +75,52 @@ export default function ReservationShow({ reservation, can_cancel, success }: Pr
                             {reservation.alasan_pembatalan && <div><dt className="text-[#667085]">Alasan pembatalan</dt><dd className="mt-1">{reservation.alasan_pembatalan}</dd></div>}
                         </dl>
                         {can_cancel && (
-                            <Form
-                                action={`/reservations/${reservation.id}/cancel`}
-                                method="patch"
-                                className="mt-6"
-                            >
-                                {({ processing, errors, submit }) => (
-                                    <>
-                                        {errors.reservation && <p role="alert" className="mb-3 text-sm text-red-700">{errors.reservation}</p>}
-                                        <button type="button" onClick={(event) => { if (!event.currentTarget.form?.reportValidity()) return; setConfirmation({ title: 'Batalkan Reservasi', description: 'Batalkan reservasi ini? Status reservasi akan berubah menjadi Dibatalkan.', confirmLabel: 'Ya, Batalkan Reservasi', destructive: true, onConfirm: submit }); }} disabled={processing} className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">{processing ? 'Membatalkan...' : 'Batalkan reservasi'}</button>
-                                    </>
-                                )}
-                            </Form>
+                            <div className="mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setCancelError(null);
+                                        setIsCancelOpen(true);
+                                    }}
+                                    className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 active:bg-red-100 transition"
+                                >
+                                    Batalkan reservasi
+                                </button>
+
+                                <ConfirmDialog
+                                    open={isCancelOpen}
+                                    onOpenChange={(open) => {
+                                        if (!isCancelling) setIsCancelOpen(open);
+                                    }}
+                                    title="Batalkan Reservasi"
+                                    description="Apakah Anda yakin ingin membatalkan pengajuan reservasi ini? Status reservasi akan berubah menjadi Dibatalkan secara permanen."
+                                    confirmText="Ya, Batalkan Reservasi"
+                                    variant="destructive"
+                                    isLoading={isCancelling}
+                                    onConfirm={handleCancel}
+                                >
+                                    <div className="mt-3 space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3.5 text-xs">
+                                        <div className="flex justify-between border-b border-slate-200 pb-2">
+                                            <span className="text-[#667085]">Fasilitas:</span>
+                                            <span className="font-semibold text-slate-800">{reservation.facility.name}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-[#667085]">Jadwal:</span>
+                                            <span className="font-medium text-slate-800">{reservation.start_time}–{reservation.end_time} WIB</span>
+                                        </div>
+                                    </div>
+
+                                    {cancelError && (
+                                        <div role="alert" className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+                                            {cancelError}
+                                        </div>
+                                    )}
+                                </ConfirmDialog>
+                            </div>
                         )}
                     </article>
                 </div>
             </main>
-            <ConfirmationDialog
-                confirmation={confirmation}
-                onOpenChange={(open) => {
-                    if (!open) setConfirmation(null);
-                }}
-            />
         </div>
     </>
     );

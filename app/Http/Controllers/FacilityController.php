@@ -61,7 +61,9 @@ class FacilityController extends Controller
             'date' => ['nullable', 'date_format:Y-m-d'],
         ]);
 
-        $selectedDate = $validated['date'] ?? CarbonImmutable::now('Asia/Jakarta')->format('Y-m-d');
+        $now = CarbonImmutable::now('Asia/Jakarta');
+        $defaultDate = $now->format('H:i') >= '19:30' ? $now->addDay()->format('Y-m-d') : $now->format('Y-m-d');
+        $selectedDate = $validated['date'] ?? $defaultDate;
 
         $facility->load([
             'parentFacility:id,name',

@@ -58,8 +58,17 @@ export default function CreateReport({ facilities, success }: Props) {
                                 </div>
                                 <div>
                                     <label htmlFor="attachments" className="block text-sm font-medium">Foto pendukung</label>
-                                    <input id="attachments" name="attachments[]" type="file" accept="image/jpeg,image/png" multiple required aria-invalid={!!errors.attachments} className="mt-1 block w-full text-sm" />
-                                    <p className="mt-1 text-sm text-[#667085]">Wajib 1–8 foto JPG, JPEG, atau PNG. Maksimal 2 MB per foto.</p>
+                                    <input
+                                        id="attachments"
+                                        name="attachments[]"
+                                        type="file"
+                                        accept="image/jpeg,image/png"
+                                        multiple
+                                        required
+                                        aria-invalid={!!errors.attachments}
+                                        className="mt-1 block w-full rounded-md border border-[#D0D5DD] bg-white p-1.5 text-xs text-[#667085] file:mr-3 file:rounded-md file:border-0 file:bg-[#2D4C79] file:px-3.5 file:py-1.5 file:text-xs file:font-semibold file:text-white file:shadow-xs hover:file:bg-[#243E63] file:cursor-pointer cursor-pointer focus:border-[#2D4C79] focus:outline-none focus:ring-1 focus:ring-[#2D4C79]"
+                                    />
+                                    <p className="mt-1.5 text-xs text-[#667085]">Wajib 1–8 foto JPG, JPEG, atau PNG. Maksimal 2 MB per foto.</p>
                                     {errors.attachments && <p role="alert" className="mt-1 text-sm text-red-700">{errors.attachments}</p>}
                                     {errors['attachments.0'] && <p role="alert" className="mt-1 text-sm text-red-700">{errors['attachments.0']}</p>}
                                 </div>

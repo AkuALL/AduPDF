@@ -2,7 +2,8 @@ import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { store as storeReservation } from '@/actions/App/Http/Controllers/ReservationController';
 import DateCalendarGrid from '@/components/date-calendar-grid';
 import { UserNavbar } from '@/components/user-navbar';
-import { useEffect, useState } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
+import { useEffect, useRef, useState } from 'react';
 
 const wibDateTimeFormatter = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Jakarta',
@@ -89,9 +90,38 @@ export default function CreateReservation({ facility, reservable, success, serve
     const requestedStartTime = requestedStart.slice(11, 16);
     const requestedEndTime = requestedEnd.slice(11, 16);
 
+    type ScheduleEntry = {
+        date: string;
+        start_time: string;
+        end_time: string;
+        slots_count?: number;
+    };
+
+    let parsedSchedules: ScheduleEntry[] = [];
+    const rawSchedules = params.get('schedules');
+    if (rawSchedules) {
+        try {
+            parsedSchedules = JSON.parse(rawSchedules);
+        } catch {
+            parsedSchedules = [];
+        }
+    }
+    if (parsedSchedules.length === 0 && requestedDate && requestedStartTime && requestedEndTime) {
+        parsedSchedules = [
+            {
+                date: requestedDate,
+                start_time: requestedStartTime,
+                end_time: requestedEndTime,
+            },
+        ];
+    }
+
     const [selectedDate, setSelectedDate] = useState(requestedDate || '');
     const [startTime, setStartTime] = useState(requestedStartTime || '');
     const [endTime, setEndTime] = useState(requestedEndTime || '');
+    const [tujuanVal, setTujuanVal] = useState('');
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const submitButtonRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         if (requestedDate) {
@@ -104,6 +134,12 @@ export default function CreateReservation({ facility, reservable, success, serve
             setEndTime(requestedEndTime);
         }
     }, [requestedDate, requestedStartTime, requestedEndTime]);
+
+    useEffect(() => {
+        if (success) {
+            document.cookie = 'pending_reservation=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
+        }
+    }, [success]);
 
     const noCurrentDaySlots = selectedDate === currentWib.date && todayUnavailable;
     const startTimeError = noCurrentDaySlots
@@ -152,112 +188,299 @@ export default function CreateReservation({ facility, reservable, success, serve
                         </div>
                         <h1 className="mt-6 text-2xl font-bold">Ajukan reservasi</h1>
                         <p className="mt-2 text-sm text-[#667085]">{facility.name} · {facility.location}</p>
-                        {success && <p role="status" className="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
-                        {!reservable && <p role="alert" className="mt-6 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Fasilitas ini sedang tidak dapat direservasi.</p>}
+                        {success ? (
+                            <div className="mt-6 space-y-5 rounded-lg border border-emerald-200 bg-emerald-50/60 p-6 shadow-sm">
+                                <div className="flex items-start gap-3.5">
+                                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-base font-bold text-white shadow-xs">
+                                        ✓
+                                    </span>
+                                    <div>
+                                        <h2 className="text-base font-bold text-emerald-900">
+                                            Pengajuan Reservasi Berhasil!
+                                        </h2>
+                                        <p role="status" className="mt-1 text-sm text-emerald-800">
+                                            {success}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-3 border-t border-emerald-200/60 pt-4">
+                                    <Link
+                                        href="/reservations"
+                                        className="inline-flex items-center gap-1.5 rounded-md bg-[#2D4C79] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] transition"
+                                    >
+                                        Lihat Riwayat Reservasi →
+                                    </Link>
+                                    <Link
+                                        href={`/facilities/${facility.id}`}
+                                        className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-4 py-2 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] transition"
+                                    >
+                                        Kembali ke Detail Fasilitas
+                                    </Link>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                {!reservable && <p role="alert" className="mt-6 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Fasilitas ini sedang tidak dapat direservasi.</p>}
 
-                        <Form {...storeReservation.form()} resetOnSuccess onSuccess={() => { setSelectedDate(''); setStartTime(''); setEndTime(''); }} className="mt-6 space-y-5 rounded-lg border border-[#E5E7EB] bg-white p-6">
+                                <Form
+                                    {...storeReservation.form()}
+                                    resetOnSuccess
+                                    onSuccess={() => {
+                                        setSelectedDate('');
+                                        setStartTime('');
+                                        setEndTime('');
+                                        setTujuanVal('');
+                                    }}
+                                    className="mt-6 space-y-5 rounded-lg border border-[#E5E7EB] bg-white p-6"
+                                >
                             {({ errors, processing }) => (
                                 <>
                                     <input type="hidden" name="facility_id" value={facility.id} />
-                                    <input type="hidden" name="start_time" value={selectedDate && startTime ? `${selectedDate}T${startTime}` : ''} />
-                                    <input type="hidden" name="end_time" value={selectedDate && endTime ? `${selectedDate}T${endTime}` : ''} />
+                                    <input
+                                        type="hidden"
+                                        name="start_time"
+                                        value={
+                                            parsedSchedules.length > 0
+                                                ? `${parsedSchedules[0].date}T${parsedSchedules[0].start_time}`
+                                                : selectedDate && startTime
+                                                ? `${selectedDate}T${startTime}`
+                                                : ''
+                                        }
+                                    />
+                                    <input
+                                        type="hidden"
+                                        name="end_time"
+                                        value={
+                                            parsedSchedules.length > 0
+                                                ? `${parsedSchedules[0].date}T${parsedSchedules[0].end_time}`
+                                                : selectedDate && endTime
+                                                ? `${selectedDate}T${endTime}`
+                                                : ''
+                                        }
+                                    />
+                                    {parsedSchedules.length > 0 && (
+                                        <input
+                                            type="hidden"
+                                            name="schedules"
+                                            value={JSON.stringify(parsedSchedules)}
+                                        />
+                                    )}
                                     {errors.facility_id && <p role="alert" className="text-sm text-red-700">{errors.facility_id}</p>}
+                                    {errors.start_time && <p role="alert" className="text-sm text-red-700">{errors.start_time}</p>}
+                                    {errors.end_time && <p role="alert" className="text-sm text-red-700">{errors.end_time}</p>}
 
-                                    <div className="grid gap-6 sm:grid-cols-2">
-                                        <fieldset className="min-w-0" aria-describedby="reservation_date_hint" aria-invalid={!!errors.start_time}>
-                                            <legend className="text-sm font-medium">Tanggal</legend>
-                                            <DateCalendarGrid
-                                                value={selectedDate}
-                                                minimumDate={firstReservableDate}
-                                                maximumDate={latestDate}
-                                                onSelect={(date) => {
-                                                    setSelectedDate(date);
-                                                    setStartTime('');
-                                                    setEndTime('');
-                                                }}
-                                            />
-                                            <p id="reservation_date_hint" className="mt-1 text-xs text-[#667085]">
-                                                {todayUnavailable ? 'Hari ini tidak tersedia karena jam operasional sudah berakhir.' : 'Tanggal lampau berwarna abu-abu dan tidak dapat dipilih.'}
-                                            </p>
-                                        </fieldset>
-
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label htmlFor="start_time_input" className="block text-sm font-medium">Waktu mulai (WIB)</label>
-                                                <input
-                                                    type="text"
-                                                    id="start_time_input"
-                                                    list="start_time_list"
-                                                    value={startTime}
-                                                    placeholder="07:00"
-                                                    maxLength={5}
-                                                    required
-                                                    disabled={!selectedDate || noCurrentDaySlots}
-                                                    onChange={(event) => {
-                                                        setStartTime(event.currentTarget.value);
-                                                        setEndTime('');
-                                                    }}
-                                                    aria-invalid={!!errors.start_time || !!startTimeError}
-                                                    aria-describedby={startTimeError ? 'start_time_client_error' : undefined}
-                                                    className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm focus-visible:border-[#2D4C79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 disabled:cursor-not-allowed disabled:bg-[#F3F5F7] disabled:text-[#98A2B3]"
-                                                />
-                                                <datalist id="start_time_list">
-                                                    {startTimeOptions.map((opt) => (
-                                                        <option key={opt} value={opt} />
-                                                    ))}
-                                                </datalist>
-                                                {startTimeError && <p id="start_time_client_error" role="alert" className="mt-1 text-sm text-red-700">{startTimeError}</p>}
-                                                {errors.start_time && <p role="alert" className="mt-1 text-sm text-red-700">{errors.start_time}</p>}
+                                    {parsedSchedules.length > 0 ? (
+                                        /* Rekap Jadwal yang Dipilih (tiap line: satu hari yang dipilih) */
+                                        <div className="rounded-lg border border-[#D0D5DD] bg-[#FAFAFC] p-5 shadow-sm">
+                                            <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-3">
+                                                <h3 className="text-sm font-bold uppercase tracking-wider text-[#2D4C79]">
+                                                    Rekap Jadwal yang Dipilih
+                                                </h3>
+                                                <span className="rounded-full bg-[#E9EEF5] px-2.5 py-0.5 text-xs font-semibold text-[#2D4C79]">
+                                                    {parsedSchedules.length} Hari Dipilih
+                                                </span>
                                             </div>
-
-                                            <div>
-                                                <label htmlFor="end_time_input" className="block text-sm font-medium">Waktu selesai (WIB)</label>
-                                                <input
-                                                    type="text"
-                                                    id="end_time_input"
-                                                    list="end_time_list"
-                                                    value={endTime}
-                                                    placeholder="07:30"
-                                                    maxLength={5}
-                                                    required
-                                                    disabled={!selectedDate || !startTime}
-                                                    onChange={(event) => setEndTime(event.currentTarget.value)}
-                                                    aria-invalid={!!errors.end_time || !!endTimeError}
-                                                    aria-describedby={endTimeError ? 'end_time_client_error' : undefined}
-                                                    className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm focus-visible:border-[#2D4C79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 disabled:cursor-not-allowed disabled:bg-[#F3F5F7] disabled:text-[#98A2B3]"
-                                                />
-                                                <datalist id="end_time_list">
-                                                    {timeOptions
-                                                        .filter((opt) => !startTime || opt > startTime)
-                                                        .map((opt) => (
-                                                            <option key={opt} value={opt} />
-                                                        ))}
-                                                </datalist>
-                                                {endTimeError && <p id="end_time_client_error" role="alert" className="mt-1 text-sm text-red-700">{endTimeError}</p>}
-                                                {errors.end_time && <p role="alert" className="mt-1 text-sm text-red-700">{errors.end_time}</p>}
+                                            <div className="mt-2 divide-y divide-[#E5E7EB]">
+                                                {parsedSchedules.map((schedule, idx) => (
+                                                    <div
+                                                        key={idx}
+                                                        className="flex flex-col py-3 sm:flex-row sm:items-center sm:justify-between text-sm"
+                                                    >
+                                                        <div className="flex items-center gap-2.5">
+                                                            <span className="inline-flex items-center justify-center rounded bg-[#2D4C79] px-2 py-0.5 text-xs font-bold text-white">
+                                                                Hari {idx + 1}
+                                                            </span>
+                                                            <span className="font-semibold text-[#111827]">
+                                                                {reservationDateFormatter.format(new Date(`${schedule.date}T00:00:00Z`))}
+                                                            </span>
+                                                        </div>
+                                                        <div className="mt-1.5 flex items-center gap-2 sm:mt-0 font-medium text-[#344054]">
+                                                            <span className="inline-flex items-center rounded bg-[#EAF7F0] border border-[#B7E2CB] px-2.5 py-0.5 text-xs font-semibold text-[#16794A]">
+                                                                {schedule.start_time} – {schedule.end_time} WIB
+                                                            </span>
+                                                            {schedule.slots_count ? (
+                                                                <span className="text-xs text-[#667085]">
+                                                                    ({schedule.slots_count} slot{formatDuration(schedule.start_time, schedule.end_time) ? ` • ${formatDuration(schedule.start_time, schedule.end_time)}` : ''})
+                                                                </span>
+                                                            ) : formatDuration(schedule.start_time, schedule.end_time) ? (
+                                                                <span className="text-xs text-[#667085]">
+                                                                    ({formatDuration(schedule.start_time, schedule.end_time)})
+                                                                </span>
+                                                            ) : null}
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
-                                    </div>
+                                    ) : (
+                                        /* Fallback jika tidak ada jadwal terpilih dari detail fasilitas */
+                                        <>
+                                            <div className="grid gap-6 sm:grid-cols-2">
+                                                <fieldset className="min-w-0" aria-describedby="reservation_date_hint" aria-invalid={!!errors.start_time}>
+                                                    <legend className="text-sm font-medium">Tanggal</legend>
+                                                    <DateCalendarGrid
+                                                        value={selectedDate}
+                                                        minimumDate={firstReservableDate}
+                                                        maximumDate={latestDate}
+                                                        onSelect={(date) => {
+                                                            setSelectedDate(date);
+                                                            setStartTime('');
+                                                            setEndTime('');
+                                                        }}
+                                                    />
+                                                    <p id="reservation_date_hint" className="mt-1 text-xs text-[#667085]">
+                                                        {todayUnavailable ? 'Hari ini tidak tersedia karena jam operasional sudah berakhir.' : 'Tanggal lampau berwarna abu-abu dan tidak dapat dipilih.'}
+                                                    </p>
+                                                </fieldset>
 
-                                    {selectedDate && startTime && endTime && (
-                                        <p role="status" className="rounded-md bg-[#F3F5F7] px-3 py-2 text-sm text-[#344054]">
-                                            Jadwal dipilih: {reservationDateFormatter.format(new Date(`${selectedDate}T00:00:00Z`))}, {startTime} - {endTime} (WIB){formatDuration(startTime, endTime) ? ` (${formatDuration(startTime, endTime)})` : ''}
-                                        </p>
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <label htmlFor="start_time_input" className="block text-sm font-medium">Waktu mulai (WIB)</label>
+                                                        <input
+                                                            type="text"
+                                                            id="start_time_input"
+                                                            list="start_time_list"
+                                                            value={startTime}
+                                                            placeholder="07:00"
+                                                            maxLength={5}
+                                                            required
+                                                            disabled={!selectedDate || noCurrentDaySlots}
+                                                            onChange={(event) => {
+                                                                setStartTime(event.currentTarget.value);
+                                                                setEndTime('');
+                                                            }}
+                                                            aria-invalid={!!errors.start_time || !!startTimeError}
+                                                            aria-describedby={startTimeError ? 'start_time_client_error' : undefined}
+                                                            className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm focus-visible:border-[#2D4C79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 disabled:cursor-not-allowed disabled:bg-[#F3F5F7] disabled:text-[#98A2B3]"
+                                                        />
+                                                        <datalist id="start_time_list">
+                                                            {startTimeOptions.map((opt) => (
+                                                                <option key={opt} value={opt} />
+                                                            ))}
+                                                        </datalist>
+                                                        {startTimeError && <p id="start_time_client_error" role="alert" className="mt-1 text-sm text-red-700">{startTimeError}</p>}
+                                                    </div>
+
+                                                    <div>
+                                                        <label htmlFor="end_time_input" className="block text-sm font-medium">Waktu selesai (WIB)</label>
+                                                        <input
+                                                            type="text"
+                                                            id="end_time_input"
+                                                            list="end_time_list"
+                                                            value={endTime}
+                                                            placeholder="07:30"
+                                                            maxLength={5}
+                                                            required
+                                                            disabled={!selectedDate || !startTime}
+                                                            onChange={(event) => setEndTime(event.currentTarget.value)}
+                                                            aria-invalid={!!errors.end_time || !!endTimeError}
+                                                            aria-describedby={endTimeError ? 'end_time_client_error' : undefined}
+                                                            className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm focus-visible:border-[#2D4C79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 disabled:cursor-not-allowed disabled:bg-[#F3F5F7] disabled:text-[#98A2B3]"
+                                                        />
+                                                        <datalist id="end_time_list">
+                                                            {timeOptions
+                                                                .filter((opt) => !startTime || opt > startTime)
+                                                                .map((opt) => (
+                                                                    <option key={opt} value={opt} />
+                                                                ))}
+                                                        </datalist>
+                                                        {endTimeError && <p id="end_time_client_error" role="alert" className="mt-1 text-sm text-red-700">{endTimeError}</p>}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {selectedDate && startTime && endTime && (
+                                                <p role="status" className="rounded-md bg-[#F3F5F7] px-3 py-2 text-sm text-[#344054]">
+                                                    Jadwal dipilih: {reservationDateFormatter.format(new Date(`${selectedDate}T00:00:00Z`))}, {startTime} - {endTime} (WIB){formatDuration(startTime, endTime) ? ` (${formatDuration(startTime, endTime)})` : ''}
+                                                </p>
+                                            )}
+                                        </>
                                     )}
 
                                     <div>
                                         <label htmlFor="tujuan" className="block text-sm font-medium">Tujuan penggunaan</label>
-                                        <textarea id="tujuan" name="tujuan" required maxLength={5000} rows={4} aria-invalid={!!errors.tujuan} className="mt-1 w-full rounded-md border border-[#D0D5DD] px-3 py-2" />
+                                        <textarea
+                                            id="tujuan"
+                                            name="tujuan"
+                                            value={tujuanVal}
+                                            onChange={(e) => setTujuanVal(e.target.value)}
+                                            required
+                                            maxLength={5000}
+                                            rows={4}
+                                            aria-invalid={!!errors.tujuan}
+                                            className="mt-1 w-full rounded-md border border-[#D0D5DD] px-3 py-2"
+                                        />
                                         {errors.tujuan && <p role="alert" className="mt-1 text-sm text-red-700">{errors.tujuan}</p>}
                                     </div>
-                                    <p className="text-sm text-[#667085]">Jam operasional 07:00–20:00 WIB, dalam slot 30 menit. Waktu yang sudah lewat tidak dapat dipilih. Pengajuan menunggu persetujuan Petugas.</p>
-                                    <button type="submit" disabled={processing || !reservable || !selectedDate || !startTime || !endTime || !!startTimeError || !!endTimeError} className="rounded-md bg-[#2D4C79] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                                    {parsedSchedules.length === 0 && (
+                                        <p className="text-sm text-[#667085]">Jam operasional 07:00–20:00 WIB, dalam slot 30 menit. Waktu yang sudah lewat tidak dapat dipilih. Pengajuan menunggu persetujuan Petugas.</p>
+                                    )}
+                                    <button
+                                        ref={submitButtonRef}
+                                        type="submit"
+                                        className="hidden"
+                                        aria-hidden="true"
+                                        tabIndex={-1}
+                                    />
+                                    <button
+                                        type="button"
+                                        disabled={
+                                            processing ||
+                                            !reservable ||
+                                            (parsedSchedules.length === 0 && (!selectedDate || !startTime || !endTime || !!startTimeError || !!endTimeError))
+                                        }
+                                        onClick={() => {
+                                            const form = submitButtonRef.current?.form;
+                                            if (form && !form.reportValidity()) {
+                                                return;
+                                            }
+                                            setIsConfirmOpen(true);
+                                        }}
+                                        className="rounded-md bg-[#2D4C79] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 cursor-pointer"
+                                    >
                                         {processing ? 'Mengirim...' : 'Kirim pengajuan'}
                                     </button>
                                 </>
                             )}
                         </Form>
+                            </>
+                        )}
                     </div>
+
+                    <ConfirmDialog
+                        open={isConfirmOpen}
+                        onOpenChange={setIsConfirmOpen}
+                        title="Kirim Pengajuan Reservasi"
+                        description="Pastikan data pengajuan dan jadwal fasilitas sudah sesuai sebelum dikirimkan ke Petugas."
+                        confirmText="Ya, Kirim Pengajuan"
+                        cancelText="Periksa Kembali"
+                        variant="default"
+                        onConfirm={() => {
+                            setIsConfirmOpen(false);
+                            submitButtonRef.current?.click();
+                        }}
+                    >
+                        <div className="mt-3 space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3.5 text-xs">
+                            <div className="flex justify-between border-b border-slate-200 pb-2">
+                                <span className="text-[#667085]">Fasilitas:</span>
+                                <span className="font-semibold text-slate-800">{facility.name}</span>
+                            </div>
+                            <div className="flex justify-between border-b border-slate-200 pb-2">
+                                <span className="text-[#667085]">Jadwal:</span>
+                                <span className="font-medium text-slate-800 text-right">
+                                    {parsedSchedules.length > 0
+                                        ? `${parsedSchedules.length} Hari Dipilih`
+                                        : `${selectedDate}, ${startTime}–${endTime} WIB`}
+                                </span>
+                            </div>
+                            {tujuanVal && (
+                                <div>
+                                    <span className="text-[#667085]">Tujuan:</span>
+                                    <p className="mt-1 font-medium text-slate-800 line-clamp-2">{tujuanVal}</p>
+                                </div>
+                            )}
+                        </div>
+                    </ConfirmDialog>
                 </main>
             </div>
         </>

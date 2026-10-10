@@ -10,6 +10,7 @@ use App\Services\FacilityConditionService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -49,18 +50,36 @@ class ReservationController extends Controller
     public function store(StoreReservationRequest $request): RedirectResponse
     {
         $input = $request->validated();
+        $rawSchedules = $request->input('schedules');
+        $schedules = ! empty($rawSchedules) ? json_decode($rawSchedules, true) : null;
 
-        Reservation::create([
-            'user_id' => $request->user()->id,
-            'facility_id' => $input['facility_id'],
-            'tujuan' => $input['tujuan'],
-            'start_time' => CarbonImmutable::parse($input['start_time'], 'Asia/Jakarta')->utc()->format('Y-m-d H:i:s'),
-            'end_time' => CarbonImmutable::parse($input['end_time'], 'Asia/Jakarta')->utc()->format('Y-m-d H:i:s'),
-            'status' => ReservationStatus::Pending,
-        ]);
+        if (is_array($schedules) && count($schedules) > 0) {
+            DB::transaction(function () use ($request, $input, $schedules) {
+                foreach ($schedules as $sched) {
+                    Reservation::create([
+                        'user_id' => $request->user()->id,
+                        'facility_id' => $input['facility_id'],
+                        'tujuan' => $input['tujuan'],
+                        'start_time' => CarbonImmutable::parse("{$sched['date']}T{$sched['start_time']}", 'Asia/Jakarta')->utc()->format('Y-m-d H:i:s'),
+                        'end_time' => CarbonImmutable::parse("{$sched['date']}T{$sched['end_time']}", 'Asia/Jakarta')->utc()->format('Y-m-d H:i:s'),
+                        'status' => ReservationStatus::Pending,
+                    ]);
+                }
+            });
+        } else {
+            Reservation::create([
+                'user_id' => $request->user()->id,
+                'facility_id' => $input['facility_id'],
+                'tujuan' => $input['tujuan'],
+                'start_time' => CarbonImmutable::parse($input['start_time'], 'Asia/Jakarta')->utc()->format('Y-m-d H:i:s'),
+                'end_time' => CarbonImmutable::parse($input['end_time'], 'Asia/Jakarta')->utc()->format('Y-m-d H:i:s'),
+                'status' => ReservationStatus::Pending,
+            ]);
+        }
 
         return redirect()->route('reservations.create', ['facility_id' => $input['facility_id']])
-            ->with('success', 'Pengajuan reservasi berhasil dikirim dan menunggu persetujuan Petugas.');
+            ->with('success', 'Pengajuan reservasi berhasil dikirim dan menunggu persetujuan Petugas.')
+            ->withoutCookie('pending_reservation');
     }
 
     public function show(Request $request, Reservation $reservation): Response
@@ -81,14 +100,13 @@ class ReservationController extends Controller
 
         if (! $this->canCancel($reservation)) {
             throw ValidationException::withMessages([
-                'reservation' => 'Reservasi hanya dapat dibatalkan hingga tepat 48 jam sebelum waktu mulai.',
+                'reservation' => 'Hanya reservasi yang berstatus Menunggu atau Disetujui yang dapat dibatalkan.',
             ]);
         }
 
         $reservation->update(['status' => ReservationStatus::Cancelled]);
 
-        return redirect()->route('reservations.show', $reservation)
-            ->with('success', 'Reservasi berhasil dibatalkan.');
+        return back()->with('success', 'Reservasi berhasil dibatalkan.');
     }
 
     private function ensureOwner(Request $request, Reservation $reservation): void
@@ -98,12 +116,11 @@ class ReservationController extends Controller
 
     private function canCancel(Reservation $reservation): bool
     {
-        return in_array($reservation->status, [ReservationStatus::Pending, ReservationStatus::Approved], true)
-            && now()->lessThanOrEqualTo($reservation->start_time->copy()->subHours(48));
+        return in_array($reservation->status, [ReservationStatus::Pending, ReservationStatus::Approved], true);
     }
 
     /**
-     * @return array<string, int|string|null|array<string, int|string>>
+     * @return array<string, int|string|null|bool|array<string, int|string>>
      */
     private function reservationData(Reservation $reservation): array
     {
@@ -116,6 +133,7 @@ class ReservationController extends Controller
             'alasan_penolakan' => $reservation->alasan_penolakan,
             'ditolak_pada' => $reservation->ditolak_pada?->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i'),
             'alasan_pembatalan' => $reservation->alasan_pembatalan,
+            'can_cancel' => $this->canCancel($reservation),
             'facility' => [
                 'id' => $reservation->facility->id,
                 'name' => $reservation->facility->name,
