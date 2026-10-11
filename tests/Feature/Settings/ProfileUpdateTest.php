@@ -67,6 +67,22 @@ test('profile update validates identity_type and institutional_id consistency', 
     $response2->assertSessionHasErrors(['institutional_id']);
 });
 
+test('profile update rejects non-numeric institutional_id and whatsapp', function () {
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->patch(route('profile.update'), [
+            'name' => 'Budi Utomo',
+            'email' => $user->email,
+            'identity_type' => 'nim',
+            'institutional_id' => '24060121140099XYZ',
+            'whatsapp' => '081234567890ABC',
+        ]);
+
+    $response->assertSessionHasErrors(['institutional_id', 'whatsapp']);
+});
+
 test('profile update with unchanged email keeps the account approved', function () {
     $user = User::factory()->create();
 

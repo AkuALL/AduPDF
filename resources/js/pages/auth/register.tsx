@@ -6,7 +6,7 @@ export default function Register() {
     const form = useForm({
         nama: '',
         email: '',
-        identity_type: '',
+        identity_type: 'nim',
         institutional_id: '',
         password: '',
         password_confirmation: '',
@@ -98,7 +98,6 @@ export default function Register() {
                                 }
                                 className="w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm text-[#111827] outline-none transition hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
                             >
-                                <option value="">-- Pilih Jenis Identitas --</option>
                                 <option value="nim">NIM (Mahasiswa)</option>
                                 <option value="nip">NIP (Dosen / Tenaga Pendidik)</option>
                                 <option value="no_pegawai">No. Pegawai (Tenaga Kependidikan atau Staf)</option>
@@ -114,9 +113,21 @@ export default function Register() {
                             <input
                                 id="institutional_id"
                                 required
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 value={form.data.institutional_id}
+                                onKeyDown={(e) => {
+                                    if (
+                                        !/[0-9]/.test(e.key) &&
+                                        !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'Enter'].includes(e.key) &&
+                                        !e.ctrlKey &&
+                                        !e.metaKey
+                                    ) {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 onChange={(event) =>
-                                    form.setData('institutional_id', event.target.value)
+                                    form.setData('institutional_id', event.target.value.replace(/\D/g, ''))
                                 }
                                 placeholder="Contoh: 24060121140001 (NIM) atau 198501012010121001 (NIP)"
                                 className="w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm text-[#111827] placeholder-[#98A2B3] outline-none transition hover:border-[#2D4C79] focus:border-[#2D4C79] focus:ring-2 focus:ring-[#2D4C79]/15"
@@ -142,7 +153,7 @@ export default function Register() {
                         />
                         <button
                             disabled={form.processing}
-                            className="h-10 w-full rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition disabled:opacity-60"
+                            className="h-10 w-full rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition disabled:opacity-60 cursor-pointer"
                         >
                             Daftar Sekarang
                         </button>
@@ -151,7 +162,7 @@ export default function Register() {
                         Sudah memiliki akun?{' '}
                         <Link
                             href="/login"
-                            className="ml-1 font-semibold text-[#2D4C79] hover:underline"
+                            className="ml-1 font-semibold text-[#2D4C79] hover:underline cursor-pointer"
                         >
                             Masuk di sini
                         </Link>

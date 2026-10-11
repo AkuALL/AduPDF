@@ -1,92 +1,211 @@
 import { Link, usePage } from '@inertiajs/react';
+import { AlertTriangle, CalendarClock, ChevronDown, KeyRound, LogOut, Menu } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
-import { home, logout } from '@/routes';
+import { FlashAlert } from '@/components/flash-alert';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { logout } from '@/routes';
 import petugas from '@/routes/petugas';
 import reports from '@/routes/petugas/reports';
 import reservations from '@/routes/petugas/reservations';
 import type { Auth } from '@/types';
 
-type ActivePage = 'dashboard' | 'reservations' | 'reports';
+type ActivePage = 'dashboard' | 'reservations' | 'reports' | 'change-password';
 
-type Props = PropsWithChildren<{ activePage: ActivePage }>;
-
-const navigationClass = (isActive: boolean): string =>
-    `rounded-md px-3 py-2 text-sm font-medium transition ${isActive ? 'bg-white/20 text-white font-semibold' : 'text-slate-200 hover:bg-white/10 hover:text-white'}`;
+type Props = PropsWithChildren<{ activePage?: ActivePage }>;
 
 export default function PetugasLayout({ activePage, children }: Props) {
-    const { auth } = usePage<{ auth: Auth }>().props;
+    const { auth, flash } = usePage<{
+        auth: Auth;
+        flash?: { success?: string; error?: string };
+    }>().props;
+    const displayName = auth.user.nama ?? auth.user.name ?? 'Petugas';
+    const initial = displayName.charAt(0).toUpperCase();
+
     const navigation = [
-        { label: 'Dashboard', href: petugas.dashboard(), active: activePage === 'dashboard' },
-        { label: 'Antrean Reservasi', href: reservations.index(), active: activePage === 'reservations' },
-        { label: 'Antrean Laporan', href: reports.index(), active: activePage === 'reports' },
+        {
+            label: 'Antrean Reservasi',
+            href: reservations.index(),
+            icon: CalendarClock,
+            active: activePage === 'reservations',
+        },
+        {
+            label: 'Antrean Laporan',
+            href: reports.index(),
+            icon: AlertTriangle,
+            active: activePage === 'reports',
+        },
     ];
 
     return (
         <div className="min-h-screen bg-[#F7F8FA] text-[#111827]">
-            <header className="sticky top-0 z-40 bg-[#2D4C79] text-white shadow-sm">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="flex min-h-16 items-center justify-between gap-4">
-                        <div className="flex min-w-0 items-center gap-6">
-                            <Link href={home()} className="flex shrink-0 items-center gap-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-white/40">
-                                <span className="text-2xl font-bold tracking-wider">AduPDF</span>
-                                <span className="rounded border border-white/20 bg-white/15 px-2 py-0.5 text-[11px] font-medium tracking-wide text-white/90">KAMPUS</span>
-                            </Link>
+            <header className="sticky top-0 z-40 bg-[#2D4C79] text-white shadow-md border-b border-[#243E63]">
+                <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center gap-6">
+                        <Link
+                            href={petugas.dashboard()}
+                            className="flex items-center gap-2 group cursor-pointer"
+                        >
+                            <span className="text-2xl font-bold tracking-wider group-hover:text-sky-200 transition">
+                                AduPDF
+                            </span>
+                            <span className="rounded-md border border-sky-400/40 bg-sky-500/30 px-2 py-0.5 text-xs font-semibold text-sky-200 shadow-xs">
+                                PETUGAS
+                            </span>
+                        </Link>
 
-                            <nav className="hidden items-center gap-1 xl:flex" aria-label="Navigasi Petugas">
-                                {navigation.map((item) => (
-                                    <Link key={item.label} href={item.href} aria-current={item.active ? 'page' : undefined} className={navigationClass(item.active)}>
-                                        {item.label}
+                        <nav className="hidden items-center gap-1.5 md:flex" aria-label="Navigasi Petugas">
+                            {navigation.map((item) => {
+                                const Icon = item.icon;
+                                return (
+                                    <Link
+                                        key={item.label}
+                                        href={item.href}
+                                        aria-current={item.active ? 'page' : undefined}
+                                        className={`group flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-all duration-200 cursor-pointer ${
+                                            item.active
+                                                ? 'bg-white text-[#2D4C79] font-bold shadow-md shadow-black/10 ring-1 ring-white/20'
+                                                : 'text-slate-200 hover:bg-white/10 hover:text-white'
+                                        }`}
+                                    >
+                                        <Icon
+                                            className={`h-4 w-4 transition-colors ${
+                                                item.active ? 'text-[#2D4C79]' : 'text-slate-300 group-hover:text-white'
+                                            }`}
+                                        />
+                                        <span>{item.label}</span>
+                                        {item.active && (
+                                            <span className="h-1.5 w-1.5 rounded-full bg-[#2D4C79]" />
+                                        )}
                                     </Link>
-                                ))}
-                            </nav>
-                        </div>
+                                );
+                            })}
+                        </nav>
+                    </div>
 
-                        <div className="ml-auto hidden shrink-0 items-center gap-4 xl:flex">
-                            <div className="text-right">
-                                <div className="text-sm font-semibold leading-tight">{auth.user.nama ?? auth.user.name}</div>
-                                <div className="mt-0.5 flex items-center justify-end gap-1.5">
-                                    <span className="rounded border border-sky-400/30 bg-sky-400/20 px-1.5 py-0.5 text-[10px] font-bold text-sky-200">PETUGAS</span>
-                                    <span className="max-w-[150px] truncate text-xs text-slate-300" title={auth.user.email}>{auth.user.email}</span>
-                                </div>
-                            </div>
-                            <Link href={logout()} method="post" as="button" className="inline-flex items-center gap-1.5 rounded-md border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40">
-                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-                                </svg>
-                                Keluar
-                            </Link>
-                        </div>
-
-                        <details className="relative xl:hidden">
-                            <summary className="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-md border border-white/20 bg-white/10 hover:bg-white/20" aria-label="Buka navigasi Petugas">
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                                </svg>
-                            </summary>
-                            <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-md border border-white/15 bg-[#243E63] p-3 shadow-lg">
-                                <div className="mb-3 border-b border-white/15 px-3 pb-3">
-                                    <div className="text-sm font-semibold">{auth.user.nama ?? auth.user.name}</div>
-                                    <div className="mt-1 flex items-center gap-1.5">
-                                        <span className="rounded border border-sky-400/30 bg-sky-400/20 px-1.5 py-0.5 text-[10px] font-bold text-sky-200">PETUGAS</span>
-                                        <span className="truncate text-xs text-slate-300">{auth.user.email}</span>
+                    <div className="flex items-center gap-3">
+                        {/* Petugas Profile Dropdown */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button
+                                    type="button"
+                                    className="group flex items-center gap-2.5 rounded-lg p-1.5 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40 cursor-pointer"
+                                >
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sky-400/20 border border-sky-300/40 text-sky-200 font-bold text-sm">
+                                        {initial}
                                     </div>
-                                </div>
+                                    <div className="hidden text-left sm:block">
+                                        <div className="flex items-center gap-1 text-sm font-semibold leading-tight text-white">
+                                            <span>{displayName}</span>
+                                            <ChevronDown className="h-3.5 w-3.5 text-slate-300 opacity-80 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                                        </div>
+                                        <div className="text-[11px] text-slate-300">Petugas</div>
+                                    </div>
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56 rounded-xl border border-slate-200 bg-white p-1.5 text-slate-800 shadow-lg">
+                                <DropdownMenuLabel className="px-3 py-2">
+                                    <div className="font-semibold text-slate-900">{displayName}</div>
+                                    {auth.user.email && (
+                                        <div className="truncate text-xs text-slate-500 font-normal">{auth.user.email}</div>
+                                    )}
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator className="my-1 bg-slate-100" />
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        href="/petugas/change-password"
+                                        className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
+                                    >
+                                        <KeyRound className="h-4 w-4 text-slate-500" />
+                                        <span>Ganti Password</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator className="my-1 bg-slate-100" />
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        href={logout()}
+                                        method="post"
+                                        as="button"
+                                        className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-rose-600 transition hover:bg-rose-50 hover:text-rose-700"
+                                    >
+                                        <LogOut className="h-4 w-4 text-rose-500" />
+                                        <span>Keluar</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        {/* Mobile Nav Toggle */}
+                        <details className="relative md:hidden">
+                            <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-lg border border-white/20 bg-white/10 hover:bg-white/20" aria-label="Buka navigasi Petugas">
+                                <Menu className="h-5 w-5 text-white" />
+                            </summary>
+                            <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-white/15 bg-[#243E63] p-2 shadow-xl">
                                 <nav className="grid gap-1" aria-label="Navigasi Petugas">
-                                    {navigation.map((item) => (
-                                        <Link key={item.label} href={item.href} aria-current={item.active ? 'page' : undefined} className={navigationClass(item.active)}>
-                                            {item.label}
-                                        </Link>
-                                    ))}
+                                    {navigation.map((item) => {
+                                        const Icon = item.icon;
+                                        return (
+                                            <Link
+                                                key={item.label}
+                                                href={item.href}
+                                                aria-current={item.active ? 'page' : undefined}
+                                                className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition cursor-pointer ${
+                                                    item.active
+                                                        ? 'bg-white text-[#2D4C79] font-bold shadow-sm'
+                                                        : 'text-slate-200 hover:bg-white/10 hover:text-white'
+                                                }`}
+                                            >
+                                                <Icon className={`h-4 w-4 ${item.active ? 'text-[#2D4C79]' : 'text-slate-300'}`} />
+                                                <span>{item.label}</span>
+                                            </Link>
+                                        );
+                                    })}
+                                    <Link
+                                        href="/petugas/change-password"
+                                        className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10 hover:text-white cursor-pointer"
+                                    >
+                                        <KeyRound className="h-4 w-4 text-slate-300" />
+                                        <span>Ganti Password</span>
+                                    </Link>
+                                    <Link
+                                        href={logout()}
+                                        method="post"
+                                        as="button"
+                                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-rose-300 transition hover:bg-rose-500/20 hover:text-rose-200 cursor-pointer"
+                                    >
+                                        <LogOut className="h-4 w-4 text-rose-400" />
+                                        <span>Keluar</span>
+                                    </Link>
                                 </nav>
-                                <Link href={logout()} method="post" as="button" className="mt-2 flex w-full items-center rounded-md px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10 hover:text-white">
-                                    Keluar
-                                </Link>
                             </div>
                         </details>
                     </div>
                 </div>
             </header>
+            {flash?.success && (
+                <FlashAlert
+                    key={`success-${flash.success}`}
+                    type="success"
+                    message={flash.success}
+                    autoCloseDelay={5000}
+                />
+            )}
+            {flash?.error && (
+                <FlashAlert
+                    key={`error-${flash.error}`}
+                    type="error"
+                    message={flash.error}
+                    autoCloseDelay={5000}
+                />
+            )}
             {children}
         </div>
     );
 }
+

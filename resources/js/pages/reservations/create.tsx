@@ -1,8 +1,9 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { store as storeReservation } from '@/actions/App/Http/Controllers/ReservationController';
 import DateCalendarGrid from '@/components/date-calendar-grid';
-import { UserNavbar } from '@/components/user-navbar';
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { FlashAlert } from '@/components/flash-alert';
+import { UserNavbar } from '@/components/user-navbar';
 import { useEffect, useRef, useState } from 'react';
 
 const wibDateTimeFormatter = new Intl.DateTimeFormat('en-CA', {
@@ -181,13 +182,20 @@ export default function CreateReservation({ facility, reservable, success, serve
                         <div className="mb-6">
                             <Link
                                 href={`/facilities/${facility.id}`}
-                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
+                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition cursor-pointer"
                             >
                                 <span aria-hidden="true">←</span> Kembali ke detail fasilitas
                             </Link>
                         </div>
                         <h1 className="mt-6 text-2xl font-bold">Ajukan reservasi</h1>
                         <p className="mt-2 text-sm text-[#667085]">{facility.name} · {facility.location}</p>
+                        {success && (
+                            <FlashAlert
+                                type="success"
+                                message={success}
+                                autoCloseDelay={5000}
+                            />
+                        )}
                         {success ? (
                             <div className="mt-6 space-y-5 rounded-lg border border-emerald-200 bg-emerald-50/60 p-6 shadow-sm">
                                 <div className="flex items-start gap-3.5">
@@ -206,13 +214,13 @@ export default function CreateReservation({ facility, reservable, success, serve
                                 <div className="flex flex-wrap items-center gap-3 border-t border-emerald-200/60 pt-4">
                                     <Link
                                         href="/reservations"
-                                        className="inline-flex items-center gap-1.5 rounded-md bg-[#2D4C79] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] transition"
+                                        className="inline-flex items-center gap-1.5 rounded-md bg-[#2D4C79] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#243E63] transition cursor-pointer"
                                     >
                                         Lihat Riwayat Reservasi →
                                     </Link>
                                     <Link
                                         href={`/facilities/${facility.id}`}
-                                        className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-4 py-2 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] transition"
+                                        className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-4 py-2 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] transition cursor-pointer"
                                     >
                                         Kembali ke Detail Fasilitas
                                     </Link>
@@ -418,7 +426,7 @@ export default function CreateReservation({ facility, reservable, success, serve
                                     <button
                                         ref={submitButtonRef}
                                         type="submit"
-                                        className="hidden"
+                                        className="hidden cursor-pointer"
                                         aria-hidden="true"
                                         tabIndex={-1}
                                     />

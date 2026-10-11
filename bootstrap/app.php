@@ -46,7 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return route('login');
             }
             if ($user->isAdmin()) {
-                return route('admin.users.index');
+                return route('admin.dashboard');
             }
             if ($user->isPetugas()) {
                 return url('/petugas/dashboard');

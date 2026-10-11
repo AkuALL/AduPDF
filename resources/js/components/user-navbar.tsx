@@ -2,6 +2,7 @@ import { Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { ChevronDown, LogOut, User as UserIcon } from 'lucide-react';
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { FlashAlert } from '@/components/flash-alert';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -20,7 +21,10 @@ type AuthUser = {
 };
 
 export function UserNavbar({ current }: { current?: 'facilities' | 'reservations' | 'reports' }) {
-    const { auth } = usePage<{ auth?: { user?: AuthUser | null } }>().props;
+    const { auth, flash } = usePage<{
+        auth?: { user?: AuthUser | null };
+        flash?: { success?: string; error?: string };
+    }>().props;
     const user = auth?.user;
     const [isLogoutOpen, setIsLogoutOpen] = useState(false);
 
@@ -35,7 +39,7 @@ export function UserNavbar({ current }: { current?: 'facilities' | 'reservations
         <header className="sticky top-0 z-30 border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm">
             <div className="relative flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center">
-                    <Link href="/" className="flex items-center gap-2">
+                    <Link href="/" className="flex items-center gap-2 cursor-pointer">
                         <span className="text-xl font-bold tracking-tight text-[#2D4C79]">
                             AduPDF
                         </span>
@@ -73,7 +77,7 @@ export function UserNavbar({ current }: { current?: 'facilities' | 'reservations
                     {user?.role === 'petugas' && (
                         <Link
                             href="/petugas/reservations"
-                            className="relative py-4 font-medium text-[#667085] hover:text-[#2D4C79] transition-colors after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#2D4C79] after:origin-center after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200"
+                            className="relative py-4 font-medium text-[#667085] hover:text-[#2D4C79] transition-colors after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#2D4C79] after:origin-center after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200 cursor-pointer"
                         >
                             Panel Petugas
                         </Link>
@@ -94,7 +98,7 @@ export function UserNavbar({ current }: { current?: 'facilities' | 'reservations
                             <DropdownMenuTrigger asChild>
                                 <button
                                     type="button"
-                                    className="flex items-center gap-3 rounded-full border border-[#E5E7EB] bg-white py-1.5 pl-2 pr-3.5 text-left transition hover:bg-[#F7F8FA] focus:outline-none focus:ring-2 focus:ring-[#2D4C79]/20 cursor-pointer shadow-xs"
+                                    className="group flex items-center gap-3 rounded-full border border-[#E5E7EB] bg-white py-1.5 pl-2 pr-3.5 text-left transition hover:bg-[#F7F8FA] focus:outline-none focus:ring-2 focus:ring-[#2D4C79]/20 cursor-pointer shadow-xs"
                                 >
                                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E9EEF5] text-sm font-bold text-[#2D4C79]">
                                         {(user.nama || user.name || 'U').charAt(0).toUpperCase()}
@@ -107,7 +111,7 @@ export function UserNavbar({ current }: { current?: 'facilities' | 'reservations
                                             {user.role}
                                         </span>
                                     </div>
-                                    <ChevronDown className="h-4 w-4 text-[#667085]" />
+                                    <ChevronDown className="h-4 w-4 text-[#667085] transition-transform duration-200 group-data-[state=open]:rotate-180" />
                                 </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56 rounded-xl border border-[#E5E7EB] bg-white p-1.5 text-[#111827] shadow-lg">
@@ -168,6 +172,23 @@ export function UserNavbar({ current }: { current?: 'facilities' | 'reservations
                 variant="destructive"
                 onConfirm={() => router.post('/logout')}
             />
+
+            {flash?.success && (
+                <FlashAlert
+                    key={`success-${flash.success}`}
+                    type="success"
+                    message={flash.success}
+                    autoCloseDelay={5000}
+                />
+            )}
+            {flash?.error && (
+                <FlashAlert
+                    key={`error-${flash.error}`}
+                    type="error"
+                    message={flash.error}
+                    autoCloseDelay={5000}
+                />
+            )}
         </header>
     );
 }

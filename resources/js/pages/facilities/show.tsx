@@ -188,7 +188,17 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                 headers['X-Inertia-Version'] = pageVersion;
             }
 
-            const res = await fetch(`/facilities/${facility.id}?date=${targetDate}`, { headers });
+            const res = await fetch(`/facilities/${facility.id}?date=${targetDate}`, {
+                headers,
+                credentials: 'same-origin',
+            });
+            if (res.status === 409) {
+                const loc = res.headers.get('X-Inertia-Location');
+                if (loc) {
+                    window.location.href = loc;
+                    return null;
+                }
+            }
             if (res.ok) {
                 const data = await res.json();
                 return data.props?.availability || null;
@@ -391,7 +401,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                     <div className="mb-6">
                         <Link
                             href="/facilities"
-                            className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-sm font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
+                            className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition cursor-pointer"
                         >
                             <span aria-hidden="true">←</span> Kembali
                         </Link>
@@ -441,7 +451,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                     <dd className="mt-1 text-base font-semibold">
                                         <Link
                                             href={`/facilities/${facility.parent_facility.id}`}
-                                            className="text-[#2D4C79] hover:underline"
+                                            className="text-[#2D4C79] hover:underline cursor-pointer"
                                         >
                                             {facility.parent_facility.name} →
                                         </Link>
@@ -489,7 +499,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                                         <div>
                                                             <Link
                                                                 href={`/facilities/${tool.id}`}
-                                                                className="text-base font-medium text-[#2D4C79] hover:underline"
+                                                                className="text-base font-medium text-[#2D4C79] hover:underline cursor-pointer"
                                                             >
                                                                 {tool.name}
                                                             </Link>
@@ -658,7 +668,7 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                                             aria-haspopup="dialog"
                                                             aria-expanded={day.isCalendarOpen}
                                                             onClick={() => toggleCalendar(day.id)}
-                                                            className="inline-flex min-w-40 items-center justify-between gap-2 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-sm font-semibold text-[#111827] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/30"
+                                                            className="inline-flex min-w-40 items-center justify-between gap-2 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#111827] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/30"
                                                         >
                                                             <span>{displayDateFormatter.format(new Date(`${day.date}T00:00:00Z`))}</span>
                                                             <span aria-hidden="true" className="text-[#667085]">▾</span>
@@ -758,9 +768,9 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                                                     } else if (isPast) {
                                                                         slotStyle = 'bg-[#F3F5F7] border-[#E5E7EB] text-[#98A2B3] opacity-60';
                                                                         statusBadge = 'Lewat';
-                                                                    } else if (slot.status === 'terisi') {
+                                                                    } else if (slot.status === 'bentrok_pengguna' || slot.status === 'terisi') {
                                                                         slotStyle = 'bg-[#F3F5F7] border-[#E5E7EB] text-[#667085] opacity-80';
-                                                                        statusBadge = 'Dipesan';
+                                                                        statusBadge = 'Direservasi';
                                                                     } else if (slot.status === 'dalam_perbaikan') {
                                                                         slotStyle = 'bg-[#FFF0E8] border-[#F5C6A7] text-[#B54708]';
                                                                         statusBadge = 'Perbaikan';
@@ -801,7 +811,11 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                                                         <div
                                                                             key={slot.start_time}
                                                                             aria-disabled="true"
-                                                                            title={`Slot ${slot.start_time} - ${slot.end_time} (${statusBadge})`}
+                                                                            title={
+                                                                                slot.status === 'bentrok_pengguna'
+                                                                                    ? `Slot ${slot.start_time} - ${slot.end_time} (Sudah direservasi pada jadwal Anda yang lain)`
+                                                                                    : `Slot ${slot.start_time} - ${slot.end_time} (${statusBadge})`
+                                                                            }
                                                                             className={`flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all cursor-not-allowed select-none ${slotStyle}`}
                                                                         >
                                                                             <span className="text-sm font-bold tracking-tight">

@@ -7,7 +7,7 @@ export default function AuthPageLayout({ children }: PropsWithChildren) {
         <div className="flex min-h-screen flex-col bg-slate-100 text-slate-800 antialiased">
             <header className="bg-[#2D4C79] text-white shadow-md">
                 <div className="flex w-full items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-                    <Link href="/" className="flex items-center gap-3">
+                    <Link href="/" className="flex items-center gap-3 cursor-pointer">
                         <span className="text-2xl font-bold tracking-wider">AduPDF</span>
                         <span className="rounded bg-white/20 px-2 py-0.5 text-xs font-medium">Kampus</span>
                     </Link>

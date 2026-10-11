@@ -224,13 +224,13 @@ export default function FacilityIndex({
                             <button
                                 type="button"
                                 onClick={resetFilters}
-                                className="h-10 rounded-md border border-[#D0D5DD] bg-white px-4 text-sm font-semibold text-[#111827] hover:bg-[#F3F5F7] transition"
+                                className="h-10 rounded-md border border-[#D0D5DD] bg-white px-4 text-sm font-semibold text-[#111827] hover:bg-[#F3F5F7] transition cursor-pointer"
                             >
                                 Reset
                             </button>
                             <button
                                 type="submit"
-                                className="h-10 rounded-md bg-[#2D4C79] px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition"
+                                className="h-10 rounded-md bg-[#2D4C79] px-5 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition cursor-pointer"
                             >
                                 Terapkan Filter
                             </button>
@@ -256,7 +256,7 @@ export default function FacilityIndex({
                             <button
                                 type="button"
                                 onClick={resetFilters}
-                                className="mt-4 inline-flex h-9 items-center justify-center rounded-md border border-[#D0D5DD] bg-white px-4 text-xs font-semibold text-[#2D4C79] hover:bg-[#E9EEF5] transition"
+                                className="mt-4 inline-flex h-9 items-center justify-center rounded-md border border-[#D0D5DD] bg-white px-4 text-xs font-semibold text-[#2D4C79] hover:bg-[#E9EEF5] transition cursor-pointer"
                             >
                                 Reset Filter
                             </button>
@@ -270,7 +270,7 @@ export default function FacilityIndex({
                                     <Link
                                         key={fac.id}
                                         href={`/facilities/${fac.id}`}
-                                        className="group flex flex-col justify-between overflow-hidden rounded-lg border border-[#E5E7EB] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#2D4C79] hover:shadow-md transition"
+                                        className="group flex flex-col justify-between overflow-hidden rounded-lg border border-[#E5E7EB] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#2D4C79] hover:shadow-md transition cursor-pointer"
                                     >
                                         {facilityImages[fac.type]?.[0] && (
                                             <img

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\PetugasDashboardController;
+use App\Http\Controllers\PetugasPasswordController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -58,9 +59,13 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:petugas'])->prefix('petugas')->name('petugas.')->group(function () {
+    Route::get('/', fn () => redirect()->route('petugas.dashboard'));
     Route::get('/dashboard', [PetugasDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/change-password', [PetugasPasswordController::class, 'edit'])->name('password.edit');
+    Route::put('/change-password', [PetugasPasswordController::class, 'update'])->name('password.update');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', fn () => redirect()->route('admin.dashboard'));
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 });

@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Enums\FacilityCondition;
+use App\Enums\ReservationStatus;
 use App\Models\Facility;
 use App\Models\Reservation;
+use App\Models\User;
 use App\Queries\ReservationOccupancyQuery;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
@@ -39,18 +41,31 @@ class FacilityAvailabilityService
      *     }>
      * }
      */
-    public function getAvailability(Facility $facility, string|CarbonInterface $date): array
+    public function getAvailability(Facility $facility, string|CarbonInterface $date, ?User $user = null): array
     {
         $dateString = $date instanceof CarbonInterface ? $date->format('Y-m-d') : $date;
         $isReservable = $this->conditionService->isReservable($facility);
 
         /** @var Collection<int, Reservation> $occupancies */
         $occupancies = collect();
+        /** @var Collection<int, Reservation> $userOccupancies */
+        $userOccupancies = collect();
+
         if ($isReservable) {
             $dayStart = CarbonImmutable::parse("{$dateString} 07:00:00", 'Asia/Jakarta')->utc();
             $dayEnd = CarbonImmutable::parse("{$dateString} 20:00:00", 'Asia/Jakarta')->utc();
 
             $occupancies = $this->occupancyQuery->forFacility($facility, $dayStart, $dayEnd);
+
+            if ($user !== null) {
+                $userOccupancies = Reservation::query()
+                    ->with('facility:id,type,parent_facility_id')
+                    ->where('user_id', $user->id)
+                    ->where('status', ReservationStatus::Approved->value)
+                    ->where('start_time', '<', $dayEnd)
+                    ->where('end_time', '>', $dayStart)
+                    ->get();
+            }
         }
 
         $effectiveCondition = $this->getEffectiveCondition($facility);
@@ -91,10 +106,33 @@ class FacilityAvailabilityService
                     return $reservation->start_time->lt($slotEndUtc) && $reservation->end_time->gt($slotStartUtc);
                 });
 
+                $isUserConflict = $userOccupancies->contains(function (Reservation $reservation) use ($slotStartUtc, $slotEndUtc, $facility): bool {
+                    if (! ($reservation->start_time->lt($slotEndUtc) && $reservation->end_time->gt($slotStartUtc))) {
+                        return false;
+                    }
+
+                    // If it's for the same facility, it's already captured by $isOccupied.
+                    if ((int) $reservation->facility_id === (int) $facility->id) {
+                        return true;
+                    }
+
+                    // Exceptions: same room tools (GAL-07, BR-12)
+                    $sameRoomTools = $facility->isTool()
+                        && $reservation->facility?->isTool()
+                        && (int) $reservation->facility->parent_facility_id === (int) $facility->parent_facility_id;
+
+                    return ! $sameRoomTools;
+                });
+
                 $isPast = $isToday && $currentTime->lessThanOrEqualTo($nowWib);
 
                 if ($isOccupied) {
                     $status = 'terisi';
+                    $label = 'Sudah Direservasi';
+                    $isAvailable = false;
+                    $occupiedCount++;
+                } elseif ($isUserConflict) {
+                    $status = 'bentrok_pengguna';
                     $label = 'Sudah Direservasi';
                     $isAvailable = false;
                     $occupiedCount++;

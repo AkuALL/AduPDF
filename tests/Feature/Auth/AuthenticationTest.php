@@ -59,7 +59,7 @@ test('petugas can authenticate successfully', function () {
     $response->assertRedirect(url('/petugas/dashboard'));
 });
 
-test('admin can authenticate successfully and redirects to user list', function () {
+test('admin can authenticate successfully and redirects to dashboard', function () {
     $admin = User::factory()->admin()->create([
         'email' => 'admin@kampus.ac.id',
         'password' => bcrypt('password123'),
@@ -72,7 +72,7 @@ test('admin can authenticate successfully and redirects to user list', function 
     ]);
 
     $this->assertAuthenticatedAs($admin);
-    $response->assertRedirect(route('admin.users.index'));
+    $response->assertRedirect(route('admin.dashboard'));
 });
 
 test('users can not authenticate with invalid password', function () {

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import ConfirmationDialog, {
     type ConfirmationRequest,
-} from '@/components/confirmation-dialog';
+} from '@/components/confirm-dialog';
 import { approve as approveAccount } from '@/actions/App/Http/Controllers/Admin/AccountManagementController';
 import {
     Dialog,
@@ -112,13 +112,13 @@ export default function Index({ users }: Props) {
                     <div className="flex gap-2">
                         <Link
                             href="/admin/users/pengguna/create"
-                            className="rounded-md border border-slate-300 bg-slate-100 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-200"
+                            className="rounded-md border border-slate-300 bg-slate-100 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-200 cursor-pointer"
                         >
                             + Buat Pengguna
                         </Link>
                         <Link
                             href="/admin/users/petugas/create"
-                            className="rounded-md bg-[#2D4C79] px-3 py-2 text-xs font-medium text-white transition hover:bg-[#1e3454]"
+                            className="rounded-md bg-[#2D4C79] px-3 py-2 text-xs font-medium text-white transition hover:bg-[#1e3454] cursor-pointer"
                         >
                             + Buat Petugas
                         </Link>
@@ -373,7 +373,7 @@ export default function Index({ users }: Props) {
                             variant="destructive"
                             onClick={confirmDeactivation}
                             disabled={isProcessing}
-                            className="rounded-lg bg-rose-600 font-medium text-white shadow-sm transition hover:bg-rose-700"
+                            className="rounded-lg bg-rose-600 font-medium text-white shadow-sm transition hover:bg-rose-700 cursor-pointer"
                         >
                             {isProcessing ? (
                                 <>

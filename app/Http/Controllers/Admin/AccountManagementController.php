@@ -42,7 +42,9 @@ class AccountManagementController extends Controller
      */
     public function createPetugas(): Response
     {
-        return Inertia::render('admin/accounts/create-petugas');
+        return Inertia::render('admin/accounts/account-form', [
+            'role' => 'Petugas',
+        ]);
     }
 
     /**
@@ -83,7 +85,9 @@ class AccountManagementController extends Controller
      */
     public function createPengguna(): Response
     {
-        return Inertia::render('admin/accounts/create-pengguna');
+        return Inertia::render('admin/accounts/account-form', [
+            'role' => 'Pengguna',
+        ]);
     }
 
     /**
@@ -95,7 +99,8 @@ class AccountManagementController extends Controller
             'nama' => ['required', 'string', 'max:100'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:100', 'unique:users,email'],
             'identity_type' => ['required', 'string', Rule::in(['nim', 'nip', 'no_pegawai'])],
-            'institutional_id' => ['required', 'string', 'max:100'],
+            'institutional_id' => ['required', 'string', 'regex:/^[0-9]+$/', 'max:100'],
+
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
             'nama.required' => 'Nama Pengguna wajib diisi.',
@@ -105,6 +110,7 @@ class AccountManagementController extends Controller
             'identity_type.required' => 'Pilih jenis identitas institusional.',
             'identity_type.in' => 'Jenis identitas institusional tidak valid.',
             'institutional_id.required' => 'Nomor identitas institusional wajib diisi.',
+            'institutional_id.regex' => 'Nomor identitas institusional hanya boleh berisi angka.',
             'password.required' => 'Kata sandi wajib diisi.',
             'password.min' => 'Kata sandi minimal harus 8 karakter.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',

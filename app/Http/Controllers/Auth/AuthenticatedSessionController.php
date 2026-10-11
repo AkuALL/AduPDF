@@ -59,7 +59,7 @@ class AuthenticatedSessionController extends Controller
 
         // Redirect based on role
         if ($user->isAdmin()) {
-            return redirect()->route('admin.users.index');
+            return redirect()->route('admin.dashboard');
         }
 
         if ($user->isPetugas()) {

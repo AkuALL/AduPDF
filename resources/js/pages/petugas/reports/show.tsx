@@ -1,8 +1,10 @@
 import { Form, Head } from '@inertiajs/react';
 import { useState } from 'react';
+import AdminBackLink from '@/components/admin-back-link';
 import ConfirmationDialog, {
     type ConfirmationRequest,
-} from '@/components/confirmation-dialog';
+} from '@/components/confirm-dialog';
+import { FlashAlert } from '@/components/flash-alert';
 import PetugasLayout from '@/layouts/petugas-layout';
 
 type ReportStatus = 'baru' | 'diproses' | 'selesai' | 'ditolak';
@@ -48,32 +50,43 @@ export default function PetugasReportShow({ report, success }: Props) {
     return (
         <PetugasLayout activePage="reports">
             <Head title="Proses Laporan" />
-            <main className="mx-auto w-full max-w-[1360px] px-4 py-8 text-[#111827] sm:px-6 lg:px-8">
+            <main className="mx-auto w-full max-w-[1360px] px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
                 <div className="w-full">
-                    {success && <p role="status" className="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
-                    <article className="mt-6 rounded-lg border border-[#E5E7EB] bg-white p-6">
+                    <div className="mb-4">
+                        <AdminBackLink href="/petugas/reports">
+                            Kembali ke Antrean Laporan
+                        </AdminBackLink>
+                    </div>
+                    {success && (
+                        <FlashAlert
+                            type="success"
+                            message={success}
+                            autoCloseDelay={5000}
+                        />
+                    )}
+                    <article className="mt-6 rounded-xl border border-slate-200 bg-white p-6">
                         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-                            <div><p className="text-sm text-[#667085]">{report.facility.location}</p><h1 className="mt-1 text-2xl font-bold">{report.facility.name}</h1><p className="mt-2 text-sm text-[#667085]">Dilaporkan oleh {report.reporter} · {report.reported_at} WIB</p></div>
+                            <div><p className="text-sm text-slate-500">{report.facility.location}</p><h1 className="mt-1 text-2xl font-bold">{report.facility.name}</h1><p className="mt-2 text-sm text-slate-500">Dilaporkan oleh {report.reporter} · {report.reported_at} WIB</p></div>
                             <div className="flex flex-wrap gap-2 sm:justify-end">
                                 <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold ${reportStatus.classes}`}><span>{reportStatus.icon}</span>Laporan: {reportStatus.label}</span>
                                 <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold ${facilityCondition.classes}`}><span>{facilityCondition.icon}</span>Fasilitas: {facilityCondition.label}</span>
                             </div>
                         </div>
-                        <dl className="mt-6 space-y-4 border-y border-[#E5E7EB] py-5 text-sm">
-                            <div><dt className="text-[#667085]">Kategori kerusakan</dt><dd className="mt-1 font-medium">{report.kategori}</dd></div>
-                            <div><dt className="text-[#667085]">Deskripsi</dt><dd className="mt-1 whitespace-pre-wrap">{report.deskripsi}</dd></div>
-                            {report.catatan_resolusi && <div><dt className="text-[#667085]">Catatan resolusi</dt><dd className="mt-1 whitespace-pre-wrap">{report.catatan_resolusi}</dd></div>}
+                        <dl className="mt-6 space-y-4 border-y border-slate-200 py-5 text-sm">
+                            <div><dt className="text-slate-500">Kategori kerusakan</dt><dd className="mt-1 font-medium">{report.kategori}</dd></div>
+                            <div><dt className="text-slate-500">Deskripsi</dt><dd className="mt-1 whitespace-pre-wrap">{report.deskripsi}</dd></div>
+                            {report.catatan_resolusi && <div><dt className="text-slate-500">Catatan resolusi</dt><dd className="mt-1 whitespace-pre-wrap">{report.catatan_resolusi}</dd></div>}
                         </dl>
-                        <section className="mt-6"><h2 className="text-sm font-semibold">Foto pendukung ({report.attachments.length})</h2><ul className="mt-3 divide-y rounded-lg border border-[#E5E7EB]">{report.attachments.map((attachment) => <li key={attachment.id} className="flex items-center justify-between gap-4 px-4 py-3 text-sm"><span className="min-w-0 truncate font-medium">{attachment.original_name}</span><span className="flex shrink-0 items-center gap-3"><span className="text-[#667085]">{formatFileSize(attachment.file_size)}</span><a href={attachment.url} target="_blank" rel="noreferrer" className="font-semibold text-[#2D4C79] hover:underline">Lihat</a></span></li>)}</ul></section>
+                        <section className="mt-6"><h2 className="text-sm font-semibold">Foto pendukung ({report.attachments.length})</h2><ul className="mt-3 divide-y rounded-xl border border-slate-200">{report.attachments.map((attachment) => <li key={attachment.id} className="flex items-center justify-between gap-4 px-4 py-3 text-sm"><span className="min-w-0 truncate font-medium">{attachment.original_name}</span><span className="flex shrink-0 items-center gap-3"><span className="text-slate-500">{formatFileSize(attachment.file_size)}</span><a href={attachment.url} target="_blank" rel="noreferrer" className="font-semibold text-[#2D4C79] hover:underline">Lihat</a></span></li>)}</ul></section>
 
                         {report.status_laporan === 'diproses' && report.facility.condition === 'aktif' && (
                             <Form
                                 action={`/petugas/reports/${report.id}/facility-condition`}
                                 method="patch"
-                                className="mt-6 border-t border-[#E5E7EB] pt-6"
+                                className="mt-6 border-t border-slate-200 pt-6"
                             >
                                 {({ errors, processing, submit }) => (
-                                    <><input type="hidden" name="condition" value="dalam_perbaikan" /><p className="text-sm text-[#667085]">Tandai fasilitas dalam perbaikan jika kerusakan perlu menghentikan reservasi baru.</p>{errors.condition && <p role="alert" className="mt-2 text-sm text-red-700">{errors.condition}</p>}<button type="button" onClick={() => setConfirmation({ title: 'Tandai Fasilitas dalam Perbaikan', description: 'Reservasi baru untuk fasilitas ini akan diblokir sampai kondisinya dipulihkan.', confirmLabel: 'Ya, Tandai dalam Perbaikan', destructive: true, onConfirm: submit })} disabled={processing} className="mt-3 rounded-md border border-[#F5C6A7] bg-[#FFF0E8] px-4 py-2 text-sm font-semibold text-[#B54708] disabled:opacity-50">{processing ? 'Memperbarui...' : 'Tandai dalam perbaikan'}</button></>
+                                    <><input type="hidden" name="condition" value="dalam_perbaikan" /><p className="text-sm text-slate-500">Tandai fasilitas dalam perbaikan jika kerusakan perlu menghentikan reservasi baru.</p>{errors.condition && <p role="alert" className="mt-2 text-sm text-red-700">{errors.condition}</p>}<button type="button" onClick={() => setConfirmation({ title: 'Tandai Fasilitas dalam Perbaikan', description: 'Reservasi baru untuk fasilitas ini akan diblokir sampai kondisinya dipulihkan.', confirmLabel: 'Ya, Tandai dalam Perbaikan', destructive: true, onConfirm: submit })} disabled={processing} className="mt-3 rounded-md border border-[#F5C6A7] bg-[#FFF0E8] px-4 py-2 text-sm font-semibold text-[#B54708] disabled:opacity-50">{processing ? 'Memperbarui...' : 'Tandai dalam perbaikan'}</button></>
                                 )}
                             </Form>
                         )}
@@ -82,10 +95,10 @@ export default function PetugasReportShow({ report, success }: Props) {
                             <Form
                                 action={`/petugas/reports/${report.id}/facility-condition`}
                                 method="patch"
-                                className="mt-6 border-t border-[#E5E7EB] pt-6"
+                                className="mt-6 border-t border-slate-200 pt-6"
                             >
                                 {({ errors, processing, submit }) => (
-                                    <><input type="hidden" name="condition" value="aktif" /><p className="text-sm text-[#667085]">Kembalikan fasilitas ke aktif setelah perbaikan selesai. Sistem akan menolak tindakan ini bila masih ada laporan terbuka lain.</p>{errors.condition && <p role="alert" className="mt-2 text-sm text-red-700">{errors.condition}</p>}<button type="button" onClick={() => setConfirmation({ title: 'Aktifkan Kembali Fasilitas', description: 'Fasilitas akan tersedia untuk reservasi baru. Sistem akan menolak tindakan ini bila masih ada laporan terbuka lain.', confirmLabel: 'Ya, Aktifkan Kembali', onConfirm: submit })} disabled={processing} className="mt-3 rounded-md border border-[#B7E2CB] bg-[#EAF7F0] px-4 py-2 text-sm font-semibold text-[#16794A] disabled:opacity-50">{processing ? 'Memperbarui...' : 'Kembalikan ke aktif'}</button></>
+                                    <><input type="hidden" name="condition" value="aktif" /><p className="text-sm text-slate-500">Kembalikan fasilitas ke aktif setelah perbaikan selesai. Sistem akan menolak tindakan ini bila masih ada laporan terbuka lain.</p>{errors.condition && <p role="alert" className="mt-2 text-sm text-red-700">{errors.condition}</p>}<button type="button" onClick={() => setConfirmation({ title: 'Aktifkan Kembali Fasilitas', description: 'Fasilitas akan tersedia untuk reservasi baru. Sistem akan menolak tindakan ini bila masih ada laporan terbuka lain.', confirmLabel: 'Ya, Aktifkan Kembali', onConfirm: submit })} disabled={processing} className="mt-3 rounded-md border border-[#B7E2CB] bg-[#EAF7F0] px-4 py-2 text-sm font-semibold text-[#16794A] disabled:opacity-50">{processing ? 'Memperbarui...' : 'Kembalikan ke aktif'}</button></>
                                 )}
                             </Form>
                         )}
@@ -94,12 +107,12 @@ export default function PetugasReportShow({ report, success }: Props) {
                             <Form
                                 action={`/petugas/reports/${report.id}`}
                                 method="patch"
-                                className="mt-6 border-t border-[#E5E7EB] pt-6"
+                                className="mt-6 border-t border-slate-200 pt-6"
                             >
                                 {({ errors, processing, submit }) => (
                                     <div className="space-y-4">
                                         <div><label htmlFor="status_laporan" className="block text-sm font-medium">Ubah status laporan</label><select id="status_laporan" name="status_laporan" required defaultValue="" aria-invalid={!!errors.status_laporan} className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2"><option value="" disabled>Pilih tindakan</option>{report.status_laporan === 'baru' && <option value="diproses">Tandai diproses</option>}<option value="ditolak">Tolak laporan</option>{report.status_laporan === 'diproses' && <option value="selesai">Tandai selesai</option>}</select>{errors.status_laporan && <p role="alert" className="mt-1 text-sm text-red-700">{errors.status_laporan}</p>}</div>
-                                        <div><label htmlFor="catatan_resolusi" className="block text-sm font-medium">Catatan resolusi</label><textarea id="catatan_resolusi" name="catatan_resolusi" rows={4} maxLength={65535} aria-invalid={!!errors.catatan_resolusi} className="mt-1 w-full rounded-md border border-[#D0D5DD] px-3 py-2" /><p className="mt-1 text-sm text-[#667085]">Wajib diisi saat laporan ditutup sebagai selesai atau ditolak.</p>{errors.catatan_resolusi && <p role="alert" className="mt-1 text-sm text-red-700">{errors.catatan_resolusi}</p>}</div>
+                                        <div><label htmlFor="catatan_resolusi" className="block text-sm font-medium">Catatan resolusi</label><textarea id="catatan_resolusi" name="catatan_resolusi" rows={4} maxLength={65535} aria-invalid={!!errors.catatan_resolusi} className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400" /><p className="mt-1 text-sm text-slate-500">Wajib diisi saat laporan ditutup sebagai selesai atau ditolak.</p>{errors.catatan_resolusi && <p role="alert" className="mt-1 text-sm text-red-700">{errors.catatan_resolusi}</p>}</div>
                                         <button type="button" disabled={processing} onClick={(event) => { const form = event.currentTarget.form; if (!form?.reportValidity()) return; const status = new FormData(form).get('status_laporan'); if (status === 'selesai' || status === 'ditolak') { const isRejected = status === 'ditolak'; setConfirmation({ title: isRejected ? 'Tolak Laporan' : 'Selesaikan Laporan', description: `Ubah status laporan menjadi ${isRejected ? 'Ditolak' : 'Selesai'}? Status ini mengakhiri pemrosesan laporan.`, confirmLabel: isRejected ? 'Ya, Tolak Laporan' : 'Ya, Selesaikan Laporan', destructive: isRejected, onConfirm: submit }); } else { submit(); } }} className="rounded-md bg-[#2D4C79] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{processing ? 'Menyimpan...' : 'Simpan perubahan'}</button>
                                     </div>
                                 )}

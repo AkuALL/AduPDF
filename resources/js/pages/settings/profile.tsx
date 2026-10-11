@@ -1,5 +1,6 @@
 import { Form, Head, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { FlashAlert } from '@/components/flash-alert';
 import { UserNavbar } from '@/components/user-navbar';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -163,7 +164,6 @@ export default function Profile({
                     </div>
 
                     <Heading
-                        variant="small"
                         title="Informasi Profil & Identitas"
                         description="Perbarui informasi profil, identitas institusional (NIM/NIP/No. Pegawai), serta nomor kontak WhatsApp Anda."
                     />
@@ -226,13 +226,10 @@ export default function Profile({
                                         id="identity_type"
                                         name="identity_type"
                                         defaultValue={
-                                            (user.identity_type as string) ?? ''
+                                            (user.identity_type as string) || 'nim'
                                         }
                                         className="border-input focus-visible:ring-ring mt-1 block w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs focus-visible:ring-1 focus-visible:outline-none"
                                     >
-                                        <option value="">
-                                            -- Pilih Jenis Identitas --
-                                        </option>
                                         <option value="nim">
                                             NIM (Mahasiswa)
                                         </option>
@@ -263,6 +260,22 @@ export default function Profile({
                                             ''
                                         }
                                         name="institutional_id"
+                                        type="text"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        onKeyDown={(e) => {
+                                            if (
+                                                !/[0-9]/.test(e.key) &&
+                                                !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'Enter'].includes(e.key) &&
+                                                !e.ctrlKey &&
+                                                !e.metaKey
+                                            ) {
+                                                e.preventDefault();
+                                            }
+                                        }}
+                                        onInput={(e) => {
+                                            e.currentTarget.value = e.currentTarget.value.replace(/\D/g, '');
+                                        }}
                                         placeholder="Contoh: 24060121140001 (NIM) atau 198501012010121001 (NIP)"
                                     />
                                     <InputError
@@ -284,6 +297,21 @@ export default function Profile({
                                             (user.whatsapp as string) ?? ''
                                         }
                                         name="whatsapp"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        onKeyDown={(e) => {
+                                            if (
+                                                !/[0-9]/.test(e.key) &&
+                                                !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'Enter'].includes(e.key) &&
+                                                !e.ctrlKey &&
+                                                !e.metaKey
+                                            ) {
+                                                e.preventDefault();
+                                            }
+                                        }}
+                                        onInput={(e) => {
+                                            e.currentTarget.value = e.currentTarget.value.replace(/\D/g, '');
+                                        }}
                                         placeholder="Contoh: 081234567890"
                                     />
                                     <InputError
@@ -294,16 +322,18 @@ export default function Profile({
 
                                 {/* Status Sukses Update */}
                                 {status === 'profile-updated' && (
-                                    <div className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-800">
-                                        Profil berhasil disimpan.
-                                    </div>
+                                    <FlashAlert
+                                        type="success"
+                                        message="Profil berhasil diperbarui."
+                                        autoCloseDelay={5000}
+                                    />
                                 )}
 
                                 <div className="flex items-center gap-4 pt-2">
                                     <Button
                                         disabled={processing}
                                         data-test="update-profile-button"
-                                        className="bg-[#2D4C79] text-white hover:bg-[#1e3454]"
+                                        className="bg-[#2D4C79] text-white hover:bg-[#243E63] active:bg-[#1C3150] transition cursor-pointer"
                                     >
                                         Simpan Perubahan
                                     </Button>

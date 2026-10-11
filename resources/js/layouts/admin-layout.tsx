@@ -15,7 +15,7 @@ type AuthUser = { name?: string; nama?: string; email?: string };
 
 const navigation = [
     {
-        label: 'Rekap & Analitik',
+        label: 'Rekapitulasi',
         href: '/admin/recap',
         icon: BarChart3,
         isActive: (currentPath: string) => currentPath.startsWith('/admin/recap'),
@@ -52,7 +52,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
             <header className="sticky top-0 z-40 bg-[#2D4C79] text-white shadow-md border-b border-[#243E63]">
                 <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-6">
-                        <Link href="/admin/dashboard" className="flex items-center gap-2 group">
+                        <Link href="/admin/dashboard" className="flex items-center gap-2 group cursor-pointer">
                             <span className="text-2xl font-bold tracking-wider group-hover:text-amber-200 transition">AduPDF</span>
                             <span className="rounded-md border border-amber-400/40 bg-amber-500/30 px-2 py-0.5 text-xs font-semibold text-amber-200 shadow-xs">
                                 ADMIN
@@ -90,7 +90,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                             <DropdownMenuTrigger asChild>
                                 <button
                                     type="button"
-                                    className="flex items-center gap-2.5 rounded-lg p-1.5 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40 cursor-pointer"
+                                    className="group flex items-center gap-2.5 rounded-lg p-1.5 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40 cursor-pointer"
                                 >
                                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-400/20 border border-amber-300/40 text-amber-200 font-bold text-sm">
                                         {initial}
@@ -98,7 +98,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                                     <div className="hidden text-left sm:block">
                                         <div className="flex items-center gap-1 text-sm font-semibold leading-tight text-white">
                                             <span>{displayName}</span>
-                                            <ChevronDown className="h-3.5 w-3.5 text-slate-300 opacity-80" />
+                                            <ChevronDown className="h-3.5 w-3.5 text-slate-300 opacity-80 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                                         </div>
                                         <div className="text-[11px] text-slate-300">Administrator</div>
                                     </div>

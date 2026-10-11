@@ -109,3 +109,17 @@ test('registration fails when password confirmation does not match', function ()
     $response->assertSessionHasErrors(['password']);
     $this->assertGuest();
 });
+
+test('registration fails when institutional_id contains non-digits', function () {
+    $response = $this->post(route('register'), [
+        'nama' => 'Ahmad Huruf',
+        'email' => 'huruf@kampus.ac.id',
+        'identity_type' => 'nim',
+        'institutional_id' => '24060121140001ABC',
+        'password' => 'Password123!',
+        'password_confirmation' => 'Password123!',
+    ]);
+
+    $response->assertSessionHasErrors(['institutional_id']);
+    $this->assertGuest();
+});
