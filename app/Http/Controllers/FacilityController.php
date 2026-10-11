@@ -40,6 +40,7 @@ class FacilityController extends Controller
             ->values();
 
         return Inertia::render('facilities/index', [
+            'siteUrl' => config('app.url'),
             'facilities' => $facilities,
             'filters' => [
                 'search' => $filters['search'] ?? '',
