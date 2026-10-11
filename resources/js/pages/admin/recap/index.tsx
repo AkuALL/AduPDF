@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ChevronDown, Download, FileSpreadsheet, FileText } from 'lucide-react';
 import { useState } from 'react';
+import AdminBackLink from '@/components/admin-back-link';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -124,6 +125,12 @@ export default function RecapIndex({
             <Head title="Rekapitulasi Okupansi & Kerusakan — AduPDF" />
 
             <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
+                <div>
+                    <AdminBackLink href="/admin/dashboard">
+                        Kembali ke Dashboard
+                    </AdminBackLink>
+                </div>
+
                 {/* Header Section */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>

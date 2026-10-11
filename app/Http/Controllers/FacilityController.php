@@ -70,7 +70,7 @@ class FacilityController extends Controller
             'childTools:id,name,type,condition,parent_facility_id',
         ]);
 
-        $availability = $availabilityService->getAvailability($facility, $selectedDate);
+        $availability = $availabilityService->getAvailability($facility, $selectedDate, $request->user());
 
         return Inertia::render('facilities/show', [
             'facility' => $this->toPublicData($facility, true),

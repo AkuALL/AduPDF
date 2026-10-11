@@ -214,3 +214,47 @@ test('on today date, past slots are marked unavailable in public availability (A
         ->where('availability.occupied_slots_count', 15)
     );
 });
+
+test('authenticated user sees their conflicting approved reservations from other facilities as unavailable (bentrok_pengguna)', function () {
+    $user = User::factory()->create();
+    $facilityA = Facility::factory()->create(['name' => 'Ruang Teater A']);
+    $facilityB = Facility::factory()->create(['name' => 'Aula Serbaguna']);
+
+    // User has an approved reservation in Facility A for 10:00-11:30
+    Reservation::create([
+        'user_id' => $user->id,
+        'facility_id' => $facilityA->id,
+        'tujuan' => 'Rapat Tahunan',
+        'start_time' => CarbonImmutable::parse('2026-09-20 10:00:00', 'Asia/Jakarta')->utc(),
+        'end_time' => CarbonImmutable::parse('2026-09-20 11:30:00', 'Asia/Jakarta')->utc(),
+        'status' => ReservationStatus::Approved,
+    ]);
+
+    // When viewed as guest, Facility B slots 10:00-11:30 are available
+    $guestResponse = $this->get("/facilities/{$facilityB->id}?date=2026-09-20");
+    $guestResponse->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('facilities/show')
+        ->where('availability.slots.6.start_time', '10:00')
+        ->where('availability.slots.6.is_available', true)
+        ->where('availability.slots.6.status', 'tersedia')
+    );
+
+    // When viewed as the authenticated user, Facility B slots 10:00-11:30 are marked as bentrok_pengguna
+    $userResponse = $this->actingAs($user)->get("/facilities/{$facilityB->id}?date=2026-09-20");
+    $userResponse->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('facilities/show')
+        ->where('availability.slots.6.start_time', '10:00')
+        ->where('availability.slots.6.is_available', false)
+        ->where('availability.slots.6.status', 'bentrok_pengguna')
+        ->where('availability.slots.6.label', 'Sudah Direservasi')
+        ->where('availability.slots.7.start_time', '10:30')
+        ->where('availability.slots.7.is_available', false)
+        ->where('availability.slots.7.status', 'bentrok_pengguna')
+        ->where('availability.slots.8.start_time', '11:00')
+        ->where('availability.slots.8.is_available', false)
+        ->where('availability.slots.8.status', 'bentrok_pengguna')
+        ->where('availability.slots.9.start_time', '11:30')
+        ->where('availability.slots.9.is_available', true)
+        ->where('availability.slots.9.status', 'tersedia')
+    );
+});

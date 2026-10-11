@@ -188,7 +188,17 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                 headers['X-Inertia-Version'] = pageVersion;
             }
 
-            const res = await fetch(`/facilities/${facility.id}?date=${targetDate}`, { headers });
+            const res = await fetch(`/facilities/${facility.id}?date=${targetDate}`, {
+                headers,
+                credentials: 'same-origin',
+            });
+            if (res.status === 409) {
+                const loc = res.headers.get('X-Inertia-Location');
+                if (loc) {
+                    window.location.href = loc;
+                    return null;
+                }
+            }
             if (res.ok) {
                 const data = await res.json();
                 return data.props?.availability || null;
@@ -758,9 +768,9 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                                                     } else if (isPast) {
                                                                         slotStyle = 'bg-[#F3F5F7] border-[#E5E7EB] text-[#98A2B3] opacity-60';
                                                                         statusBadge = 'Lewat';
-                                                                    } else if (slot.status === 'terisi') {
+                                                                    } else if (slot.status === 'bentrok_pengguna' || slot.status === 'terisi') {
                                                                         slotStyle = 'bg-[#F3F5F7] border-[#E5E7EB] text-[#667085] opacity-80';
-                                                                        statusBadge = 'Dipesan';
+                                                                        statusBadge = 'Direservasi';
                                                                     } else if (slot.status === 'dalam_perbaikan') {
                                                                         slotStyle = 'bg-[#FFF0E8] border-[#F5C6A7] text-[#B54708]';
                                                                         statusBadge = 'Perbaikan';
@@ -801,7 +811,11 @@ export default function FacilityShow({ facility, availability, selectedDate }: P
                                                                         <div
                                                                             key={slot.start_time}
                                                                             aria-disabled="true"
-                                                                            title={`Slot ${slot.start_time} - ${slot.end_time} (${statusBadge})`}
+                                                                            title={
+                                                                                slot.status === 'bentrok_pengguna'
+                                                                                    ? `Slot ${slot.start_time} - ${slot.end_time} (Sudah direservasi pada jadwal Anda yang lain)`
+                                                                                    : `Slot ${slot.start_time} - ${slot.end_time} (${statusBadge})`
+                                                                            }
                                                                             className={`flex flex-col items-center justify-center rounded-md border p-2 text-center transition-all cursor-not-allowed select-none ${slotStyle}`}
                                                                         >
                                                                             <span className="text-sm font-bold tracking-tight">

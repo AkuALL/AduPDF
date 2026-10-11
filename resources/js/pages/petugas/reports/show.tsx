@@ -1,5 +1,6 @@
 import { Form, Head } from '@inertiajs/react';
 import { useState } from 'react';
+import AdminBackLink from '@/components/admin-back-link';
 import ConfirmationDialog, {
     type ConfirmationRequest,
 } from '@/components/confirm-dialog';
@@ -51,6 +52,11 @@ export default function PetugasReportShow({ report, success }: Props) {
             <Head title="Proses Laporan" />
             <main className="mx-auto w-full max-w-[1360px] px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
                 <div className="w-full">
+                    <div className="mb-4">
+                        <AdminBackLink href="/petugas/reports">
+                            Kembali ke Antrean Laporan
+                        </AdminBackLink>
+                    </div>
                     {success && (
                         <FlashAlert
                             type="success"
