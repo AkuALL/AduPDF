@@ -123,15 +123,21 @@ export default function CreateReport({ facilities, success }: Props) {
                                             <label htmlFor="kategori" className="block text-sm font-medium">
                                                 Kategori kerusakan
                                             </label>
-                                            <input
+                                            <select
                                                 id="kategori"
                                                 name="kategori"
-                                                type="text"
                                                 required
-                                                maxLength={100}
+                                                defaultValue=""
                                                 aria-invalid={!!errors.kategori}
                                                 className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm text-[#111827]"
-                                            />
+                                            >
+                                                <option value="" disabled>
+                                                    Pilih kategori kerusakan
+                                                </option>
+                                                <option value="Ringan">Ringan</option>
+                                                <option value="Sedang">Sedang</option>
+                                                <option value="Parah">Parah</option>
+                                            </select>
                                             {errors.kategori && (
                                                 <p role="alert" className="mt-1 text-sm text-red-700">
                                                     {errors.kategori}
