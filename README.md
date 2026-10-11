@@ -16,5 +16,5 @@ Di lokal directory, via terminal, run these sequentially:
 
 Demo accounts:
 1. user@com pw:12345678
-2. admin@com pw:12345678
+2. admin@adupdf.ac.id pw:Admin123!
 3. petugas@com pw:12345678
