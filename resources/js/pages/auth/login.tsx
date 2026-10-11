@@ -2,6 +2,7 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import FlashAlert from '@/components/flash-alert';
 import PasswordField from '@/components/password-field';
 import AuthPageLayout from '@/layouts/auth-page-layout';
+import { AppLogo } from '@/components/app-logo';
 
 export default function Login({ status }: { status?: string }) {
     const { flash } = usePage<{ flash?: { status?: string; success?: string; error?: string } }>().props;
@@ -14,6 +15,9 @@ export default function Login({ status }: { status?: string }) {
             <Head title="Masuk — AduPDF" />
             <div className="relative w-full max-w-md overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
                 <div className="bg-[#2D4C79] p-6 text-center text-white">
+                    <div className="mb-3 flex justify-center">
+                        <AppLogo size="xl" withBackground className="shadow-md" />
+                    </div>
                     <h1 className="text-xl font-bold tracking-tight">Masuk ke AduPDF</h1>
                     <p className="mt-1 text-xs text-slate-200">Sistem Reservasi & Pelaporan Fasilitas Kampus</p>
                 </div>
@@ -83,14 +87,14 @@ export default function Login({ status }: { status?: string }) {
                         </label>
                         <button
                             disabled={form.processing}
-                            className="h-10 w-full rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition disabled:opacity-60"
+                            className="h-10 w-full rounded-md bg-[#2D4C79] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#243E63] active:bg-[#1C3150] transition disabled:opacity-60 cursor-pointer"
                         >
                             Masuk
                         </button>
                     </form>
                     <div className="mt-6 border-t border-slate-200 pt-6 text-center text-xs text-slate-600">
                         Belum memiliki akun Pengguna?{' '}
-                        <Link href="/register" className="ml-1 font-semibold text-[#2D4C79] hover:underline">
+                        <Link href="/register" className="ml-1 font-semibold text-[#2D4C79] hover:underline cursor-pointer">
                             Daftar sekarang
                         </Link>
                     </div>

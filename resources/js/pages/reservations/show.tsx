@@ -1,4 +1,7 @@
-import { Form, Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
+import { FlashAlert } from '@/components/flash-alert';
 import { UserNavbar } from '@/components/user-navbar';
 
 type Reservation = {
@@ -16,6 +19,31 @@ type Reservation = {
 type Props = { reservation: Reservation; can_cancel: boolean; success: string | null };
 
 export default function ReservationShow({ reservation, can_cancel, success }: Props) {
+    const [isCancelOpen, setIsCancelOpen] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
+    const [cancelError, setCancelError] = useState<string | null>(null);
+
+    function handleCancel() {
+        setCancelError(null);
+        router.patch(
+            `/reservations/${reservation.id}/cancel`,
+            {},
+            {
+                preserveScroll: true,
+                onStart: () => setIsCancelling(true),
+                onSuccess: () => {
+                    setIsCancelling(false);
+                    setIsCancelOpen(false);
+                },
+                onError: (errors) => {
+                    setIsCancelling(false);
+                    if (errors.reservation) {
+                        setCancelError(errors.reservation);
+                    }
+                },
+            }
+        );
+    }
     return (
         <>
             <Head title="Detail Reservasi" />
@@ -27,12 +55,25 @@ export default function ReservationShow({ reservation, can_cancel, success }: Pr
                         <div className="mb-6">
                             <Link
                                 href="/reservations"
-                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition"
+                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-semibold text-[#344054] shadow-sm hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4C79]/20 transition cursor-pointer"
                             >
                                 <span aria-hidden="true">←</span> Kembali ke riwayat
                             </Link>
                         </div>
-                        {success && <p role="status" className="mb-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
+                        {success && (
+                            <FlashAlert
+                                type="success"
+                                message={success}
+                                autoCloseDelay={5000}
+                            />
+                        )}
+                        {cancelError && (
+                            <FlashAlert
+                                type="error"
+                                message={cancelError}
+                                autoCloseDelay={5000}
+                            />
+                        )}
                     <article className="mt-6 rounded-lg border border-[#E5E7EB] bg-white p-6">
                         <div className="flex items-start justify-between gap-4">
                             <div>
@@ -47,24 +88,67 @@ export default function ReservationShow({ reservation, can_cancel, success }: Pr
                             {reservation.status === 'ditolak' && reservation.alasan_penolakan && <div><dt className="text-[#667085]">Alasan penolakan</dt><dd className="mt-1 whitespace-pre-wrap text-red-700">{reservation.alasan_penolakan}</dd>{reservation.ditolak_pada && <dd className="mt-1 text-xs text-[#667085]">Ditolak pada {reservation.ditolak_pada} WIB</dd>}</div>}
                             {reservation.alasan_pembatalan && <div><dt className="text-[#667085]">Alasan pembatalan</dt><dd className="mt-1">{reservation.alasan_pembatalan}</dd></div>}
                         </dl>
-                        {can_cancel && (
-                            <Form
-                                action={`/reservations/${reservation.id}/cancel`}
-                                method="patch"
-                                onSubmit={(event) => {
-                                    if (!window.confirm('Batalkan reservasi ini? Status reservasi akan berubah menjadi Dibatalkan.')) {
-                                        event.preventDefault();
-                                    }
-                                }}
-                                className="mt-6"
-                            >
-                                {({ processing, errors }) => (
+                        {reservation.status === 'menunggu' && (
+                            <div className="mt-6">
+                                {can_cancel ? (
                                     <>
-                                        {errors.reservation && <p role="alert" className="mb-3 text-sm text-red-700">{errors.reservation}</p>}
-                                        <button type="submit" disabled={processing} className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">{processing ? 'Membatalkan...' : 'Batalkan reservasi'}</button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setCancelError(null);
+                                                setIsCancelOpen(true);
+                                            }}
+                                            className="rounded-md border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-600 hover:text-white hover:border-red-600 active:bg-red-700 transition cursor-pointer"
+                                        >
+                                            Batalkan reservasi
+                                        </button>
+
+                                        <ConfirmDialog
+                                            open={isCancelOpen}
+                                            onOpenChange={(open) => {
+                                                if (!isCancelling) setIsCancelOpen(open);
+                                            }}
+                                            title="Batalkan Reservasi"
+                                            description="Apakah Anda yakin ingin membatalkan pengajuan reservasi ini? Status reservasi akan berubah menjadi Dibatalkan secara permanen."
+                                            confirmText="Ya, Batalkan Reservasi"
+                                            variant="destructive"
+                                            isLoading={isCancelling}
+                                            onConfirm={handleCancel}
+                                        >
+                                            <div className="mt-3 space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3.5 text-xs">
+                                                <div className="flex justify-between border-b border-slate-200 pb-2">
+                                                    <span className="text-[#667085]">Fasilitas:</span>
+                                                    <span className="font-semibold text-slate-800">{reservation.facility.name}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-[#667085]">Jadwal:</span>
+                                                    <span className="font-medium text-slate-800">{reservation.start_time}–{reservation.end_time} WIB</span>
+                                                </div>
+                                            </div>
+
+                                            {cancelError && (
+                                                <div role="alert" className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+                                                    {cancelError}
+                                                </div>
+                                            )}
+                                        </ConfirmDialog>
                                     </>
+                                ) : (
+                                    <div>
+                                        <button
+                                            type="button"
+                                            disabled
+                                            title="Pembatalan hanya dapat dilakukan paling lambat 48 jam sebelum jadwal dimulai"
+                                            className="rounded-md border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-400 cursor-not-allowed opacity-60"
+                                        >
+                                            Batalkan reservasi
+                                        </button>
+                                        <p className="mt-2 text-xs text-slate-500">
+                                            Pembatalan mandiri tidak dapat dilakukan karena sudah melewati batas H-48 jam sebelum jadwal dimulai.
+                                        </p>
+                                    </div>
                                 )}
-                            </Form>
+                            </div>
                         )}
                     </article>
                 </div>

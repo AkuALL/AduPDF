@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Queries\DamageStatisticsQuery;
 use App\Queries\ReservationStatisticsQuery;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -29,8 +30,24 @@ class AdminDashboardController extends Controller
         ReservationStatisticsQuery $reservationQuery,
         DamageStatisticsQuery $damageQuery,
     ): Response {
-        $startOfMonth = now()->startOfMonth();
-        $endOfMonth = now()->endOfMonth();
+        $selectedMonthStr = $request->query('month');
+        try {
+            $baseDate = $selectedMonthStr ? Carbon::createFromFormat('Y-m', (string) $selectedMonthStr)->startOfMonth() : now()->startOfMonth();
+        } catch (\Throwable) {
+            $baseDate = now()->startOfMonth();
+        }
+
+        $startOfMonth = $baseDate->copy()->startOfMonth();
+        $endOfMonth = $baseDate->copy()->endOfMonth();
+
+        $availableMonths = [];
+        for ($i = 0; $i <= 5; $i++) {
+            $m = now()->subMonths($i);
+            $availableMonths[] = [
+                'value' => $m->format('Y-m'),
+                'label' => $m->locale('id')->translatedFormat('F Y'),
+            ];
+        }
 
         // 1. Facilities Infrastructure Overview
         $totalFacilitiesCount = Facility::count();
@@ -133,8 +150,79 @@ class AdminDashboardController extends Controller
         $activePetugasCount = User::where('role', 'petugas')->whereNull('deleted_at')->count();
         $adminCount = User::where('role', 'admin')->count();
 
+        // 5. Visual Analytics Data (Matplotlib-style visual plots)
+        $daysInMonth = (int) $startOfMonth->daysInMonth;
+        $dailyCounts = array_fill(1, $daysInMonth, 0);
+        $dailyMinutes = array_fill(1, $daysInMonth, 0);
+
+        foreach ($monthApprovedReservations as $reservation) {
+            $day = (int) $reservation->start_time->format('j');
+            if (isset($dailyCounts[$day])) {
+                $dailyCounts[$day]++;
+                $diff = (int) $reservation->start_time->diffInMinutes($reservation->end_time);
+                $dailyMinutes[$day] += $diff;
+            }
+        }
+
+        $monthAbbr = $startOfMonth->locale('id')->isoFormat('MMM');
+        $dailyUsageTrend = [];
+        for ($d = 1; $d <= $daysInMonth; $d++) {
+            $dailyUsageTrend[] = [
+                'day' => $d,
+                'label' => sprintf('%02d %s', $d, $monthAbbr),
+                'reservations_count' => $dailyCounts[$d],
+                'total_hours' => round($dailyMinutes[$d] / 60, 1),
+            ];
+        }
+
+        $typeLabelsMap = [
+            FacilityType::Classroom->value => 'Ruang Kelas',
+            FacilityType::Laboratory->value => 'Laboratorium',
+            FacilityType::Hall->value => 'Aula',
+            FacilityType::Field->value => 'Lapangan',
+            FacilityType::Equipment->value => 'Peralatan',
+        ];
+
+        $typeMinutes = array_fill_keys(array_keys($typeLabelsMap), 0);
+        $typeCounts = array_fill_keys(array_keys($typeLabelsMap), 0);
+
+        foreach ($monthApprovedReservations as $reservation) {
+            $tKey = $reservation->facility?->type?->value ?? (string) ($reservation->facility?->type ?? '');
+            if (array_key_exists($tKey, $typeMinutes)) {
+                $typeCounts[$tKey]++;
+                $diff = (int) $reservation->start_time->diffInMinutes($reservation->end_time);
+                $typeMinutes[$tKey] += $diff;
+            }
+        }
+
+        $usageByType = [];
+        foreach ($typeLabelsMap as $tKey => $label) {
+            $usageByType[] = [
+                'type' => $tKey,
+                'label' => $label,
+                'total_hours' => round($typeMinutes[$tKey] / 60, 1),
+                'total_reservations' => $typeCounts[$tKey],
+            ];
+        }
+
+        $damageByLocation = Report::query()
+            ->join('facilities', 'reports.facility_id', '=', 'facilities.id')
+            ->selectRaw('facilities.location, count(reports.id) as total_reports')
+            ->groupBy('facilities.location')
+            ->orderByDesc('total_reports')
+            ->take(6)
+            ->get()
+            ->map(fn ($row): array => [
+                'location' => (string) $row->location,
+                'total_reports' => (int) $row->total_reports,
+            ])
+            ->values()
+            ->all();
+
         $data = [
-            'month_label' => now()->locale('id')->translatedFormat('F Y'),
+            'month_label' => $startOfMonth->locale('id')->translatedFormat('F Y'),
+            'selected_month' => $startOfMonth->format('Y-m'),
+            'available_months' => $availableMonths,
             'facility_stats' => [
                 'total' => $totalFacilitiesCount,
                 'active' => $activeFacilitiesCount,
@@ -161,6 +249,11 @@ class AdminDashboardController extends Controller
                 'pengguna_count' => $activePenggunaCount,
                 'petugas_count' => $activePetugasCount,
                 'admin_count' => $adminCount,
+            ],
+            'chart_stats' => [
+                'daily_usage_trend' => $dailyUsageTrend,
+                'usage_by_type' => $usageByType,
+                'damage_by_location' => $damageByLocation,
             ],
         ];
 

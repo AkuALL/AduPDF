@@ -20,8 +20,8 @@ class EnsureHasInstitutionalIdentity
         if ($user && $user->isPengguna() && ! $user->hasInstitutionalIdentity()) {
             return redirect()->route('profile.edit')->with(
                 'warning',
-                'Silakan lengkapi identitas institusional (NIM, NIP, atau No. Pegawai) pada profil Anda terlebih dahulu sebelum melakukan reservasi.'
-            );
+                'Lengkapi profil untuk melanjutkan reservasi'
+            )->with('from', 'reservation');
         }
 
         return $next($request);

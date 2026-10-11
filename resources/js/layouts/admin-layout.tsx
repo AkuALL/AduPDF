@@ -1,7 +1,8 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BarChart3, Building2, ChevronDown, KeyRound, LayoutDashboard, LogOut, Menu, UserCheck, UserPlus, Users } from 'lucide-react';
+import { BarChart3, Building2, ChevronDown, KeyRound, LogOut, Menu, UserCheck, UserPlus, Users } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { FlashAlert } from '@/components/flash-alert';
+import { AppLogo } from '@/components/app-logo';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -15,13 +16,7 @@ type AuthUser = { name?: string; nama?: string; email?: string };
 
 const navigation = [
     {
-        label: 'Dashboard',
-        href: '/admin/dashboard',
-        icon: LayoutDashboard,
-        isActive: (currentPath: string) => currentPath === '/admin/dashboard' || currentPath === '/admin',
-    },
-    {
-        label: 'Rekap & Analitik',
+        label: 'Rekapitulasi',
         href: '/admin/recap',
         icon: BarChart3,
         isActive: (currentPath: string) => currentPath.startsWith('/admin/recap'),
@@ -54,11 +49,12 @@ export default function AdminLayout({ children }: PropsWithChildren) {
     const initial = displayName.charAt(0).toUpperCase();
 
     return (
-        <div className="flex min-h-screen flex-col bg-slate-100 text-slate-800 antialiased">
+        <div className="admin-interactions flex min-h-screen flex-col bg-slate-100 text-slate-800 antialiased">
             <header className="sticky top-0 z-40 bg-[#2D4C79] text-white shadow-md border-b border-[#243E63]">
                 <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-6">
-                        <Link href="/admin/dashboard" className="flex items-center gap-2 group">
+                        <Link href="/admin/dashboard" className="flex items-center gap-2.5 group cursor-pointer">
+                            <AppLogo size="md" withBackground className="group-hover:scale-105" />
                             <span className="text-2xl font-bold tracking-wider group-hover:text-amber-200 transition">AduPDF</span>
                             <span className="rounded-md border border-amber-400/40 bg-amber-500/30 px-2 py-0.5 text-xs font-semibold text-amber-200 shadow-xs">
                                 ADMIN
@@ -96,7 +92,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                             <DropdownMenuTrigger asChild>
                                 <button
                                     type="button"
-                                    className="flex items-center gap-2.5 rounded-lg p-1.5 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40 cursor-pointer"
+                                    className="group flex items-center gap-2.5 rounded-lg p-1.5 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40 cursor-pointer"
                                 >
                                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-400/20 border border-amber-300/40 text-amber-200 font-bold text-sm">
                                         {initial}
@@ -104,7 +100,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                                     <div className="hidden text-left sm:block">
                                         <div className="flex items-center gap-1 text-sm font-semibold leading-tight text-white">
                                             <span>{displayName}</span>
-                                            <ChevronDown className="h-3.5 w-3.5 text-slate-300 opacity-80" />
+                                            <ChevronDown className="h-3.5 w-3.5 text-slate-300 opacity-80 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                                         </div>
                                         <div className="text-[11px] text-slate-300">Administrator</div>
                                     </div>
@@ -186,7 +182,10 @@ export default function AdminLayout({ children }: PropsWithChildren) {
             </main>
 
             <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
-                © {new Date().getFullYear()} AduPDF. Sistem Reservasi & Pelaporan Fasilitas Kampus.
+                <div className="flex items-center justify-center gap-2">
+                    <AppLogo size="xs" className="h-4 w-4" />
+                    <span>© {new Date().getFullYear()} AduPDF. Sistem Reservasi & Pelaporan Fasilitas Kampus.</span>
+                </div>
             </footer>
         </div>
     );

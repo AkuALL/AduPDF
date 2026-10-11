@@ -18,16 +18,32 @@ class PetugasReportController extends Controller
 {
     public function index(Request $request): Response
     {
-        $reports = Report::query()
-            ->with(['facility:id,name,location,condition', 'user:id,nama'])
-            ->where('status_laporan', ReportStatus::New->value)
-            ->oldest()
+        $status = $request->query('status', ReportStatus::New->value);
+
+        $query = Report::query()
+            ->with(['facility:id,name,location,condition', 'user:id,nama,deleted_at']);
+
+        if ($status !== 'all' && in_array($status, [ReportStatus::New->value, ReportStatus::Processing->value, ReportStatus::Completed->value, ReportStatus::Rejected->value])) {
+            $query->where('status_laporan', $status);
+        }
+
+        $reports = $query->oldest('id')
             ->get()
             ->map(fn (Report $report): array => $this->queueData($report))
             ->values();
 
+        $counts = [
+            'all' => Report::count(),
+            'baru' => Report::where('status_laporan', ReportStatus::New->value)->count(),
+            'diproses' => Report::where('status_laporan', ReportStatus::Processing->value)->count(),
+            'selesai' => Report::where('status_laporan', ReportStatus::Completed->value)->count(),
+            'ditolak' => Report::where('status_laporan', ReportStatus::Rejected->value)->count(),
+        ];
+
         return Inertia::render('petugas/reports/index', [
             'reports' => $reports,
+            'counts' => $counts,
+            'current_status' => $status,
             'success' => $request->session()->get('success'),
         ]);
     }
@@ -36,7 +52,7 @@ class PetugasReportController extends Controller
     {
         $report->load([
             'facility:id,name,location,condition',
-            'user:id,nama',
+            'user:id,nama,deleted_at',
             'attachments:id,report_id,original_name,mime_type,file_size',
         ]);
 
@@ -88,8 +104,9 @@ class PetugasReportController extends Controller
             'id' => $report->id,
             'kategori' => $report->kategori,
             'deskripsi' => $report->deskripsi,
+            'status_laporan' => $report->status_laporan->value,
             'reported_at' => $report->created_at->setTimezone('Asia/Jakarta')->format('d M Y, H:i'),
-            'reporter' => $report->user->name,
+            'reporter' => $report->user ? ($report->user->trashed() ? $report->user->name.' (Nonaktif)' : $report->user->name) : 'Pengguna (Dihapus)',
             'facility' => [
                 'name' => $report->facility->name,
                 'location' => $report->facility->location,

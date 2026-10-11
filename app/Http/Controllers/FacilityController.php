@@ -40,6 +40,7 @@ class FacilityController extends Controller
             ->values();
 
         return Inertia::render('facilities/index', [
+            'siteUrl' => config('app.url'),
             'facilities' => $facilities,
             'filters' => [
                 'search' => $filters['search'] ?? '',
@@ -61,14 +62,16 @@ class FacilityController extends Controller
             'date' => ['nullable', 'date_format:Y-m-d'],
         ]);
 
-        $selectedDate = $validated['date'] ?? CarbonImmutable::now('Asia/Jakarta')->format('Y-m-d');
+        $now = CarbonImmutable::now('Asia/Jakarta');
+        $defaultDate = $now->format('H:i') >= '19:30' ? $now->addDay()->format('Y-m-d') : $now->format('Y-m-d');
+        $selectedDate = $validated['date'] ?? $defaultDate;
 
         $facility->load([
             'parentFacility:id,name',
             'childTools:id,name,type,condition,parent_facility_id',
         ]);
 
-        $availability = $availabilityService->getAvailability($facility, $selectedDate);
+        $availability = $availabilityService->getAvailability($facility, $selectedDate, $request->user());
 
         return Inertia::render('facilities/show', [
             'facility' => $this->toPublicData($facility, true),

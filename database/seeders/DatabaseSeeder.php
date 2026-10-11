@@ -22,7 +22,6 @@ class DatabaseSeeder extends Seeder
         // Akun Demo Cepat
         $demoUsers = [
             ['nama' => 'Demo Pengguna', 'email' => 'user@com', 'password' => Hash::make('12345678'), 'role' => 'pengguna'],
-            ['nama' => 'Demo Admin', 'email' => 'admin@com', 'password' => Hash::make('12345678'), 'role' => 'admin'],
             ['nama' => 'Demo Petugas', 'email' => 'petugas@com', 'password' => Hash::make('12345678'), 'role' => 'petugas'],
         ];
 

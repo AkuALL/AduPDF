@@ -31,6 +31,8 @@ test('new Pengguna must wait for Admin approval before login (GAL-02, BR-05, BR-
     $response = $this->post(route('register'), [
         'nama' => 'Ahmad Dahlan',
         'email' => 'ahmad@kampus.ac.id',
+        'identity_type' => 'nim',
+        'institutional_id' => '24060121140001',
         'password' => 'Password123!',
         'password_confirmation' => 'Password123!',
         'role' => 'petugas',
@@ -46,6 +48,8 @@ test('new Pengguna must wait for Admin approval before login (GAL-02, BR-05, BR-
     $this->assertDatabaseHas('users', [
         'nama' => 'Ahmad Dahlan',
         'email' => 'ahmad@kampus.ac.id',
+        'identity_type' => 'nim',
+        'institutional_id' => '24060121140001',
         'role' => 'pengguna',
         'approved_at' => null,
         'approved_by' => null,
@@ -62,6 +66,18 @@ test('new Pengguna must wait for Admin approval before login (GAL-02, BR-05, BR-
     $this->assertGuest();
 });
 
+test('registration fails when identity fields are missing', function () {
+    $response = $this->post(route('register'), [
+        'nama' => 'Ahmad Polos',
+        'email' => 'polos@kampus.ac.id',
+        'password' => 'Password123!',
+        'password_confirmation' => 'Password123!',
+    ]);
+
+    $response->assertSessionHasErrors(['identity_type', 'institutional_id']);
+    $this->assertGuest();
+});
+
 test('registration fails when email is already registered', function () {
     User::factory()->create([
         'email' => 'existing@kampus.ac.id',
@@ -70,6 +86,8 @@ test('registration fails when email is already registered', function () {
     $response = $this->post(route('register'), [
         'nama' => 'Ahmad Duplikat',
         'email' => 'existing@kampus.ac.id',
+        'identity_type' => 'nim',
+        'institutional_id' => '24060121140002',
         'password' => 'Password123!',
         'password_confirmation' => 'Password123!',
     ]);
@@ -82,10 +100,26 @@ test('registration fails when password confirmation does not match', function ()
     $response = $this->post(route('register'), [
         'nama' => 'Ahmad Mismatch',
         'email' => 'mismatch@kampus.ac.id',
+        'identity_type' => 'nim',
+        'institutional_id' => '24060121140003',
         'password' => 'Password123!',
         'password_confirmation' => 'DifferentPassword!',
     ]);
 
     $response->assertSessionHasErrors(['password']);
+    $this->assertGuest();
+});
+
+test('registration fails when institutional_id contains non-digits', function () {
+    $response = $this->post(route('register'), [
+        'nama' => 'Ahmad Huruf',
+        'email' => 'huruf@kampus.ac.id',
+        'identity_type' => 'nim',
+        'institutional_id' => '24060121140001ABC',
+        'password' => 'Password123!',
+        'password_confirmation' => 'Password123!',
+    ]);
+
+    $response->assertSessionHasErrors(['institutional_id']);
     $this->assertGuest();
 });

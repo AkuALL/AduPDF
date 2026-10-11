@@ -23,7 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
-        $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+        $middleware->encryptCookies(except: ['appearance', 'sidebar_state', 'pending_reservation']);
 
         $middleware->web(append: [
             HandleAppearance::class,
@@ -46,7 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return route('login');
             }
             if ($user->isAdmin()) {
-                return route('admin.users.index');
+                return route('admin.dashboard');
             }
             if ($user->isPetugas()) {
                 return url('/petugas/dashboard');

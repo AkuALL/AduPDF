@@ -30,9 +30,11 @@
             }
         </style>
 
-        <link rel="icon" href="/favicon.ico" sizes="any">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=4">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,8 +42,13 @@
 
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
+        @if (request()->routeIs('facilities.index'))
+            <meta name="description" content="AduPDF membantu sivitas kampus menemukan fasilitas, mengajukan reservasi, dan melaporkan kerusakan fasilitas kampus." data-inertia="description">
+            <meta property="og:site_name" content="AduPDF" data-inertia="site-name">
+            <script type="application/ld+json" data-inertia="website-schema">@json(['@context' => 'https://schema.org', '@type' => 'WebSite', 'name' => 'AduPDF', 'url' => rtrim(config('app.url'), '/').'/'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT)</script>
+        @endif
         <x-inertia::head>
-            <title>{{ config('app.name', 'Laravel') }}</title>
+            <title>{{ request()->routeIs('facilities.index') ? 'AduPDF — Sistem Reservasi dan Pelaporan Fasilitas Kampus' : config('app.name', 'AduPDF') }}</title>
         </x-inertia::head>
     </head>
     <body class="font-sans antialiased">

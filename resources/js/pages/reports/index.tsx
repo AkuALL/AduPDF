@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { FlashAlert } from '@/components/flash-alert';
 import { UserNavbar } from '@/components/user-navbar';
 
 type ReportStatus = 'baru' | 'diproses' | 'selesai' | 'ditolak';
@@ -57,7 +58,7 @@ export default function ReportIndex({ reports, success }: Props) {
                         </div>
                         <Link
                             href="/reports/create"
-                            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-[#2D4C79] px-5 text-sm font-semibold text-white shadow-xs hover:bg-[#243E63] active:bg-[#1C3150] transition shrink-0"
+                            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-[#2D4C79] px-5 text-sm font-semibold text-white shadow-xs hover:bg-[#243E63] active:bg-[#1C3150] transition shrink-0 cursor-pointer"
                         >
                             <span>+</span>
                             <span>Laporkan Kerusakan</span>
@@ -65,12 +66,11 @@ export default function ReportIndex({ reports, success }: Props) {
                     </div>
 
                     {success && (
-                        <div
-                            role="status"
-                            className="mb-6 rounded-lg border border-green-200 bg-[#EAF7F0] p-4 text-sm font-medium text-[#16794A]"
-                        >
-                            {success}
-                        </div>
+                        <FlashAlert
+                            type="success"
+                            message={success}
+                            autoCloseDelay={5000}
+                        />
                     )}
 
                     {reports.length === 0 ? (
@@ -81,12 +81,6 @@ export default function ReportIndex({ reports, success }: Props) {
                             <p className="mt-1 text-sm text-[#667085]">
                                 Laporan kerusakan fasilitas yang Anda kirimkan akan muncul di sini.
                             </p>
-                            <Link
-                                href="/reports/create"
-                                className="mt-4 inline-flex h-9 items-center justify-center rounded-md border border-[#D0D5DD] bg-white px-4 text-xs font-semibold text-[#2D4C79] hover:bg-[#E9EEF5] transition"
-                            >
-                                Laporkan Kerusakan
-                            </Link>
                         </div>
                     ) : (
                         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -97,7 +91,7 @@ export default function ReportIndex({ reports, success }: Props) {
                                     <Link
                                         key={report.id}
                                         href={`/reports/${report.id}`}
-                                        className="group flex flex-col justify-between rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#2D4C79] hover:shadow-md transition"
+                                        className="group flex flex-col justify-between rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.03)] hover:border-[#2D4C79] hover:shadow-md transition cursor-pointer"
                                     >
                                         <div>
                                             <div className="flex items-center justify-between gap-2">

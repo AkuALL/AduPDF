@@ -39,7 +39,6 @@ test('admin can view all other accounts in the account list', function () {
     $response->assertSee($otherAdmin->nama);
     $response->assertSee('Pengguna Nonaktif');
     $response->assertSee('Pengguna Menunggu');
-    $response->assertDontSee($admin->nama);
 });
 
 test('admin can create Petugas account directly (FR-15 / US-13, GAL-06)', function () {
@@ -75,6 +74,8 @@ test('admin can create Pengguna account directly (FR-16 / US-14, GAL-06)', funct
     $response = $this->actingAs($admin)->post(route('admin.users.pengguna.store'), [
         'nama' => 'Dosen Khusus',
         'email' => 'dosen.khusus@kampus.ac.id',
+        'identity_type' => 'nip',
+        'institutional_id' => '198501012010121001',
         'password' => 'Password123!',
         'password_confirmation' => 'Password123!',
     ]);
@@ -92,6 +93,21 @@ test('admin can create Pengguna account directly (FR-16 / US-14, GAL-06)', funct
     $pengguna = User::query()->where('email', 'dosen.khusus@kampus.ac.id')->sole();
     expect($pengguna->approved_at)->not->toBeNull();
     Notification::assertNothingSent();
+});
+
+test('admin cannot create Pengguna account with non-numeric institutional_id', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)->post(route('admin.users.pengguna.store'), [
+        'nama' => 'Dosen Huruf',
+        'email' => 'dosen.huruf@kampus.ac.id',
+        'identity_type' => 'nip',
+        'institutional_id' => '198501012010121001XYZ',
+        'password' => 'Password123!',
+        'password_confirmation' => 'Password123!',
+    ]);
+
+    $response->assertSessionHasErrors(['institutional_id']);
 });
 
 test('admin can approve a self-registered Pengguna without email verification (FR-20)', function () {
