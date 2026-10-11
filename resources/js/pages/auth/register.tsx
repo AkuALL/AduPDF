@@ -1,6 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import PasswordField from '@/components/password-field';
 import AuthPageLayout from '@/layouts/auth-page-layout';
+import { AppLogo } from '@/components/app-logo';
 
 export default function Register() {
     const form = useForm({
@@ -17,6 +18,9 @@ export default function Register() {
             <Head title="Daftar Akun Pengguna — AduPDF" />
             <div className="relative w-full max-w-md overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
                 <div className="bg-[#2D4C79] p-6 text-center text-white">
+                    <div className="mb-3 flex justify-center">
+                        <AppLogo size="xl" withBackground className="shadow-md" />
+                    </div>
                     <h1 className="text-xl font-bold tracking-tight">Pendaftaran Pengguna</h1>
                     <p className="mt-1 text-xs text-slate-200">
                         Khusus Mahasiswa, Dosen, dan Tenaga Kependidikan
