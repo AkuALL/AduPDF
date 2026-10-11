@@ -28,6 +28,7 @@ type Option = {
 };
 
 type Props = {
+    siteUrl: string;
     facilities: Facility[];
     filters: Filters;
     locations: string[];
@@ -64,6 +65,7 @@ const conditionConfig: Record<
 };
 
 export default function FacilityIndex({
+    siteUrl,
     facilities,
     filters,
     locations,
@@ -87,7 +89,22 @@ export default function FacilityIndex({
 
     return (
         <>
-            <Head title="Katalog Fasilitas — AduPDF" />
+            <Head title="AduPDF — Sistem Reservasi dan Pelaporan Fasilitas Kampus">
+                <meta
+                    name="description"
+                    content="AduPDF membantu sivitas kampus menemukan fasilitas, mengajukan reservasi, dan melaporkan kerusakan fasilitas kampus."
+                    head-key="description"
+                />
+                <meta property="og:site_name" content="AduPDF" head-key="site-name" />
+                <script type="application/ld+json" head-key="website-schema">
+                    {JSON.stringify({
+                        '@context': 'https://schema.org',
+                        '@type': 'WebSite',
+                        name: 'AduPDF',
+                        url: new URL('/', siteUrl).toString(),
+                    })}
+                </script>
+            </Head>
             <div className="min-h-screen bg-[#F7F8FA] text-[#111827] font-sans antialiased">
                 {/* Navigation Bar */}
                 <UserNavbar current="facilities" />
@@ -97,7 +114,7 @@ export default function FacilityIndex({
                     {/* Header */}
                     <div className="mb-6">
                         <h1 className="text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl">
-                            Fasilitas Kampus
+                            AduPDF — Sistem Reservasi dan Pelaporan Fasilitas Kampus
                         </h1>
                         <p className="mt-1 text-lg text-[#667085]">
                             Temukan ruangan dan peralatan untuk kegiatan akademik dan organisasi.

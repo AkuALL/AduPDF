@@ -1,6 +1,27 @@
 <?php
 
+use App\Models\Facility;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/robots.txt', function () {
+    $sitemapUrl = rtrim(config('app.url'), '/').'/sitemap.xml';
+
+    return response("User-agent: *\nDisallow:\nSitemap: {$sitemapUrl}\n")
+        ->header('Content-Type', 'text/plain; charset=UTF-8');
+})->name('robots');
+
+Route::get('/sitemap.xml', function () {
+    $baseUrl = rtrim(config('app.url'), '/');
+    $facilityUrls = Facility::query()
+        ->orderBy('id')
+        ->pluck('id')
+        ->map(fn (int|string $facilityId): string => $baseUrl.route('facilities.show', ['facility' => $facilityId], false));
+    $urls = collect([$baseUrl.route('facilities.index', [], false)])
+        ->concat($facilityUrls);
+
+    return response()->view('sitemap', ['urls' => $urls])
+        ->header('Content-Type', 'application/xml; charset=UTF-8');
+})->name('sitemap');
 
 Route::get('/', function () {
     $user = request()->user();

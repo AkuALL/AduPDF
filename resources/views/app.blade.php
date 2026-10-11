@@ -39,8 +39,13 @@
 
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
+        @if (request()->routeIs('facilities.index'))
+            <meta name="description" content="AduPDF membantu sivitas kampus menemukan fasilitas, mengajukan reservasi, dan melaporkan kerusakan fasilitas kampus." data-inertia="description">
+            <meta property="og:site_name" content="AduPDF" data-inertia="site-name">
+            <script type="application/ld+json" data-inertia="website-schema">@json(['@context' => 'https://schema.org', '@type' => 'WebSite', 'name' => 'AduPDF', 'url' => rtrim(config('app.url'), '/').'/'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT)</script>
+        @endif
         <x-inertia::head>
-            <title>{{ config('app.name', 'Laravel') }}</title>
+            <title>{{ request()->routeIs('facilities.index') ? 'AduPDF — Sistem Reservasi dan Pelaporan Fasilitas Kampus' : config('app.name', 'AduPDF') }}</title>
         </x-inertia::head>
     </head>
     <body class="font-sans antialiased">
