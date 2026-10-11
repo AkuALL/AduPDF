@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { BarChart3, Building2, ChevronDown, KeyRound, LogOut, Menu, UserCheck, UserPlus, Users } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { FlashAlert } from '@/components/flash-alert';
+import { AppLogo } from '@/components/app-logo';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -52,7 +53,8 @@ export default function AdminLayout({ children }: PropsWithChildren) {
             <header className="sticky top-0 z-40 bg-[#2D4C79] text-white shadow-md border-b border-[#243E63]">
                 <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-6">
-                        <Link href="/admin/dashboard" className="flex items-center gap-2 group cursor-pointer">
+                        <Link href="/admin/dashboard" className="flex items-center gap-2.5 group cursor-pointer">
+                            <AppLogo size="md" withBackground className="group-hover:scale-105" />
                             <span className="text-2xl font-bold tracking-wider group-hover:text-amber-200 transition">AduPDF</span>
                             <span className="rounded-md border border-amber-400/40 bg-amber-500/30 px-2 py-0.5 text-xs font-semibold text-amber-200 shadow-xs">
                                 ADMIN
@@ -180,7 +182,10 @@ export default function AdminLayout({ children }: PropsWithChildren) {
             </main>
 
             <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
-                © {new Date().getFullYear()} AduPDF. Sistem Reservasi & Pelaporan Fasilitas Kampus.
+                <div className="flex items-center justify-center gap-2">
+                    <AppLogo size="xs" className="h-4 w-4" />
+                    <span>© {new Date().getFullYear()} AduPDF. Sistem Reservasi & Pelaporan Fasilitas Kampus.</span>
+                </div>
             </footer>
         </div>
     );

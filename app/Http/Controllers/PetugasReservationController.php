@@ -24,7 +24,7 @@ class PetugasReservationController extends Controller
             ->get()
             ->map(fn (Reservation $reservation): array => [
                 'id' => $reservation->id,
-                'user' => $reservation->user->name,
+                'user' => $reservation->user ? ($reservation->user->trashed() ? $reservation->user->name.' (Nonaktif)' : $reservation->user->name) : 'Pengguna (Dihapus)',
                 'facility' => $reservation->facility->name,
                 'location' => $reservation->facility->location,
                 'tujuan' => $reservation->tujuan,
@@ -34,14 +34,14 @@ class PetugasReservationController extends Controller
             ->values();
 
         $approvedReservations = Reservation::query()
-            ->with(['facility:id,name,location', 'user:id,nama'])
+            ->with(['facility:id,name,location', 'user:id,nama,deleted_at'])
             ->where('status', ReservationStatus::Approved->value)
             ->oldest('start_time')
             ->oldest('id')
             ->get()
             ->map(fn (Reservation $reservation): array => [
                 'id' => $reservation->id,
-                'user' => $reservation->user->name,
+                'user' => $reservation->user ? ($reservation->user->trashed() ? $reservation->user->name.' (Nonaktif)' : $reservation->user->name) : 'Pengguna (Dihapus)',
                 'facility' => $reservation->facility->name,
                 'location' => $reservation->facility->location,
                 'start_time' => $reservation->start_time->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i'),

@@ -14,7 +14,7 @@ class ReportQueueQuery
     public function newReports(): Builder
     {
         return Report::query()
-            ->with(['facility:id,name,location,condition', 'user:id,nama'])
+            ->with(['facility:id,name,location,condition', 'user:id,nama,deleted_at'])
             ->where('status_laporan', ReportStatus::New->value)
             ->oldest()
             ->oldest('id');

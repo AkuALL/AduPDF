@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ChevronDown, LogOut, User as UserIcon } from 'lucide-react';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { FlashAlert } from '@/components/flash-alert';
+import { AppLogo } from '@/components/app-logo';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -39,7 +40,8 @@ export function UserNavbar({ current }: { current?: 'facilities' | 'reservations
         <header className="sticky top-0 z-30 border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm">
             <div className="relative flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center">
-                    <Link href="/" className="flex items-center gap-2 cursor-pointer">
+                    <Link href="/" className="flex items-center gap-2.5 cursor-pointer group">
+                        <AppLogo size="md" className="transition-transform duration-200 group-hover:scale-105" />
                         <span className="text-xl font-bold tracking-tight text-[#2D4C79]">
                             AduPDF
                         </span>

@@ -905,6 +905,7 @@ Laravel menyediakan route dan mengirimkan data halaman melalui Inertia; React me
 | GET | /reports/create | Pengguna | Form laporan |
 | POST | /reports | Pengguna | Buat laporan + unggah maksimal 8 foto JPG/JPEG/PNG @ 2 MB |
 | GET | /reports/{report} | Pengguna | Detail/status sendiri |
+| GET | /report-attachments/{attachment} | Authenticated | Unduh/lihat lampiran foto bukti kerusakan fasilitas |
 | GET | /petugas/dashboard | Petugas | Dashboard dengan antrian reservasi per slot dan laporan baru |
 | GET | /petugas/reservations | Petugas | Daftar reservasi menunggu dan reservasi disetujui |
 | PATCH | /petugas/reservations/{reservation}/approve | Petugas | Approve + validasi konflik terbaru + auto-reject pending requests yang kini konflik |
@@ -914,12 +915,14 @@ Laravel menyediakan route dan mengirimkan data halaman melalui Inertia; React me
 | GET | /petugas/reports/{report} | Petugas | Detail laporan |
 | PATCH | /petugas/reports/{report} | Petugas | Update status/catatan laporan |
 | PATCH | /petugas/reports/{report}/facility-condition | Petugas | Update kondisi fasilitas terkait laporan |
+| GET/PUT | /petugas/change-password | Petugas | Form dan proses perubahan kata sandi Petugas |
 | GET | /admin/users/petugas/create | Admin | Form Petugas |
 | POST | /admin/users/petugas | Admin | Create Petugas |
 | GET | /admin/users/pengguna/create | Admin | Form Pengguna |
 | POST | /admin/users/pengguna | Admin | Create Pengguna |
 | PATCH | /admin/users/{user}/deactivate | Admin | Nonaktifkan akun; tolak reservasi menunggu dan batalkan reservasi disetujui yang belum selesai dengan alasan akun dinonaktifkan Admin |
 | PATCH | /admin/users/{user}/activate | Admin | Aktifkan kembali akun; histori tetap tersedia |
+| GET | /admin/verifications | Admin | Verifikasi akun registrasi mandiri yang menunggu persetujuan |
 | GET/PUT | /admin/change-password | Admin | Form dan proses perubahan kata sandi Admin |
 | GET | /admin/facilities | Admin | Kelola fasilitas |
 | GET | /admin/facilities/create | Admin | Form tambah fasilitas |
