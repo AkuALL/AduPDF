@@ -57,8 +57,8 @@ export default function AdminDataVisualization({
                             <span className="flex size-7 items-center justify-center rounded-md bg-[#2D4C79] text-white">
                                 <Activity className="size-4" />
                             </span>
-                            <h2 className="text-lg font-bold text-slate-900">
-                                Visualisasi Data & Analitik Kampus
+                            <h2 className="text-xl font-bold text-slate-900">
+                                Visualisasi & Analitik Penggunaan
                             </h2>
                         </div>
                     </div>
@@ -66,14 +66,14 @@ export default function AdminDataVisualization({
                     {/* Month Filter Selector (Rata Kanan) */}
                     {availableMonths && availableMonths.length > 0 && (
                         <div className="flex items-center gap-2 self-start sm:self-center">
-                            <span className="text-xs text-slate-500 font-medium hidden md:inline">Bulan Analisis:</span>
+                            <span className="text-sm text-slate-500 font-medium hidden md:inline">Bulan Analisis:</span>
                             <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 shadow-2xs">
                                 <Calendar className="size-3.5 text-slate-500" />
                                 <select
                                     value={selectedMonth}
                                     onChange={(e) => {
                                         router.get(
-                                            '/admin',
+                                            '/admin/dashboard',
                                             { month: e.target.value },
                                             {
                                                 preserveState: true,
@@ -82,7 +82,7 @@ export default function AdminDataVisualization({
                                         );
                                     }}
                                     aria-label="Pilih Bulan Analisis"
-                                    className="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer pr-1"
+                                    className="bg-transparent text-sm font-semibold text-slate-700 outline-none cursor-pointer pr-1"
                                 >
                                     {availableMonths.map((m) => (
                                         <option key={m.value} value={m.value}>
@@ -98,11 +98,11 @@ export default function AdminDataVisualization({
                 {/* Baris 2: Tab Navigasi Plot (Rata Kiri) & Indikator Periode (Rata Kanan) */}
                 <div className="flex flex-wrap items-center justify-between gap-2.5 pt-0.5">
                     {/* View Switcher Tabs */}
-                    <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 p-1 font-mono text-xs">
+                    <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 p-1 font-mono text-sm">
                         <button
                             type="button"
                             onClick={() => setActiveTab('all')}
-                            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
+                            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm font-medium transition cursor-pointer ${
                                 activeTab === 'all'
                                     ? 'bg-white text-slate-900 shadow-xs border border-slate-200 font-bold'
                                     : 'text-slate-600 hover:text-slate-900'
@@ -114,7 +114,7 @@ export default function AdminDataVisualization({
                         <button
                             type="button"
                             onClick={() => setActiveTab('trend')}
-                            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
+                            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm font-medium transition cursor-pointer ${
                                 activeTab === 'trend'
                                     ? 'bg-white text-[#2D4C79] shadow-xs border border-slate-200 font-bold'
                                     : 'text-slate-600 hover:text-slate-900'
@@ -126,7 +126,7 @@ export default function AdminDataVisualization({
                         <button
                             type="button"
                             onClick={() => setActiveTab('category')}
-                            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
+                            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm font-medium transition cursor-pointer ${
                                 activeTab === 'category'
                                     ? 'bg-white text-[#2D4C79] shadow-xs border border-slate-200 font-bold'
                                     : 'text-slate-600 hover:text-slate-900'
@@ -138,7 +138,7 @@ export default function AdminDataVisualization({
                         <button
                             type="button"
                             onClick={() => setActiveTab('damage')}
-                            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
+                            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm font-medium transition cursor-pointer ${
                                 activeTab === 'damage'
                                     ? 'bg-white text-rose-700 shadow-xs border border-slate-200 font-bold'
                                     : 'text-slate-600 hover:text-slate-900'
@@ -149,23 +149,23 @@ export default function AdminDataVisualization({
                         </button>
                     </div>
 
-                    <div className="font-mono text-xs text-slate-500">
+                    <div className="font-mono text-sm text-slate-500">
                         Periode: <span className="font-semibold text-slate-800">{monthLabel}</span>
                     </div>
                 </div>
             </div>
 
-        {/* Quick Analytical Insights Pill Banner */}
+            {/* Quick Analytical Insights Pill Banner */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-3 shadow-xs">
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded bg-blue-50 text-[#2D4C79] border border-blue-200 font-mono text-xs font-bold">
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded bg-blue-50 text-[#2D4C79] border border-blue-200 font-mono text-sm font-bold">
                         ▲
                     </div>
                     <div className="min-w-0">
-                        <div className="text-[11px] font-mono uppercase text-slate-500">
-                            Hari Beban Puncak
+                        <div className="text-xs font-mono uppercase text-slate-500">
+                            Hari Tersibuk
                         </div>
-                        <div className="text-xs font-bold text-slate-900 truncate">
+                        <div className="text-sm font-bold text-slate-900 truncate">
                             {insights.peakDay ? (
                                 <>
                                     {insights.peakDay.label} ·{' '}
@@ -179,14 +179,14 @@ export default function AdminDataVisualization({
                 </div>
 
                 <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-3 shadow-xs">
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-xs font-bold">
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-sm font-bold">
                         ★
                     </div>
                     <div className="min-w-0">
-                        <div className="text-[11px] font-mono uppercase text-slate-500">
-                            Kategori Paling Diminati
+                        <div className="text-xs font-mono uppercase text-slate-500">
+                            Kategori Terpopuler
                         </div>
-                        <div className="text-xs font-bold text-slate-900 truncate">
+                        <div className="text-sm font-bold text-slate-900 truncate">
                             {insights.topCategory ? (
                                 <>
                                     {insights.topCategory.label} ·{' '}
@@ -200,14 +200,14 @@ export default function AdminDataVisualization({
                 </div>
 
                 <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-3 shadow-xs">
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded bg-rose-50 text-rose-700 border border-rose-200 font-mono text-xs font-bold">
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded bg-rose-50 text-rose-700 border border-rose-200 font-mono text-sm font-bold">
                         !
                     </div>
                     <div className="min-w-0">
-                        <div className="text-[11px] font-mono uppercase text-slate-500">
+                        <div className="text-xs font-mono uppercase text-slate-500">
                             Lokasi Laporan Terbanyak
                         </div>
-                        <div className="text-xs font-bold text-slate-900 truncate">
+                        <div className="text-sm font-bold text-slate-900 truncate">
                             {insights.topHotspot ? (
                                 <>
                                     {insights.topHotspot.location} ·{' '}

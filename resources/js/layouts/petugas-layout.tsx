@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { AlertTriangle, CalendarClock } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
+import { FlashAlert } from '@/components/flash-alert';
 import { logout } from '@/routes';
 import petugas from '@/routes/petugas';
 import reports from '@/routes/petugas/reports';
@@ -12,7 +13,10 @@ type ActivePage = 'dashboard' | 'reservations' | 'reports';
 type Props = PropsWithChildren<{ activePage: ActivePage }>;
 
 export default function PetugasLayout({ activePage, children }: Props) {
-    const { auth } = usePage<{ auth: Auth }>().props;
+    const { auth, flash } = usePage<{
+        auth: Auth;
+        flash?: { success?: string; error?: string };
+    }>().props;
     const navigation = [
         {
             label: 'Antrean Reservasi',
@@ -131,6 +135,22 @@ export default function PetugasLayout({ activePage, children }: Props) {
                         </details>
                     </div>
             </header>
+            {flash?.success && (
+                <FlashAlert
+                    key={`success-${flash.success}`}
+                    type="success"
+                    message={flash.success}
+                    autoCloseDelay={5000}
+                />
+            )}
+            {flash?.error && (
+                <FlashAlert
+                    key={`error-${flash.error}`}
+                    type="error"
+                    message={flash.error}
+                    autoCloseDelay={5000}
+                />
+            )}
             {children}
         </div>
     );

@@ -39,7 +39,7 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-md border-slate-200 bg-white p-6 shadow-xl sm:rounded-2xl">
+            <DialogContent className="max-w-md border-slate-200 bg-white p-6 shadow-xl sm:rounded-2xl text-slate-900">
                 <DialogHeader className="text-left">
                     <DialogTitle className="text-lg font-bold text-slate-900">{title}</DialogTitle>
                     {description && (
@@ -106,7 +106,7 @@ export function ConfirmationDialog({
     return (
         <Dialog open={confirmation !== null} onOpenChange={onOpenChange}>
             {confirmation && (
-                <DialogContent className="max-w-md border-slate-200 bg-white p-6 shadow-xl sm:rounded-2xl">
+                <DialogContent className="max-w-md border-slate-200 bg-white p-6 shadow-xl sm:rounded-2xl text-slate-900">
                     <DialogHeader className="flex flex-col items-center sm:items-start">
                         <div
                             className={`mb-2 flex h-12 w-12 items-center justify-center rounded-full ${destructive ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-700'}`}

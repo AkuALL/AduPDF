@@ -98,9 +98,15 @@ class ReservationController extends Controller
     {
         $this->ensureOwner($request, $reservation);
 
-        if (! $this->canCancel($reservation)) {
+        if ($reservation->status !== ReservationStatus::Pending) {
             throw ValidationException::withMessages([
                 'reservation' => 'Hanya reservasi yang berstatus Menunggu yang dapat dibatalkan.',
+            ]);
+        }
+
+        if (! $this->canCancel($reservation)) {
+            throw ValidationException::withMessages([
+                'reservation' => 'Pembatalan reservasi tidak dapat dilakukan karena sudah melewati batas 48 jam sebelum jadwal dimulai.',
             ]);
         }
 
@@ -116,7 +122,11 @@ class ReservationController extends Controller
 
     private function canCancel(Reservation $reservation): bool
     {
-        return $reservation->status === ReservationStatus::Pending;
+        if ($reservation->status !== ReservationStatus::Pending) {
+            return false;
+        }
+
+        return now()->addHours(48)->lte($reservation->start_time);
     }
 
     /**

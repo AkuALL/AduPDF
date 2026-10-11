@@ -1,8 +1,9 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { store as storeReservation } from '@/actions/App/Http/Controllers/ReservationController';
 import DateCalendarGrid from '@/components/date-calendar-grid';
-import { UserNavbar } from '@/components/user-navbar';
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { FlashAlert } from '@/components/flash-alert';
+import { UserNavbar } from '@/components/user-navbar';
 import { useEffect, useRef, useState } from 'react';
 
 const wibDateTimeFormatter = new Intl.DateTimeFormat('en-CA', {
@@ -188,6 +189,13 @@ export default function CreateReservation({ facility, reservable, success, serve
                         </div>
                         <h1 className="mt-6 text-2xl font-bold">Ajukan reservasi</h1>
                         <p className="mt-2 text-sm text-[#667085]">{facility.name} · {facility.location}</p>
+                        {success && (
+                            <FlashAlert
+                                type="success"
+                                message={success}
+                                autoCloseDelay={5000}
+                            />
+                        )}
                         {success ? (
                             <div className="mt-6 space-y-5 rounded-lg border border-emerald-200 bg-emerald-50/60 p-6 shadow-sm">
                                 <div className="flex items-start gap-3.5">

@@ -15,7 +15,7 @@ export default function AccountForm({
     const form = useForm({
         nama: '',
         email: '',
-        identity_type: '',
+        identity_type: 'nim',
         institutional_id: '',
         password: '',
         password_confirmation: '',
@@ -129,15 +129,12 @@ export default function AccountForm({
                                         }
                                         className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
                                     >
-                                        <option value="">
-                                            -- Pilih Jenis Identitas --
-                                        </option>
                                         <option value="nim">NIM (Mahasiswa)</option>
                                         <option value="nip">
-                                            NIP (Dosen / Tenaga Pendidik)
+                                             NIP (Dosen / Tenaga Pendidik)
                                         </option>
                                         <option value="no_pegawai">
-                                            No. Pegawai (Tenaga Kependidikan atau Staf)
+                                             No. Pegawai (Tenaga Kependidikan atau Staf)
                                         </option>
                                     </select>
                                 </div>
@@ -151,11 +148,23 @@ export default function AccountForm({
                                     <input
                                         id="institutional_id"
                                         required
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
                                         value={form.data.institutional_id}
+                                        onKeyDown={(e) => {
+                                            if (
+                                                !/[0-9]/.test(e.key) &&
+                                                !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'Enter'].includes(e.key) &&
+                                                !e.ctrlKey &&
+                                                !e.metaKey
+                                            ) {
+                                                e.preventDefault();
+                                            }
+                                        }}
                                         onChange={(event) =>
                                             form.setData(
                                                 'institutional_id',
-                                                event.target.value,
+                                                event.target.value.replace(/\D/g, ''),
                                             )
                                         }
                                         placeholder="Masukkan nomor identitas kampus"

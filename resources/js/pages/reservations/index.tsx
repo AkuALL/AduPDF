@@ -1,7 +1,8 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { UserNavbar } from '@/components/user-navbar';
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { FlashAlert } from '@/components/flash-alert';
+import { UserNavbar } from '@/components/user-navbar';
 
 type Reservation = {
     id: number;
@@ -97,12 +98,18 @@ export default function ReservationIndex({ reservations, success }: Props) {
                     </div>
 
                     {success && (
-                        <div
-                            role="status"
-                            className="mb-6 rounded-lg border border-green-200 bg-[#EAF7F0] p-4 text-sm font-medium text-[#16794A]"
-                        >
-                            {success}
-                        </div>
+                        <FlashAlert
+                            type="success"
+                            message={success}
+                            autoCloseDelay={5000}
+                        />
+                    )}
+                    {cancelError && (
+                        <FlashAlert
+                            type="error"
+                            message={cancelError}
+                            autoCloseDelay={5000}
+                        />
                     )}
 
                     {reservations.length === 0 ? (
@@ -187,17 +194,28 @@ export default function ReservationIndex({ reservations, success }: Props) {
                                             >
                                                 Lihat Detail →
                                             </Link>
-                                            {reservation.can_cancel && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setCancelError(null);
-                                                        setReservationToCancel(reservation);
-                                                    }}
-                                                    className="inline-flex h-9 items-center justify-center rounded-md border border-red-200 bg-white px-3 text-xs font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition shrink-0"
-                                                >
-                                                    Batalkan
-                                                </button>
+                                            {reservation.status === 'menunggu' && (
+                                                reservation.can_cancel ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setCancelError(null);
+                                                            setReservationToCancel(reservation);
+                                                        }}
+                                                        className="inline-flex h-9 items-center justify-center rounded-md border border-red-200 bg-white px-3 text-xs font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition shrink-0 cursor-pointer"
+                                                    >
+                                                        Batalkan
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        disabled
+                                                        title="Pembatalan hanya dapat dilakukan paling lambat 48 jam sebelum jadwal dimulai"
+                                                        className="inline-flex h-9 items-center justify-center rounded-md border border-slate-200 bg-slate-100 px-3 text-xs font-semibold text-slate-400 cursor-not-allowed opacity-60 shrink-0"
+                                                    >
+                                                        Batalkan
+                                                    </button>
+                                                )
                                             )}
                                         </div>
                                     </div>

@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { FlashAlert } from '@/components/flash-alert';
 import { UserNavbar } from '@/components/user-navbar';
 
 type ReportStatus = 'baru' | 'diproses' | 'selesai' | 'ditolak';
@@ -65,12 +66,11 @@ export default function ReportIndex({ reports, success }: Props) {
                     </div>
 
                     {success && (
-                        <div
-                            role="status"
-                            className="mb-6 rounded-lg border border-green-200 bg-[#EAF7F0] p-4 text-sm font-medium text-[#16794A]"
-                        >
-                            {success}
-                        </div>
+                        <FlashAlert
+                            type="success"
+                            message={success}
+                            autoCloseDelay={5000}
+                        />
                     )}
 
                     {reports.length === 0 ? (

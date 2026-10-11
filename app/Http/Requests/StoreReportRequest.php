@@ -41,6 +41,8 @@ class StoreReportRequest extends FormRequest
             'attachments.max' => 'Satu laporan dapat memiliki maksimal :max foto.',
             'attachments.*.image' => 'Setiap lampiran harus berupa gambar.',
             'attachments.*.mimes' => 'Foto harus berformat JPG, JPEG, atau PNG.',
+            'attachments.*.file' => 'Berkas foto tidak valid atau melebihi batas maksimal 2 MB.',
+            'attachments.*.uploaded' => 'Ukuran foto melebihi batas maksimal 2 MB atau berkas gagal diunggah.',
             'attachments.*.max' => 'Ukuran setiap foto maksimal 2 MB.',
         ];
     }

@@ -9,6 +9,7 @@ import {
     XCircle,
 } from 'lucide-react';
 import PetugasLayout from '@/layouts/petugas-layout';
+import { FlashAlert } from '@/components/flash-alert';
 import { Link } from '@inertiajs/react';
 
 type Report = {
@@ -144,12 +145,11 @@ export default function PetugasReportIndex({
 
                 {/* Flash Success Notification */}
                 {success && (
-                    <div
-                        role="status"
-                        className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-800 shadow-sm"
-                    >
-                        {success}
-                    </div>
+                    <FlashAlert
+                        type="success"
+                        message={success}
+                        autoCloseDelay={5000}
+                    />
                 )}
 
                 {/* Kartu KPI Utama yang Berfungsi Langsung Sebagai Filter Tab */}

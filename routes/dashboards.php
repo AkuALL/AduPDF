@@ -58,9 +58,11 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:petugas'])->prefix('petugas')->name('petugas.')->group(function () {
+    Route::get('/', fn () => redirect()->route('petugas.dashboard'));
     Route::get('/dashboard', [PetugasDashboardController::class, 'index'])->name('dashboard');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', fn () => redirect()->route('admin.dashboard'));
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 });

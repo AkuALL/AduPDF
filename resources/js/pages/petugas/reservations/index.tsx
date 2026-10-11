@@ -13,6 +13,7 @@ import {
 import ConfirmationDialog, {
     type ConfirmationRequest,
 } from '@/components/confirm-dialog';
+import { FlashAlert } from '@/components/flash-alert';
 import PetugasLayout from '@/layouts/petugas-layout';
 
 type Reservation = {
@@ -119,12 +120,11 @@ export default function PetugasReservationIndex({
 
                 {/* Flash Success Notification */}
                 {success && (
-                    <div
-                        role="status"
-                        className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-800 shadow-sm"
-                    >
-                        {success}
-                    </div>
+                    <FlashAlert
+                        type="success"
+                        message={success}
+                        autoCloseDelay={5000}
+                    />
                 )}
 
                 {/* KPI Summary Cards */}
@@ -405,7 +405,7 @@ export default function PetugasReservationIndex({
                             value={rejectReason}
                             onChange={(e) => setRejectReason(e.target.value)}
                             placeholder="Tuliskan alasan penolakan secara jelas agar diketahui oleh pemohon..."
-                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
                             autoFocus
                         />
                     </div>
@@ -449,7 +449,7 @@ export default function PetugasReservationIndex({
                             value={cancelReason}
                             onChange={(e) => setCancelReason(e.target.value)}
                             placeholder="Contoh: Terjadi gangguan teknis atau renovasi darurat pada fasilitas..."
-                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
                             autoFocus
                         />
                     </div>

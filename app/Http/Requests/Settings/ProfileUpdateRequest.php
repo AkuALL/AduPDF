@@ -19,4 +19,17 @@ class ProfileUpdateRequest extends FormRequest
     {
         return $this->profileRules($this->user()->id);
     }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'institutional_id.regex' => 'Nomor identitas kampus hanya boleh berisi angka.',
+            'whatsapp.regex' => 'Nomor WhatsApp hanya boleh berisi angka.',
+        ];
+    }
 }

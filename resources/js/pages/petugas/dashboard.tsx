@@ -658,7 +658,8 @@ export default function PetugasDashboard({
                             rows={3}
                             value={rejectionReason}
                             onChange={(event) => setRejectionReason(event.target.value)}
-                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                            placeholder="Tuliskan alasan penolakan secara jelas agar diketahui oleh pemohon..."
+                            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
                         />
                     </div>
                 )}

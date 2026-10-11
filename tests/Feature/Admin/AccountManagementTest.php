@@ -95,6 +95,21 @@ test('admin can create Pengguna account directly (FR-16 / US-14, GAL-06)', funct
     Notification::assertNothingSent();
 });
 
+test('admin cannot create Pengguna account with non-numeric institutional_id', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)->post(route('admin.users.pengguna.store'), [
+        'nama' => 'Dosen Huruf',
+        'email' => 'dosen.huruf@kampus.ac.id',
+        'identity_type' => 'nip',
+        'institutional_id' => '198501012010121001XYZ',
+        'password' => 'Password123!',
+        'password_confirmation' => 'Password123!',
+    ]);
+
+    $response->assertSessionHasErrors(['institutional_id']);
+});
+
 test('admin can approve a self-registered Pengguna without email verification (FR-20)', function () {
     Notification::fake();
     $admin = User::factory()->admin()->create();

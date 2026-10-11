@@ -15,7 +15,7 @@ type AuthUser = { name?: string; nama?: string; email?: string };
 
 const navigation = [
     {
-        label: 'Rekap & Analitik',
+        label: 'Rekapitulasi',
         href: '/admin/recap',
         icon: BarChart3,
         isActive: (currentPath: string) => currentPath.startsWith('/admin/recap'),

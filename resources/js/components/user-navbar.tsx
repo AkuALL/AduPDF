@@ -2,6 +2,7 @@ import { Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { ChevronDown, LogOut, User as UserIcon } from 'lucide-react';
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { FlashAlert } from '@/components/flash-alert';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -20,7 +21,10 @@ type AuthUser = {
 };
 
 export function UserNavbar({ current }: { current?: 'facilities' | 'reservations' | 'reports' }) {
-    const { auth } = usePage<{ auth?: { user?: AuthUser | null } }>().props;
+    const { auth, flash } = usePage<{
+        auth?: { user?: AuthUser | null };
+        flash?: { success?: string; error?: string };
+    }>().props;
     const user = auth?.user;
     const [isLogoutOpen, setIsLogoutOpen] = useState(false);
 
@@ -168,6 +172,23 @@ export function UserNavbar({ current }: { current?: 'facilities' | 'reservations
                 variant="destructive"
                 onConfirm={() => router.post('/logout')}
             />
+
+            {flash?.success && (
+                <FlashAlert
+                    key={`success-${flash.success}`}
+                    type="success"
+                    message={flash.success}
+                    autoCloseDelay={5000}
+                />
+            )}
+            {flash?.error && (
+                <FlashAlert
+                    key={`error-${flash.error}`}
+                    type="error"
+                    message={flash.error}
+                    autoCloseDelay={5000}
+                />
+            )}
         </header>
     );
 }

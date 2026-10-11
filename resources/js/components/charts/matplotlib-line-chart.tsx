@@ -115,12 +115,9 @@ export default function MatplotlibLineChart({ data, monthLabel }: Props) {
             {/* Header / Figure Title + Plotly Toolbar */}
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
                 <div>
-                    <h3 className="text-sm font-bold text-slate-800">
+                    <h3 className="text-base font-bold text-slate-800">
                         Tren Okupansi Fasilitas Harian ({monthLabel})
                     </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                        Sumbu Y: Total Jam & Frekuensi · Sumbu X: Hari dalam Bulan (Klik legenda untuk filter garis)
-                    </p>
                 </div>
 
                 {/* Plotly-style Snapshot Button */}
@@ -128,7 +125,7 @@ export default function MatplotlibLineChart({ data, monthLabel }: Props) {
                     type="button"
                     onClick={() => exportSvgToPng(svgRef.current, `tren-okupansi-${monthLabel}`)}
                     title="Unduh Snapshot Gambar (PNG)"
-                    className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900 cursor-pointer shadow-2xs"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900 cursor-pointer shadow-2xs"
                 >
                     <Camera className="size-3.5 text-slate-500" />
                     <span>Simpan Plot</span>
@@ -404,7 +401,7 @@ export default function MatplotlibLineChart({ data, monthLabel }: Props) {
                 {/* Tooltip Card (positioned dynamically) */}
                 {hoverIndex !== null && activePoint && (
                     <div
-                        className="pointer-events-none absolute top-2 rounded border border-slate-700 bg-slate-900/95 px-3 py-1.5 text-xs text-white shadow-md font-mono"
+                        className="pointer-events-none absolute top-2 rounded border border-slate-700 bg-slate-900/95 px-3 py-1.5 text-sm text-white shadow-md font-mono"
                         style={{
                             left: `${Math.min(
                                 85,
@@ -416,7 +413,7 @@ export default function MatplotlibLineChart({ data, monthLabel }: Props) {
                         <div className="font-bold text-amber-300">
                             {activePoint.label} (Hari {activePoint.day})
                         </div>
-                        <div className="flex items-center gap-3 mt-1 text-[11px]">
+                        <div className="flex items-center gap-3 mt-1 text-xs">
                             {showHours && (
                                 <span className="text-sky-300">
                                     ● Durasi: <strong>{activePoint.total_hours} Jam</strong>

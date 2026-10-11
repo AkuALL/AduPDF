@@ -3,6 +3,7 @@ import { useState } from 'react';
 import ConfirmationDialog, {
     type ConfirmationRequest,
 } from '@/components/confirm-dialog';
+import { FlashAlert } from '@/components/flash-alert';
 import PetugasLayout from '@/layouts/petugas-layout';
 
 type ReportStatus = 'baru' | 'diproses' | 'selesai' | 'ditolak';
@@ -50,7 +51,13 @@ export default function PetugasReportShow({ report, success }: Props) {
             <Head title="Proses Laporan" />
             <main className="mx-auto w-full max-w-[1360px] px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
                 <div className="w-full">
-                    {success && <p role="status" className="mt-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">{success}</p>}
+                    {success && (
+                        <FlashAlert
+                            type="success"
+                            message={success}
+                            autoCloseDelay={5000}
+                        />
+                    )}
                     <article className="mt-6 rounded-xl border border-slate-200 bg-white p-6">
                         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                             <div><p className="text-sm text-slate-500">{report.facility.location}</p><h1 className="mt-1 text-2xl font-bold">{report.facility.name}</h1><p className="mt-2 text-sm text-slate-500">Dilaporkan oleh {report.reporter} · {report.reported_at} WIB</p></div>
@@ -99,7 +106,7 @@ export default function PetugasReportShow({ report, success }: Props) {
                                 {({ errors, processing, submit }) => (
                                     <div className="space-y-4">
                                         <div><label htmlFor="status_laporan" className="block text-sm font-medium">Ubah status laporan</label><select id="status_laporan" name="status_laporan" required defaultValue="" aria-invalid={!!errors.status_laporan} className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2"><option value="" disabled>Pilih tindakan</option>{report.status_laporan === 'baru' && <option value="diproses">Tandai diproses</option>}<option value="ditolak">Tolak laporan</option>{report.status_laporan === 'diproses' && <option value="selesai">Tandai selesai</option>}</select>{errors.status_laporan && <p role="alert" className="mt-1 text-sm text-red-700">{errors.status_laporan}</p>}</div>
-                                        <div><label htmlFor="catatan_resolusi" className="block text-sm font-medium">Catatan resolusi</label><textarea id="catatan_resolusi" name="catatan_resolusi" rows={4} maxLength={65535} aria-invalid={!!errors.catatan_resolusi} className="mt-1 w-full rounded-md border border-[#D0D5DD] px-3 py-2" /><p className="mt-1 text-sm text-slate-500">Wajib diisi saat laporan ditutup sebagai selesai atau ditolak.</p>{errors.catatan_resolusi && <p role="alert" className="mt-1 text-sm text-red-700">{errors.catatan_resolusi}</p>}</div>
+                                        <div><label htmlFor="catatan_resolusi" className="block text-sm font-medium">Catatan resolusi</label><textarea id="catatan_resolusi" name="catatan_resolusi" rows={4} maxLength={65535} aria-invalid={!!errors.catatan_resolusi} className="mt-1 w-full rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400" /><p className="mt-1 text-sm text-slate-500">Wajib diisi saat laporan ditutup sebagai selesai atau ditolak.</p>{errors.catatan_resolusi && <p role="alert" className="mt-1 text-sm text-red-700">{errors.catatan_resolusi}</p>}</div>
                                         <button type="button" disabled={processing} onClick={(event) => { const form = event.currentTarget.form; if (!form?.reportValidity()) return; const status = new FormData(form).get('status_laporan'); if (status === 'selesai' || status === 'ditolak') { const isRejected = status === 'ditolak'; setConfirmation({ title: isRejected ? 'Tolak Laporan' : 'Selesaikan Laporan', description: `Ubah status laporan menjadi ${isRejected ? 'Ditolak' : 'Selesai'}? Status ini mengakhiri pemrosesan laporan.`, confirmLabel: isRejected ? 'Ya, Tolak Laporan' : 'Ya, Selesaikan Laporan', destructive: isRejected, onConfirm: submit }); } else { submit(); } }} className="rounded-md bg-[#2D4C79] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{processing ? 'Menyimpan...' : 'Simpan perubahan'}</button>
                                     </div>
                                 )}

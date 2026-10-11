@@ -19,9 +19,9 @@ trait ProfileValidationRules
             'name' => ['nullable', 'string', 'max:100', 'required_without:nama'],
             'nama' => ['nullable', 'string', 'max:100', 'required_without:name'],
             'email' => $this->emailRules($userId),
-            'whatsapp' => ['nullable', 'string', 'max:30'],
+            'whatsapp' => ['nullable', 'string', 'regex:/^[0-9]+$/', 'max:30'],
             'identity_type' => ['nullable', 'string', Rule::in(['nim', 'nip', 'no_pegawai']), 'required_with:institutional_id'],
-            'institutional_id' => ['nullable', 'string', 'max:100', 'required_with:identity_type'],
+            'institutional_id' => ['nullable', 'string', 'regex:/^[0-9]+$/', 'max:100', 'required_with:identity_type'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ];
     }

@@ -30,7 +30,7 @@ class RegisteredUserController extends Controller
             'nama' => ['required', 'string', 'max:100'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:100', 'unique:users,email'],
             'identity_type' => ['required', 'string', Rule::in(['nim', 'nip', 'no_pegawai'])],
-            'institutional_id' => ['required', 'string', 'max:100'],
+            'institutional_id' => ['required', 'string', 'regex:/^[0-9]+$/', 'max:100'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
             'nama.required' => 'Nama lengkap wajib diisi.',
@@ -40,6 +40,7 @@ class RegisteredUserController extends Controller
             'identity_type.required' => 'Jenis identitas kampus wajib dipilih.',
             'identity_type.in' => 'Pilihan jenis identitas kampus tidak valid.',
             'institutional_id.required' => 'Nomor identitas kampus wajib diisi.',
+            'institutional_id.regex' => 'Nomor identitas kampus hanya boleh berisi angka.',
             'institutional_id.max' => 'Nomor identitas kampus maksimal 100 karakter.',
             'password.required' => 'Kata sandi wajib diisi.',
             'password.min' => 'Kata sandi minimal harus 8 karakter.',
