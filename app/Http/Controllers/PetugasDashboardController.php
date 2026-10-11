@@ -62,7 +62,7 @@ class PetugasDashboardController extends Controller
                     'count' => $reservations->count(),
                     'reservations' => $reservations->map(fn (Reservation $reservation): array => [
                         'id' => $reservation->id,
-                        'user_name' => $reservation->user->nama ?? $reservation->user->name ?? 'Pengguna',
+                        'user_name' => $reservation->user ? ($reservation->user->trashed() ? $reservation->user->name.' (Nonaktif)' : $reservation->user->name) : 'Pengguna (Dihapus)',
                         'facility_name' => $reservation->facility->name,
                         'facility_location' => $reservation->facility->location,
                         'tujuan' => $reservation->tujuan,
@@ -78,7 +78,7 @@ class PetugasDashboardController extends Controller
             'id' => $report->id,
             'kategori' => $report->kategori,
             'deskripsi' => $report->deskripsi,
-            'reporter_name' => $report->user->nama ?? $report->user->name ?? 'Pengguna',
+            'reporter_name' => $report->user ? ($report->user->trashed() ? $report->user->name.' (Nonaktif)' : $report->user->name) : 'Pengguna (Dihapus)',
             'facility_name' => $report->facility->name,
             'facility_location' => $report->facility->location,
             'facility_condition' => $report->facility->condition->value ?? (string) $report->facility->condition,
@@ -88,7 +88,7 @@ class PetugasDashboardController extends Controller
         ])->values()->all();
 
         $todayReservations = Reservation::query()
-            ->with(['facility:id,name,location', 'user:id,nama'])
+            ->with(['facility:id,name,location', 'user:id,nama,deleted_at'])
             ->where('status', ReservationStatus::Approved->value)
             ->whereDate('start_time', today())
             ->oldest('start_time')
@@ -106,7 +106,7 @@ class PetugasDashboardController extends Controller
 
             return [
                 'id' => $reservation->id,
-                'user_name' => $reservation->user->nama ?? $reservation->user->name ?? 'Pengguna',
+                'user_name' => $reservation->user ? ($reservation->user->trashed() ? $reservation->user->name.' (Nonaktif)' : $reservation->user->name) : 'Pengguna (Dihapus)',
                 'facility_name' => $reservation->facility->name,
                 'facility_location' => $reservation->facility->location,
                 'tujuan' => $reservation->tujuan,

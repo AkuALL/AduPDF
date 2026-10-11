@@ -14,7 +14,7 @@ class ReservationQueueQuery
     public function pending(): Builder
     {
         return Reservation::query()
-            ->with(['facility:id,name,location', 'user:id,nama'])
+            ->with(['facility:id,name,location', 'user:id,nama,deleted_at'])
             ->where('status', ReservationStatus::Pending->value)
             ->oldest('start_time')
             ->oldest('created_at');
