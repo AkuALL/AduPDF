@@ -11,6 +11,12 @@
 5. [BAB 4: The 5 Archetypes (5 Pola Template Berulang di AduPDF)](#5-bab-4-the-5-archetypes-5-pola-template-berulang-di-adupdf)
 6. [BAB 5: Bedah Kasus Nyata Baris-demi-Baris (Line-by-Line Annotation)](#6-bab-5-bedah-kasus-nyata-baris-demi-baris-line-by-line-annotation)
 7. [BAB 6: Lembar Contekan Cepat Simbol & Operator (The Cheat Sheet Matrix)](#7-bab-6-lembar-contekan-cepat-simbol--operator-the-cheat-sheet-matrix)
+   - [6.1 Tabel Master Operator & Simbol PHP 8.4 (Backend Core)](#61-tabel-master-operator--simbol-php-84-backend-core)
+   - [6.2 Tabel Master Operator & Simbol TypeScript & React 19 (Frontend Core)](#62-tabel-master-operator--simbol-typescript--react-19-frontend-core)
+   - [6.3 Kamus Helper Kunci Laravel & Eloquent di AduPDF](#63-kamus-helper-kunci-laravel--eloquent-di-adupdf)
+   - [6.4 Kamus Helper Kunci React & Inertia di AduPDF](#64-kamus-helper-kunci-react--inertia-di-adupdf)
+   - [6.5 Komparasi Silang Simbol Berdampingan: PHP vs TypeScript/JavaScript](#65-komparasi-silang-simbol-berdampingan-php-vs-typescriptjavascript)
+   - [6.6 Dekoder Kalimat Kode Majemuk (Compound Expression Decoder)](#66-dekoder-kalimat-kode-majemuk-compound-expression-decoder)
 
 ---
 
@@ -663,25 +669,165 @@ Mari kita bedah baris 67 hingga 95 pada komponen React ini:
 
 ## 7. BAB 6: LEMBAR CONTEKAN CEPAT SIMBOL & OPERATOR (THE CHEAT SHEET MATRIX)
 
-Tabel berikut adalah kamus cepat ketika Anda menemukan simbol atau operator yang tampak asing di codebase:
+Bab ini adalah **kamus dekoder cepat** ketika Anda menemukan simbol, operator, tanda baca, atau fungsi pembantu (*helper*) yang tampak asing di baris kode AduPDF. Materi dibagi ke dalam 5 kategori terstruktur:
 
-| Simbol / Operator | Nama Operator | Lingkungan | Arti & Cara Kerja | Contoh di Codebase AduPDF |
-| :--- | :--- | :--- | :--- | :--- |
-| `->` | Object Operator | PHP | Mengakses metode atau properti dari sebuah objek instansiasi | `$request->user()`, `$facility->name` |
-| `::` | Scope Resolution | PHP | Mengakses konstanta, enum, atau metode statis dari sebuah kelas | `Reservation::create()`, `ReservationStatus::Pending` |
-| `=>` | Double Arrow | PHP / JS | Pasangan key-value pada array PHP, atau body dari arrow function | `['key' => 'val']`, `(e) => setData(...)` |
-| `??` | Null Coalescing | PHP & JS | Mengembalikan nilai kanan jika nilai kiri adalah `null` atau `undefined` | `$a ?? 'default'`, `params.get('id') ?? 0` |
-| `?.` | Optional Chaining | PHP & JS | Mengakses properti anak secara aman tanpa error jika induknya bernilai null | `$user?->isAdmin()`, `facility?.location` |
-| `...` | Spread / Rest | PHP & JS | Memecah elemen array/objek atau mengumpulkan parameter variabel | `[...prev, item]`, `...parent::share($request)` |
-| `#[...]` | Attribute | PHP 8 | Metadata deklaratif penanda konfigurasi model atau rute | `#[Fillable([...])]`, `#[Hidden([...])]` |
-| `fn()` | Arrow Function | PHP 8 | Fungsi anonim satu baris yang otomatis membaca variabel dari scope luar | `$urls->map(fn ($id) => ...)` |
-| `use ()` | Closure Binding | PHP | Membawa variabel dari luar masuk ke dalam fungsi anonim multi-baris | `function () use ($request) { ... }` |
-| `<T>` | Generics | TypeScript / PHPDoc | Tipe data fleksibel yang ditentukan saat pemanggilan | `Set<() => void>`, `Collection<int, Reservation>` |
-| `e.preventDefault()` | Prevent Default | JS / DOM | Menghentikan aksi standar browser (seperti reload saat form dikirim) | `onSubmit={(e) => { e.preventDefault(); ... }}` |
-| `compact()` | Compact Function | PHP | Mengubah nama variabel string menjadi array asosiatif | `compact('reservations', 'facilities')` |
-| `values()` | Collection Values | PHP | Mengatur ulang urutan index array numerik menjadi `[0, 1, 2...]` | `$reservations->map(...)->values()` |
-| `with()` | Eager Loading | PHP / Laravel | Memuat relasi tabel database secara bersamaan untuk mencegah masalah N+1 | `Reservation::with('facility:id,name')` |
-| `tap()` | Tap Helper | PHP / Laravel | Menjalankan closure pada sebuah nilai lalu mengembalikan nilai tersebut | `tap($user)->update([...])` |
+---
+
+### 6.1 Tabel Master Operator & Simbol PHP 8.4 (Backend Core)
+
+Tabel berikut mencakup seluruh simbol sintaksis bahasa PHP 8.4 yang digunakan di folder `app/`, `routes/`, `bootstrap/`, dan `config/`:
+
+| Simbol / Operator | Nama Resmi | Arti & Mekanisme Kerja | Contoh Nyata di Codebase AduPDF |
+| :--- | :--- | :--- | :--- |
+| **`->`** | *Object Operator* | Mengakses properti atau memanggil metode dari **instance objek**. | `$request->user()`, `$facility->name` |
+| **`?->`** | *Nullsafe Operator (PHP 8)* | Mengakses properti/metode objek anak secara aman. Jika objek bernilai `null`, eksekusi berhenti dan menghasilkan `null` tanpa memicu crash `Error: Call to a member function on null`. | `$user?->isAdmin()`, `$reservation->facility?->isTool()` |
+| **`::`** | *Scope Resolution Operator* (Paamayim Nekudotayim) | Mengakses konstanta, pemanggilan method statis, atau kelas Enum tanpa membuat instansiasi objek baru. | `Reservation::create()`, `ReservationStatus::Pending` |
+| **`=>`** | *Double Arrow Operator* | Memasangkan **Kunci (*Key*)** dengan **Nilai (*Value*)** pada array asosiatif, atau memetakan nilai pada percabangan `match`. | `['status' => 'menunggu']`, `match ($this) { self::Pending => 'Menunggu' }` |
+| **`??`** | *Null Coalescing Operator* | Mengembalikan operan di sebelah kanan hanya jika operan di sebelah kiri bernilai `null` atau variabelnya tidak terdefinisi. | `$request->session()->get('from') ?? $request->query('from')` |
+| **`??=`** | *Null Coalescing Assignment* | Memberi nilai default ke variabel hanya jika variabel tersebut saat ini bernilai `null`. | `$user['role'] ??= 'pengguna'` |
+| **`?:`** | *Elvis Operator* | Bentuk ringkas ternary `$a ? $a : $b`. Mengembalikan nilai kanan jika nilai kiri bernilai *falsy* (`false`, `0`, `""`, `null`). | `$name = $input['nama'] ?: 'Anonim'` |
+| **`...`** | *Splat / Variadic Operator* | **1. Unpacking:** Membuka elemen array ke dalam argumen fungsi.<br>**2. Rest:** Mengumpulkan banyak parameter fungsi menjadi satu array. | Unpacking: `[...parent::share($request)]`<br>Rest: `function handle(Request $req, Closure $next, string ...$roles)` |
+| **`#[...]`** | *PHP Attributes (PHP 8)* | Anotasi metadata deklaratif bawaan bahasa yang dibaca oleh sistem reflection Laravel untuk menyetel konfigurasi kelas. | `#[Fillable(['user_id', 'facility_id', ...])]`<br>`#[Hidden(['password', 'remember_token'])]` |
+| **`fn(...) => ...`** | *Arrow Function (PHP 8)* | Fungsi anonim ringkas satu baris yang secara otomatis menangkap variabel dari scope luar (*by-value capture*). | `$collection->map(fn (int $id): string => $baseUrl."/facilities/{$id}")` |
+| **`function(...) use (...)`** | *Multi-line Closure* | Fungsi anonim multi-baris. Variabel dari scope luar **wajib** dideklarasikan secara eksplisit di dalam blok `use (...)`. | `DB::transaction(function () use ($request, $input, $schedules) { ... })` |
+| **`match (...)`** | *Match Expression (PHP 8)* | Struktur percabangan pengganti `switch-case` yang menggunakan evaluasi kesetaraan ketat (`===`) dan langsung mengembalikan nilai. | `match ($this) { self::Pending => 'Menunggu', self::Approved => 'Disetujui' }` |
+| **`?Type`** | *Nullable Type Hint* | Menandakan bahwa parameter atau nilai kembalian boleh bertipe tersebut ATAU bernilai `null`. | `public function version(Request $request): ?string`<br>`?User $user` |
+| **`Type1|Type2`** | *Union Type (PHP 8)* | Menandakan bahwa nilai boleh berupa salah satu dari tipe yang dideklarasikan. | `fn (int|string $facilityId): string => ...` |
+| **`void`** | *Void Return Type* | Menegaskan bahwa metode hanya melakukan aksi sampingan dan tidak mengembalikan nilai apa pun. | `public function down(): void { Schema::dropIfExists('reports'); }` |
+| **`.`** | *String Concatenation* | Menggabungkan dua string menjadi satu string utuh. | `$baseUrl . route('facilities.show', ['facility' => $id])` |
+| **`.=`** | *Concatenation Assignment* | Menambahkan teks ke ujung string variabel yang sudah ada. | `$sql .= ' ORDER BY start_time ASC'` |
+| **`===`** | *Strict Equality* | Membandingkan dua nilai secara identik: **nilai harus sama DAN tipe data harus sama persis**. | `(int) $report->user_id === (int) $request->user()->id` |
+| **`!==`** | *Strict Inequality* | Menghasilkan `true` jika nilai berbeda ATAU tipe datanya berbeda. | `$facility->status !== 'rusak'` |
+| **`!`** | *Logical NOT* | Membalikkan nilai kebenaran boolean (mengubah `true` jadi `false` dan sebaliknya). | `! $user->isActive()`, `! empty($rawSchedules)` |
+| **`&&`** & **`||`** | *Logical AND* & *OR* | Operasi logika: `&&` mengharuskan kedua sisi bernilai `true`, `||` cukup salah satu sisi bernilai `true`. | `$user->isPengguna() && ! $user->hasInstitutionalIdentity()` |
+
+---
+
+### 6.2 Tabel Master Operator & Simbol TypeScript & React 19 (Frontend Core)
+
+Tabel berikut mencakup simbol dan operator yang digunakan pada berkas antarmuka di direktori `resources/js/`:
+
+| Simbol / Operator | Nama Resmi | Arti & Mekanisme Kerja | Contoh Nyata di Codebase AduPDF |
+| :--- | :--- | :--- | :--- |
+| **`=>`** | *Fat Arrow Function* | Sintaks pendefinisian fungsi di JavaScript/TypeScript. | `const nextWibSlot = (time: string): string => { ... }` |
+| **`?.`** | *Optional Chaining* | Mengakses properti objek anak tanpa crash jika induknya bernilai `null` atau `undefined`. | `reservation.facility?.location`, `user?.name` |
+| **`??`** | *Nullish Coalescing* | Memberikan nilai cadangan hanya jika nilai sebelah kiri adalah `null` atau `undefined` (angka `0` dan string kosong `""` tetap dipertahankan). | `params.get('start_time') ?? ''` |
+| **`...`** | *Spread / Rest Operator* | **1. Object Spread:** Menyalin properti objek untuk menjaga prinsip immutability.<br>**2. Array Spread:** Menggabungkan array baru. | Object: `setForm(prev => ({ ...prev, start_time: val }))`<br>Array: `const newDays = [...days, nextDay]` |
+| **`<T>`** | *Generics Type Parameter* | Menentukan tipe data dinamis yang dapat disesuaikan pada saat fungsi atau hook dipanggil. | `useState<string | null>(null)`<br>`new Set<() => void>()`<br>`Record<string, string>` |
+| **`as`** | *Type Assertion* | Memberitahu kompilator TypeScript agar memperlakukan suatu variabel sebagai tipe tertentu (*casting*). | `(localStorage.getItem('theme') as Appearance) || 'system'` |
+| **`typeof`** | *Type Query / Guard* | Memeriksa tipe data variabel pada saat runtime JavaScript, atau mengambil tipe bentuk variabel di TypeScript. | `if (typeof window !== 'undefined')`<br>`if (typeof document === 'undefined')` |
+| **`|`** | *Union Type* | Menandakan bahwa nilai boleh berupa salah satu dari beberapa pilihan tipe/literal. | `type Appearance = 'light' \| 'dark' \| 'system'` |
+| **`&`** | *Intersection Type* | Menggabungkan dua atau lebih tipe/interface menjadi satu kesatuan kontrak tipe baru. | `type FullProps = BaseProps & { facilityId: number }` |
+| **`?:`** | *Optional Property* | Menandakan bahwa properti pada objek interface/tipe bersifat opsional (boleh tidak diisi). | `type Props = { facility_name?: string }` |
+| **`!`** | *Non-Null Assertion Operator* | Menegaskan kepada kompilator TypeScript: *"Saya yakin objek ini pasti ada dan tidak bernilai null/undefined saat runtime"*. | `selectedDays[0].availability!.slots[...]` |
+| **`&&`** | *Short-Circuit / Guard Rendering* | Di JSX, digunakan untuk merender komponen secara kondisional: jika sisi kiri bernilai `true`, render elemen di sisi kanan. | `{todayUnavailable && <p className="text-red-500">Tutup</p>}` |
+| **`? :`** | *Ternary Conditional Operator* | Percabangan satu baris: `kondisi ? jika_benar : jika_salah`. | `{reservable ? <ButtonSubmit /> : <BadgeDisabled />}` |
+| **` `` `** & **`${}`** | *Template Literal Strings* | String bertanda kutip miring (*backtick*) yang mendukung penyisipan variabel dinamis di dalamnya. | `` `pending_reservation=${encodeURIComponent(val)}` `` |
+| **`[key]`** | *Computed Property Name* | Menjadikan nilai dari variabel sebagai nama kunci (*key*) dari sebuah objek JavaScript. | `{ [dayId]: { isExpanded: true } }` |
+| **`<></>`** | *React Fragments* | Pembungkus tak kasat mata untuk mengelompokkan banyak elemen JSX tanpa menambahkan tag `<div>` ekstra ke Real DOM browser. | `<> {app} <Toaster /> </>` |
+| **`_`** | *Discard / Unused Convention* | Konvensi penamaan parameter yang sengaja tidak digunakan agar linter tidak mengeluarkan peringatan. | `Array.from({ length: 27 }, (_, index) => ...)` |
+
+---
+
+### 6.3 Kamus Helper Kunci Laravel & Eloquent di AduPDF
+
+Fungsi-fungsi bawaan Laravel yang paling sering Anda jumpai di controller dan service:
+
+```
++──────────────────────────┬──────────────────────────────────────────────────────────────────────────────────+
+| Nama Helper / Method     | Arti, Tujuan & Cara Kerjanya                                                     |
++──────────────────────────┼──────────────────────────────────────────────────────────────────────────────────+
+| compact('a', 'b')        | Mengubah variabel $a dan $b menjadi array asosiatif: ['a' => $a, 'b' => $b].     |
+| values()                 | Menata ulang index array koleksi Laravel agar kembali berurutan dari 0, 1, 2...  |
+| with('relasi')           | Eager Loading: Memuat relasi database secara bersamaan untuk mencegah query N+1. |
+| whereBelongsTo($user)    | Query filter otomatis: menyaring baris berdasarkan relasi pemilik ($user->id).   |
+| firstOrFail()            | Mengambil baris pertama yang cocok; jika tidak ada, otomatis lempar error 404.   |
+| findOrFail($id)          | Mencari baris berdasarkan Primary Key ID; jika tidak ada, otomatis lempar 404.  |
+| pluck('kolom')           | Mengekstrak hanya nilai dari satu kolom tertentu menjadi koleksi array flat.     |
+| lockForUpdate()          | Pessimistic Lock: Mengunci baris database agar tidak bisa diedit transaksi lain.  |
+| DB::transaction(fn)      | Membuka transaksi database ACID: otomatis commit jika sukses, rollback jika error|
+| abort_unless(cond, 403)  | Satpam HTTP: Lempar error 403 Forbidden jika kondisi boolean bernilai false.     |
+| tap($obj)->update(...)   | Menjalankan closure pada objek lalu mengembalikan objek asli yang telah berubah. |
+| session()->get('key')    | Membaca pesan atau data kilat (flash data) yang disimpan di sesi pengguna.       |
++──────────────────────────┴──────────────────────────────────────────────────────────────────────────────────+
+```
+
+---
+
+### 6.4 Kamus Helper Kunci React & Inertia di AduPDF
+
+Fungsi dan metode frontend yang mengendalikan interaktivitas aplikasi:
+
+```
++──────────────────────────┬──────────────────────────────────────────────────────────────────────────────────+
+| Nama Fungsi / Hook       | Arti, Tujuan & Cara Kerjanya                                                     |
++──────────────────────────┼──────────────────────────────────────────────────────────────────────────────────+
+| e.preventDefault()       | Menghentikan perilaku default browser (seperti reload halaman saat submit form). |
+| e.stopPropagation()      | Mencegah event merambat (bubbling) ke elemen pembungkus (parent container).      |
+| useForm(initialData)     | Inertia Form Hook: Mengelola data form, fungsi pengiriman, loading, dan error.  |
+| usePage().props          | Mengambil data global yang dibagikan dari middleware Laravel (auth, flash, dsb). |
+| router.visit(url)        | Melakukan perpindahan halaman SPA secara programatis via JavaScript.             |
+| cn(...classes)           | Helper merger: Menggabungkan kelas styling Tailwind CSS secara kondisional.     |
+| Date.now()               | Mengambil timestamp milidetik waktu saat ini dari sistem operasi.                |
+| Intl.DateTimeFormat      | API browser standar untuk memformat tanggal dan jam sesuai zona WIB / id-ID.    |
++──────────────────────────┴──────────────────────────────────────────────────────────────────────────────────+
+```
+
+---
+
+### 6.5 Komparasi Silang Simbol Berdampingan: PHP vs TypeScript/JavaScript
+
+Perbandingan langsung sintaks antara Backend (PHP) dan Frontend (TypeScript):
+
+| Konsep Rekayasa | Sisi Backend (PHP 8.4) | Sisi Frontend (TypeScript / React 19) |
+| :--- | :--- | :--- |
+| **Memanggil Method Objek** | Menggunakan tanda panah tunggal: `$obj->method()` | Menggunakan tanda titik: `obj.method()` |
+| **Memanggil Static / Class** | Menggunakan titik dua ganda: `Class::method()` | Menggunakan tanda titik: `Class.method()` |
+| **Pasangan Key-Value** | Menggunakan tanda panah ganda: `['key' => 'val']` | Menggunakan titik dua: `{ key: 'val' }` |
+| **Fungsi Panah Singkat** | `fn ($x) => $x * 2` | `(x) => x * 2` |
+| **Penyambungan String** | Menggunakan tanda titik: `$a . $b` | Menggunakan tanda tambah atau template literal: `` `${a}${b}` `` |
+| **Pencegah Crash Null** | Nullsafe operator: `$user?->facility?->name` | Optional chaining: `user?.facility?.name` |
+| **Nilai Cadangan Default** | Null coalescing: `$val ?? 'default'` | Nullish coalescing: `val ?? 'default'` |
+| **Spread / Unpack Data** | `[...$array1, ...$array2]` | `[...array1, ...array2]` atau `{ ...obj1, ...obj2 }` |
+| **Perulangan Array** | `$collection->map(fn ($item) => ...)` | `array.map(item => ...)` |
+| **Pengecekan Tipe Runtime** | `is_array($x)`, `is_string($x)` | `typeof x === 'string'`, `Array.isArray(x)` |
+
+---
+
+### 6.6 Dekoder Kalimat Kode Majemuk (*Compound Expression Decoder*)
+
+Di dalam proyek AduPDF, Anda sering menemukan baris kode yang menggabungkan banyak operator sekaligus. Berikut cara membongkarnya:
+
+#### Contoh Kasus 1 (PHP di Controller):
+```php
+$urls = collect([$baseUrl.route('facilities.index', [], false)])->concat($facilityUrls);
+```
+* **Bedah Dekoder:**
+  1. `route('facilities.index', [], false)` $\rightarrow$ Menghasilkan path relatif string `/facilities`.
+  2. `$baseUrl . ...` $\rightarrow$ Operator `.` menyambungkan domain utama dengan path di atas sehingga menjadi `http://localhost:8000/facilities`.
+  3. `collect([...])` $\rightarrow$ Membungkus array satu string tersebut menjadi objek Laravel Collection.
+  4. `->concat($facilityUrls)` $\rightarrow$ Menggabungkan koleksi tersebut dengan daftar URL fasilitas lainnya menjadi satu koleksi utuh.
+
+#### Contoh Kasus 2 (TypeScript di Komponen React):
+```typescript
+const match = document.cookie.match(/(?:^|; )pending_reservation=([^;]*)/);
+```
+* **Bedah Dekoder:**
+  1. `document.cookie` $\rightarrow$ Objek Browser (BOM) berupa string panjang seluruh cookie yang ada.
+  2. `.match(...)` $\rightarrow$ Fungsi Regex JavaScript untuk mencari pola teks tertentu.
+  3. `/(?:^|; )pending_reservation=([^;]*)/` $\rightarrow$ Pola RegEx: cari teks yang diawali dengan awal baris atau tanda titik koma, diikuti kata `pending_reservation=`, lalu tangkap semua karakter nilainya ke dalam grup penangkap `match[1]`.
+
+#### Contoh Kasus 3 (Ternary + Optional Chaining di FormRequest):
+```typescript
+const searchString = url.includes('?') ? url.split('?')[1] : (typeof window !== 'undefined' ? window.location.search.replace(/^\?/, '') : '');
+```
+* **Bedah Dekoder:**
+  1. `url.includes('?') ? ... : ...` $\rightarrow$ Jika string URL dari Inertia memiliki tanda tanya, potong dan ambil parameter query setelah tanda tanya (`split('?')[1]`).
+  2. Jika tidak ada tanda tanya di URL Inertia, masuk ke percabangan kedua:
+  3. `typeof window !== 'undefined'` $\rightarrow$ Pastikan kode sedang berjalan di browser (bukan di SSR server).
+  4. `window.location.search.replace(/^\?/, '')` $\rightarrow$ Ambil query string dari browser bar lalu buang karakter tanda tanya di awalnya.
+  5. `''` $\rightarrow$ Jika semua gagal, gunakan string kosong sebagai fallback yang aman.
 
 ---
 *Panduan ini disusun untuk memberikan pemahaman menyeluruh terhadap setiap baris kode di proyek AduPDF. Simpan panduan ini sebagai buku saku referensi utama saat Anda menelusuri repositori.*
+
