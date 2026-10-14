@@ -1,0 +1,3 @@
+# Nixpacks configuration for AduPDF Laravel deployment on Railway
+[providers.php]
+extensions = ["pdo_pgsql", "pdo_mysql", "mbstring", "openssl", "zip", "bcmath", "curl", "fileinfo", "tokenizer", "xml"]
