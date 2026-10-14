@@ -61,7 +61,7 @@ test('new Pengguna must wait for Admin approval before login (GAL-02, BR-05, BR-
     ]);
 
     $loginResponse->assertSessionHasErrors([
-        'email' => 'Akun Anda masih menunggu persetujuan Admin.',
+        'email' => 'Akun anda belum disetujui oleh Admin.',
     ]);
     $this->assertGuest();
 });

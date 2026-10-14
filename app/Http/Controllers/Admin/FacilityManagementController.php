@@ -32,9 +32,10 @@ class FacilityManagementController extends Controller
             ->withCount(['childTools', 'reservations']);
 
         if (! empty($search)) {
-            $query->where(function (Builder $query) use ($search): void {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('location', 'like', "%{$search}%");
+            $term = mb_strtolower($search, 'UTF-8');
+            $query->where(function (Builder $query) use ($term): void {
+                $query->whereRaw('LOWER(name) LIKE ?', ["%{$term}%"])
+                    ->orWhereRaw('LOWER(location) LIKE ?', ["%{$term}%"]);
             });
         }
 

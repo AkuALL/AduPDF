@@ -49,7 +49,7 @@ class AuthenticatedSessionController extends Controller
 
         if ($user->isPengguna() && ! $user->isApproved()) {
             throw ValidationException::withMessages([
-                'email' => 'Akun Anda masih menunggu persetujuan Admin.',
+                'email' => 'Akun anda belum disetujui oleh Admin.',
             ]);
         }
 

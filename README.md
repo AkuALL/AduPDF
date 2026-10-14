@@ -11,8 +11,9 @@ Di lokal directory, via terminal, run these sequentially:
 5. <setup .env at project's root directory>
 5. php artisan key:generate
 6. php artisan migrate --seed
-7. composer run dev
-8. open http://127.0.0.1:8000/
+7. php artisan schedule:work
+8. composer run dev
+9. open http://127.0.0.1:8000/
 
 Demo accounts:
 1. user@com pw:12345678

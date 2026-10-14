@@ -37,6 +37,11 @@ test('admin can view facility list with search and filters', function () {
     $response->assertOk();
     $response->assertSee('Ruang Teater Komputer');
     $response->assertDontSee('Lapangan Futsal');
+
+    $responseCaseInsensitive = $this->actingAs($admin)->get(route('admin.facilities.index', ['search' => 'MP']));
+    $responseCaseInsensitive->assertOk();
+    $responseCaseInsensitive->assertSee('Ruang Teater Komputer');
+    $responseCaseInsensitive->assertDontSee('Lapangan Futsal');
 });
 
 test('admin can create a room facility', function () {

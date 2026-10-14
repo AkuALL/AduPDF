@@ -50,3 +50,38 @@ test('guests can view a facility and its child tools without reservation data', 
         ->missing('facility.reservations')
     );
 });
+
+test('facility search is case-insensitive (e.g. searching "MP" matches "Laboratorium Komputer")', function () {
+    $laboratory = Facility::factory()->create([
+        'name' => 'Laboratorium Komputer',
+        'type' => FacilityType::Laboratory,
+        'location' => 'Gedung A',
+        'capacity' => 40,
+    ]);
+
+    Facility::factory()->create([
+        'name' => 'Aula Serbaguna',
+        'type' => FacilityType::Hall,
+        'location' => 'Gedung B',
+        'capacity' => 200,
+    ]);
+
+    // Search "MP" (uppercase) matches "Komputer" (contains "mp")
+    $response = $this->get('/facilities?search=MP');
+
+    $response->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('facilities/index')
+        ->has('facilities', 1)
+        ->where('facilities.0.id', $laboratory->id)
+        ->where('facilities.0.name', 'Laboratorium Komputer')
+    );
+
+    // Search "gedung a" (lowercase) matches "Gedung A"
+    $responseLoc = $this->get('/facilities?search=gedung%20a');
+
+    $responseLoc->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('facilities/index')
+        ->has('facilities', 1)
+        ->where('facilities.0.id', $laboratory->id)
+    );
+});

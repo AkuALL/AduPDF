@@ -26,9 +26,10 @@ class FacilityController extends Controller
         $facilities = Facility::query()
             ->with('parentFacility:id,name')
             ->when($filters['search'] ?? null, function (Builder $query, string $search): void {
-                $query->where(function (Builder $query) use ($search): void {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('location', 'like', "%{$search}%");
+                $term = mb_strtolower($search, 'UTF-8');
+                $query->where(function (Builder $query) use ($term): void {
+                    $query->whereRaw('LOWER(name) LIKE ?', ["%{$term}%"])
+                        ->orWhereRaw('LOWER(location) LIKE ?', ["%{$term}%"]);
                 });
             })
             ->when($filters['type'] ?? null, fn (Builder $query, string $type): Builder => $query->where('type', $type))

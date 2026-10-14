@@ -159,10 +159,12 @@ class RecapController extends Controller
                 $query->where('type', $type);
             })
             ->when($locationFilter, function ($query, string $loc): void {
-                $query->where('location', 'like', '%'.$loc.'%');
+                $term = mb_strtolower($loc, 'UTF-8');
+                $query->whereRaw('LOWER(location) LIKE ?', ['%'.$term.'%']);
             })
             ->when($searchFilter, function ($query, string $search): void {
-                $query->where('name', 'like', '%'.$search.'%');
+                $term = mb_strtolower($search, 'UTF-8');
+                $query->whereRaw('LOWER(name) LIKE ?', ['%'.$term.'%']);
             })
             ->orderBy('type')
             ->orderBy('name')
